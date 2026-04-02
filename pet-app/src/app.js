@@ -149,8 +149,8 @@ const MONA_GIF_MAP = {
   running:    ['mona/tongue.gif', 'mona/tech.gif'],
   delegating: ['mona/ducks.gif', 'mona/smirk.gif'],
   waiting:    ['mona/shocked.gif', 'mona/mona.gif'],
-  error:      ['mona/angry.gif', 'mona/ohbrother.gif'],
-  offline:    ['mona/sick.gif', 'mona/ohbrother.gif'],
+  error:      ['mona/angry.gif', 'mona/sick.gif'],
+  offline:    ['mona/ohbrother.gif', 'mona/mona.gif'],
   unknown:    ['mona/love.gif'],
 };
 
