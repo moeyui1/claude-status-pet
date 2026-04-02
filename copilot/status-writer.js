@@ -131,8 +131,9 @@ function run(input) {
       let alreadyRunning = false;
       try {
         if (isWin) {
-          const psOut = execSync('tasklist /FI "IMAGENAME eq ' + path.basename(petBin) + '" /NH', { encoding: 'utf8', timeout: 3000 });
-          alreadyRunning = psOut.includes(path.basename(petBin));
+          // tasklist truncates long image names, so match on short prefix
+          const psOut = execSync('tasklist /NH', { encoding: 'utf8', timeout: 3000 });
+          alreadyRunning = psOut.includes('claude-status-pet');
         } else {
           execSync('pgrep -f claude-status-pet', { timeout: 3000 });
           alreadyRunning = true;
