@@ -37,9 +37,12 @@ let detail = hookEvent;
 
 switch (hookEvent) {
   case 'sessionStart':
-    state = 'idle';
-    detail = 'Session started';
-    break;
+    // Only ensure status file exists, don't override current state
+    // (avoids racing with userPromptSubmitted's 'thinking' state)
+    if (!require('fs').existsSync(statusFile)) {
+      require('fs').writeFileSync(statusFile, JSON.stringify({ state: 'idle', detail: 'Session started', tool: '', event: hookEvent, session_id: sessionId, session_name: require('path').basename(cwd || sessionId), timestamp: new Date().toISOString() }));
+    }
+    process.exit(0);
   case 'userPromptSubmitted':
     state = 'thinking';
     detail = 'Processing prompt...';

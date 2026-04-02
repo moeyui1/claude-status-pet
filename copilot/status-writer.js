@@ -45,8 +45,8 @@ function run(input) {
 
   switch (hookEvent) {
     case 'sessionStart':
-      state = 'idle';
-      detail = 'Session started';
+      // Only launch pet binary, don't write status (avoids overriding
+      // userPromptSubmitted's 'thinking' state due to race condition)
       break;
     case 'userPromptSubmitted':
       state = 'thinking';
@@ -118,7 +118,10 @@ function run(input) {
     timestamp: new Date().toISOString()
   };
 
-  fs.writeFileSync(statusFile, JSON.stringify(status));
+  // sessionStart only launches pet, doesn't write status
+  if (hookEvent !== 'sessionStart') {
+    fs.writeFileSync(statusFile, JSON.stringify(status));
+  }
 
   // On sessionStart, auto-launch the pet binary if not already running
   if (hookEvent === 'sessionStart') {
