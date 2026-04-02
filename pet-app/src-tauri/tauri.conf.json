@@ -1,0 +1,29 @@
+{
+  "productName": "claude-status-pet",
+  "version": "0.1.0",
+  "identifier": "com.claude.status-pet",
+  "build": {
+    "frontendDist": "../src",
+    "devUrl": "http://localhost:1420"
+  },
+  "app": {
+    "withGlobalTauri": true,
+    "windows": [
+      {
+        "label": "main",
+        "title": "",
+        "width": 200,
+        "height": 240,
+        "resizable": false,
+        "decorations": false,
+        "transparent": true,
+        "shadow": false,
+        "alwaysOnTop": true,
+        "skipTaskbar": true,
+        "acceptFirstMouse": true,
+        "x": 1600,
+        "y": 800
+      }
+    ]
+  }
+}

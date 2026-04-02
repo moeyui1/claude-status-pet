@@ -1,0 +1,401 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+  font-family: 'Fredoka', 'Quicksand', 'Segoe UI', sans-serif;
+}
+
+#pet-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 200px;
+  height: 240px;
+}
+
+/* Speech bubble */
+#speech-bubble {
+  background: rgba(255, 255, 255, 0.95);
+  border: 2px solid #e06c3c;
+  border-radius: 12px;
+  padding: 6px 10px;
+  max-width: 180px;
+  text-align: center;
+  position: relative;
+  margin-bottom: 6px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  min-height: 28px;
+  transform: scale(1);
+}
+
+#speech-bubble::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 8px solid #e06c3c;
+}
+
+#speech-bubble.hidden {
+  opacity: 0;
+  transform: scale(0.8);
+  pointer-events: none;
+}
+
+#status-text {
+  font-size: 13px;
+  font-weight: 500;
+  color: #333;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Ferris image */
+#ferris-wrapper {
+  width: 140px;
+  height: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+}
+
+#ferris-wrapper:active {
+  cursor: grabbing;
+}
+
+#ferris-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transition: opacity 0.2s ease;
+}
+
+/* Session name */
+#session-name {
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1;
+  color: rgba(255, 255, 255, 0.95);
+  background: rgba(224, 108, 60, 0.8);
+  padding: 5px 10px;
+  border-radius: 6px;
+  margin-top: 2px;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: center;
+  transition: opacity 0.3s;
+}
+
+#session-name:empty {
+  display: none;
+}
+
+/* State label */
+#state-label {
+  font-size: 12px;
+  color: #e06c3c;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-top: 2px;
+  text-shadow: 0 0 4px rgba(224, 108, 60, 0.4);
+  transition: color 0.3s ease;
+}
+
+/* ── Animations per state ── */
+
+/* Idle: gentle floating */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+/* Thinking: slow tilt side to side */
+@keyframes think {
+  0%, 100% { transform: rotate(0deg) translateY(-2px); }
+  25% { transform: rotate(-5deg) translateY(-4px); }
+  75% { transform: rotate(5deg) translateY(-4px); }
+}
+
+/* Working: energetic wiggle */
+@keyframes wiggle {
+  0%, 100% { transform: rotate(0deg); }
+  20% { transform: rotate(-4deg) scale(1.02); }
+  40% { transform: rotate(3deg) scale(0.98); }
+  60% { transform: rotate(-3deg) scale(1.02); }
+  80% { transform: rotate(4deg) scale(0.98); }
+}
+
+/* Delegating: pointing bounce */
+@keyframes delegate {
+  0%, 100% { transform: translateX(0) translateY(0); }
+  25% { transform: translateX(4px) translateY(-3px); }
+  75% { transform: translateX(-4px) translateY(-3px); }
+}
+
+/* Offline: slow breathing */
+@keyframes sleep {
+  0%, 100% { transform: scale(1); opacity: 0.6; }
+  50% { transform: scale(1.03); opacity: 0.8; }
+}
+
+/* Appear animation */
+@keyframes pop-in {
+  0% { transform: scale(0) rotate(-20deg); opacity: 0; }
+  60% { transform: scale(1.1) rotate(5deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+.anim-idle #ferris-wrapper, .anim-idle #ascii-art {
+  animation: float 3s ease-in-out infinite;
+}
+
+.anim-thinking #ferris-wrapper, .anim-thinking #ascii-art {
+  animation: think 2s ease-in-out infinite;
+}
+
+.anim-reading #ferris-wrapper, .anim-reading #ascii-art {
+  animation: float 2s ease-in-out infinite;
+}
+
+.anim-editing #ferris-wrapper, .anim-editing #ascii-art {
+  animation: wiggle 0.6s ease-in-out infinite;
+}
+
+.anim-searching #ferris-wrapper, .anim-searching #ascii-art {
+  animation: think 1.2s ease-in-out infinite;
+}
+
+.anim-running #ferris-wrapper, .anim-running #ascii-art {
+  animation: wiggle 0.4s ease-in-out infinite;
+}
+
+.anim-delegating #ferris-wrapper, .anim-delegating #ascii-art {
+  animation: delegate 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.06); }
+}
+
+.anim-waiting #ferris-wrapper, .anim-waiting #ascii-art {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.anim-error #ferris-wrapper, .anim-error #ascii-art {
+  animation: wiggle 0.3s ease-in-out 3;
+}
+
+.anim-offline #ferris-wrapper, .anim-offline #ascii-art {
+  animation: sleep 3s ease-in-out infinite;
+}
+
+.anim-appear #ferris-wrapper, .anim-appear #ascii-art {
+  animation: pop-in 0.4s ease-out forwards;
+}
+
+/* ASCII art character */
+#ascii-art {
+  font-family: 'Cascadia Code', 'Consolas', 'Courier New', monospace;
+  font-size: 16px;
+  line-height: 1.2;
+  color: #e06c3c;
+  text-align: center;
+  cursor: grab;
+  white-space: pre;
+  text-shadow:
+    0 0 2px rgba(224, 108, 60, 0.3),
+    1px 1px 0 rgba(0,0,0,0.15);
+  padding: 12px 10px;
+  border-radius: 10px;
+}
+
+#ascii-art:active {
+  cursor: grabbing;
+}
+
+
+/* Character selection menu */
+#menu-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 99;
+}
+
+#menu-backdrop.hidden {
+  display: none;
+}
+
+#char-menu {
+  position: fixed;
+  top: 5px;
+  left: 5px;
+  right: 5px;
+  background: rgba(255, 255, 255, 0.97);
+  border: 2px solid #e06c3c;
+  border-radius: 10px;
+  padding: 6px 0;
+  max-height: 230px;
+  overflow-y: auto;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  z-index: 100;
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+#char-menu.hidden {
+  opacity: 0;
+  transform: scale(0.9);
+  pointer-events: none;
+}
+
+.menu-item {
+  padding: 6px 10px;
+  font-size: 12px;
+  font-family: 'Fredoka', 'Quicksand', sans-serif;
+  font-weight: 500;
+  color: #333;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: background 0.15s;
+}
+
+.menu-item:hover {
+  background: rgba(224, 108, 60, 0.12);
+}
+
+.menu-item.active {
+  color: #e06c3c;
+  font-weight: bold;
+}
+
+.menu-close-bar {
+  text-align: right;
+  padding: 2px 10px 2px 0;
+  font-size: 12px;
+  color: #aaa;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.menu-close-bar:hover {
+  color: #e74c3c;
+}
+
+.menu-section-label {
+  padding: 3px 10px;
+  font-size: 10px;
+  font-weight: 600;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.menu-item-danger {
+  color: #e74c3c !important;
+}
+
+.menu-item-danger:hover {
+  background: rgba(231, 76, 60, 0.12) !important;
+}
+
+/* Config rows */
+.menu-config-row {
+  display: flex;
+  align-items: center;
+  padding: 4px 10px;
+  gap: 6px;
+}
+
+.menu-config-label {
+  font-size: 11px;
+  color: #555;
+  min-width: 62px;
+}
+
+.menu-config-value {
+  font-size: 10px;
+  color: #888;
+  min-width: 30px;
+  text-align: right;
+}
+
+.menu-color-input {
+  width: 24px;
+  height: 20px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  padding: 0;
+  background: none;
+}
+
+.menu-color-input::-webkit-color-swatch-wrapper {
+  padding: 1px;
+}
+
+.menu-color-input::-webkit-color-swatch {
+  border: none;
+  border-radius: 3px;
+}
+
+.menu-reset {
+  font-size: 10px;
+  color: #aaa;
+  cursor: pointer;
+  padding: 0 2px;
+  line-height: 1;
+}
+
+.menu-reset:hover {
+  color: #e74c3c;
+}
+
+.menu-slider-input {
+  flex: 1;
+  min-width: 0;
+  height: 4px;
+  cursor: pointer;
+  accent-color: #e06c3c;
+}
+
+.menu-divider {
+  height: 1px;
+  background: rgba(224, 108, 60, 0.2);
+  margin: 4px 10px;
+}
+
+/* State-specific label colors */
+.anim-thinking #state-label { color: #f39c12; }
+.anim-reading #state-label { color: #3498db; }
+.anim-editing #state-label { color: #27ae60; }
+.anim-searching #state-label { color: #9b59b6; }
+.anim-running #state-label { color: #e67e22; }
+.anim-delegating #state-label { color: #3498db; }
+.anim-waiting #state-label { color: #e67e22; }
+.anim-error #state-label { color: #e74c3c; }
+.anim-offline #state-label { color: #95a5a6; }

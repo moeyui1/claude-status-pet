@@ -1,0 +1,11 @@
+{
+  "name": "claude-status-pet",
+  "version": "0.3.0",
+  "description": "A desktop pet that shows Claude Code's working status in real time",
+  "author": {
+    "name": "moeyui1"
+  },
+  "license": "MIT",
+  "keywords": ["status", "desktop-pet", "ferris", "mona", "hooks"],
+  "skills": "./skills/"
+}

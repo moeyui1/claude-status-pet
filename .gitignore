@@ -1,0 +1,8 @@
+pet-app/src-tauri/target/
+pet-app/node_modules/
+pet-app/src/ferris/preview*.png
+pet-app/src/mona/
+pet-app/src/kuromi/
+pet-app/app-icon.png
+pet-app/src/characters.js
+pet-assets.zip

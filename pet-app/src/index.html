@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude Status Pet</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="pet-container">
+    <div id="speech-bubble" class="hidden">
+      <span id="status-text"></span>
+    </div>
+    <div id="ferris-wrapper">
+      <img id="ferris-img" src="ferris/1.svg" alt="Ferris" draggable="false">
+    </div>
+    <pre id="ascii-art" style="display:none;"></pre>
+    <div id="session-name"></div>
+    <div id="state-label">idle</div>
+  </div>
+  <div id="menu-backdrop" class="hidden"></div>
+  <div id="char-menu" class="hidden"></div>
+  <script src="app.js"></script>
+</body>
+</html>
