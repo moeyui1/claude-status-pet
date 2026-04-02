@@ -36,12 +36,16 @@ A desktop pet that shows what your AI coding assistant is doing — in real time
 
 ## Quick Start
 
-In Claude Code, run:
+**Option 1 — Plugin install** (Claude Code):
 
 ```
 /plugin marketplace add moeyui1/claude-status-pet
 /plugin install claude-status-pet
 ```
+
+**Option 2 — Ask your AI agent** (works with Claude Code, Copilot, etc.):
+
+> Read https://raw.githubusercontent.com/moeyui1/claude-status-pet/main/INSTALL.md and install it for me
 
 That's it! A pet will appear on your next session. 🎉
 
@@ -78,15 +82,6 @@ Also works with **GitHub Copilot CLI** and **Copilot Coding Agent**! See [`copil
 Both tools can run simultaneously — each gets its own pet window.
 
 ## Other Installation Methods
-
-<details>
-<summary>📦 Ask your AI agent to install</summary>
-
-Tell your Claude Code:
-
-> Read https://raw.githubusercontent.com/moeyui1/claude-status-pet/main/INSTALL.md and install it for me
-
-</details>
 
 <details>
 <summary>📥 Download pre-built binary</summary>
