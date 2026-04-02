@@ -332,7 +332,7 @@ function updateStatus(status) {
     statusText.textContent = detail;
     bubble.classList.remove('hidden');
     clearTimeout(bubbleTimeout);
-    bubbleTimeout = setTimeout(() => { bubble.classList.add('hidden'); }, state === 'idle' ? 3000 : 8000);
+    bubbleTimeout = setTimeout(() => { bubble.classList.add('hidden'); }, state === 'idle' ? 3000 : 20000);
   } else if (state === 'offline') {
     statusText.textContent = 'Zzz...';
     bubble.classList.remove('hidden');
