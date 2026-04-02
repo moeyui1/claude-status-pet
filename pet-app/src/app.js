@@ -236,6 +236,13 @@ function showAscii() {
 function setImage(src) {
   const resolved = assetUrl(src);
   if (resolved === currentImgSrc) return;
+  // If asset not yet cached, try loading it on-demand (fixes race with preload)
+  if (resolved === src && hasExternalAssets && window.__TAURI__) {
+    loadAsset(src).then(url => {
+      if (url !== src) setImage(src); // retry with cached version
+    });
+    return;
+  }
   imgEl.style.opacity = '0';
   setTimeout(() => {
     imgEl.src = resolved;
@@ -280,7 +287,10 @@ function updateStatus(status) {
   const detail = status.detail || '';
   const sessionName = status.session_name || '';
 
+  console.log(`[pet] updateStatus: state=${state}, detail=${detail}, event=${status.event || ''}`);
+
   if (state === 'closed' && window.__TAURI__) {
+    console.log('[pet] Received closed state — closing window');
     window.__TAURI__.window.getCurrentWindow().close();
     return;
   }

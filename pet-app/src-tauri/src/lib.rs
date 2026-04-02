@@ -1,9 +1,32 @@
 use notify::{EventKind, RecursiveMode, Watcher};
 use serde::Serialize;
 use std::fs;
+use std::io::Write;
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 use tauri::{Emitter, Manager};
+
+fn debug_log(status_path: &PathBuf, msg: &str) {
+    let log_path = status_path
+        .parent()
+        .unwrap_or(status_path)
+        .join("pet-debug.log");
+    let timestamp = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|d| {
+            let secs = d.as_secs();
+            let millis = d.subsec_millis();
+            // Format as HH:MM:SS.mmm (UTC)
+            let h = (secs % 86400) / 3600;
+            let m = (secs % 3600) / 60;
+            let s = secs % 60;
+            format!("{:02}:{:02}:{:02}.{:03}", h, m, s, millis)
+        })
+        .unwrap_or_default();
+    if let Ok(mut f) = fs::OpenOptions::new().create(true).append(true).open(&log_path) {
+        let _ = writeln!(f, "[{}] {}", timestamp, msg);
+    }
+}
 
 #[derive(Clone, Serialize)]
 struct StatusPayload {
@@ -166,53 +189,90 @@ pub fn run() {
 
             let handle = app.handle().clone();
             let watch_path = status_path.clone();
+            let log_path = status_path.clone();
 
             std::thread::spawn(move || {
                 let (tx, rx) = std::sync::mpsc::channel();
-                let mut watcher = notify::recommended_watcher(tx).unwrap();
+                let mut watcher = match notify::recommended_watcher(tx) {
+                    Ok(w) => w,
+                    Err(e) => {
+                        debug_log(&log_path, &format!("FATAL: watcher init failed: {}", e));
+                        return;
+                    }
+                };
 
-                let watch_dir = watch_path.parent().unwrap().to_path_buf();
+                let watch_dir = match watch_path.parent() {
+                    Some(p) => p.to_path_buf(),
+                    None => {
+                        debug_log(&log_path, "FATAL: status path has no parent dir");
+                        return;
+                    }
+                };
                 let _ = fs::create_dir_all(&watch_dir);
-                watcher
-                    .watch(&watch_dir, RecursiveMode::NonRecursive)
-                    .unwrap();
+                if let Err(e) = watcher.watch(&watch_dir, RecursiveMode::NonRecursive) {
+                    debug_log(&log_path, &format!("FATAL: watch() failed: {}", e));
+                    return;
+                }
+
+                debug_log(&log_path, &format!("Watcher started on {:?}", watch_dir));
 
                 if let Some(status) = read_status(&watch_path) {
+                    debug_log(&log_path, &format!("Initial status: state={}", status.state));
                     let _ = handle.emit("status-update", status);
                 }
 
-                // Watch for file changes AND file deletion (session ended)
                 for event in rx {
                     if let Ok(event) = event {
                         let is_our_file = event.paths.iter().any(|p| *p == watch_path);
                         if !is_our_file {
                             continue;
                         }
+                        debug_log(&log_path, &format!("Event: {:?}, paths: {:?}", event.kind, event.paths));
                         match event.kind {
                             EventKind::Modify(_) | EventKind::Create(_) => {
                                 std::thread::sleep(std::time::Duration::from_millis(50));
                                 if let Some(status) = read_status(&watch_path) {
+                                    debug_log(&log_path, &format!("Emit: state={}, detail={}", status.state, status.detail));
                                     let _ = handle.emit("status-update", status);
+                                } else {
+                                    debug_log(&log_path, "Read failed after Modify/Create (file may be mid-write)");
                                 }
                             }
                             EventKind::Remove(_) => {
-                                // Session file deleted — session ended, close the pet
-                                let _ = handle.emit(
-                                    "status-update",
-                                    StatusPayload {
-                                        state: "closed".to_string(),
-                                        detail: "Session ended".to_string(),
-                                        tool: String::new(),
-                                        event: "SessionEnd".to_string(),
-                                        session_id: String::new(),
-                                        session_name: String::new(),
-                                    },
-                                );
+                                // On Windows, writeFileSync can trigger Remove+Create.
+                                // Wait briefly and check if file reappears before closing.
+                                debug_log(&log_path, "Remove detected, waiting 300ms to confirm deletion...");
+                                std::thread::sleep(std::time::Duration::from_millis(300));
+                                if watch_path.exists() {
+                                    debug_log(&log_path, "File still exists after Remove — spurious event (Windows writeFileSync), reading status");
+                                    if let Some(status) = read_status(&watch_path) {
+                                        debug_log(&log_path, &format!("Emit after spurious Remove: state={}, detail={}", status.state, status.detail));
+                                        let _ = handle.emit("status-update", status);
+                                    }
+                                } else {
+                                    debug_log(&log_path, "File truly deleted — emitting closed state");
+                                    let _ = handle.emit(
+                                        "status-update",
+                                        StatusPayload {
+                                            state: "closed".to_string(),
+                                            detail: "Session ended".to_string(),
+                                            tool: String::new(),
+                                            event: "SessionEnd".to_string(),
+                                            session_id: String::new(),
+                                            session_name: String::new(),
+                                        },
+                                    );
+                                }
                             }
-                            _ => {}
+                            _ => {
+                                debug_log(&log_path, &format!("Ignored event: {:?}", event.kind));
+                            }
                         }
+                    } else if let Err(e) = event {
+                        debug_log(&log_path, &format!("Watcher error: {:?}", e));
                     }
                 }
+                debug_log(&log_path, "Watcher loop ended (channel closed)");
             });
 
             Ok(())
