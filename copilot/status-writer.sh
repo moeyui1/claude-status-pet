@@ -68,8 +68,12 @@ switch (hookEvent) {
     }
     break;
   case 'postToolUse':
-    state = 'working';
-    detail = 'Done with ' + toolName;
+    state = 'thinking';
+    detail = 'Processing...';
+    break;
+  case 'stop':
+    state = 'idle';
+    detail = 'Done';
     break;
   case 'errorOccurred':
     state = 'working';

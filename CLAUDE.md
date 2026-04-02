@@ -28,9 +28,10 @@ claude-status-pet/
 │   ├── download-gifs.js     # Downloads GIFs from GIPHY (Node.js, cross-platform)
 ├── skills/
 │   └── pet/SKILL.md         # /pet slash command definition
-├── copilot/                 # GitHub Copilot CLI adapter
-│   ├── hooks.json           # Copilot hook definitions (.github/hooks/)
-│   ├── status-writer.sh     # Copilot-specific status writer
+├── copilot/                 # VS Code Copilot adapter
+│   ├── hooks.json           # Copilot hook definitions (camelCase format)
+│   ├── status-writer.js     # Copilot status writer (Node.js, Windows-compatible)
+│   ├── status-writer.sh     # Copilot status writer (bash, macOS/Linux)
 │   └── README.md
 ├── pet-app/                 # Tauri desktop app
 │   ├── src/                 # Frontend (HTML/CSS/JS — NOT a framework, plain files)
@@ -61,8 +62,28 @@ Hook scripts use `node` for JSON parsing. Every Claude Code / Copilot environmen
 - Never commit GIPHY-sourced GIFs to git. Add new GIF characters to `download-gifs.js` instead
 - `pet-assets.zip` in releases only contains CC0-licensed Ferris SVGs
 
-### No PostToolUse hook
-We intentionally removed PostToolUse because async hooks race with the next PreToolUse, causing stale "Done with X" messages. Only use PreToolUse for tool status.
+### Hook systems: Claude Code vs VS Code Copilot
+
+Two different hook systems with different event names, input formats, and tool names:
+
+**Claude Code hooks** (`hooks/hooks.json`):
+- Events: `UserPromptSubmit`, `PreToolUse`, `Stop`, `StopFailure`, `Notification`, `SessionStart`, `SessionEnd`, `SubagentStart`
+- Tool input uses `snake_case`: `tool_input.file_path`
+- Tool names: `Edit`, `Write`, `Read`, `Bash`, `Grep`, `Glob`, `WebFetch`, `WebSearch`
+- Has `Stop` hook (fires when agent finishes responding) — used for idle state
+- Has `StopFailure` — used for error state
+
+**VS Code Copilot hooks** (`copilot/hooks.json`):
+- Events (camelCase in config, auto-converted to PascalCase): `sessionStart`, `userPromptSubmitted`, `preToolUse`, `postToolUse`, `stop`, `subagentStart`, `subagentStop`, `preCompact`
+- Tool input uses `camelCase`: `tool_input.filePath`
+- Tool names: `replace_string_in_file`, `create_file`, `read_file`, `run_in_terminal`, `grep_search`, `file_search`, `semantic_search`, `fetch_webpage`, `list_dir`
+- `stop` fires after **each agent response** (not just session close) — used for idle state
+- `postToolUse` fires after each tool — mapped to `thinking` (not idle, to avoid flashing)
+- No `sessionEnd` event — use `stop` or file cleanup instead
+- OS-specific commands: `powershell` → Windows, `bash` → macOS/Linux
+- On Windows, `bash` resolves to WSL — always use `node` for PowerShell commands. Never use `~` in PowerShell paths (use `$env:USERPROFILE`).
+
+**Doc reference**: https://code.visualstudio.com/docs/copilot/customization/hooks
 
 ### Window transparency on Windows
 Tauri config: `transparent: true`, `decorations: false`, `shadow: false`. WebView2 background set to RGBA(0,0,0,0) in Rust. Do NOT use Win32 DWM hacks — Tauri handles it natively. Reference: https://github.com/ayangweb/BongoCat
