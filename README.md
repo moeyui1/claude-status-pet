@@ -7,13 +7,16 @@ A desktop pet that shows your AI coding assistant's working status in real time.
 <table>
 <tr>
 <td align="center">
-<img src="https://private-user-images.githubusercontent.com/11503525/573129288-f8174efa-99a5-4891-93db-5b269d7965ed.gif?jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NzUxNDE1ODQsIm5iZiI6MTc3NTE0MTI4NCwicGF0aCI6Ii8xMTUwMzUyNS81NzMxMjkyODgtZjgxNzRlZmEtOTlhNS00ODkxLTkzZGItNWIyNjlkNzk2NWVkLmdpZj9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNjA0MDIlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjYwNDAyVDE0NDgwNFomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPWUwOWYwMDgyNWNmZTQ1MjQyYmQ0NjYxMmJmMzgxZmVkZDcxZDQ1NTNjNWJhZjE4MmNmNjg4ZWFjNjU5MGFjYWImWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.foI_BXUkPZWJygwzZC9Zqr_xvAKIJT1qgwB6euqEnlA" width="100%" alt="Ferris demo">
+<img src="https://github.com/user-attachments/assets/ffa59b1d-ad7f-47a7-869a-a2e31ff0c353" width="100%" alt="Ferris demo">
 </td>
 <td align="center">
-<img src="https://private-user-images.githubusercontent.com/11503525/573126825-645fea27-ef66-46ee-974b-bf0161a8de98.gif?jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NzUxNDEyOTUsIm5iZiI6MTc3NTE0MDk5NSwicGF0aCI6Ii8xMTUwMzUyNS81NzMxMjY4MjUtNjQ1ZmVhMjctZWY2Ni00NmVlLTk3NGItYmYwMTYxYThkZTk4LmdpZj9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNjA0MDIlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjYwNDAyVDE0NDMxNVomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPTNjOTJmMzU3NWQ0YThjNTNiMzBlYTRkYjNhNjVjZmM0N2FlOTc4ZWI0ZjA2NzIzMWZmYTJmOTY5Nzc0YTczMGQmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.XOh_64SqQcR-b-TJLexjU9fyZu03HiaiS35hEgJ6WD4" width="100%" alt="Kuromi demo">
+<img src="https://github.com/user-attachments/assets/1df49ae1-d6ae-439d-9549-3c65135f3adf" width="100%" alt="Kuromi demo">
 </td>
 <td align="center">
-<img src="https://github.com/user-attachments/assets/30f05b6c-11b6-4a79-a96f-fa404ddd8080" width="100%" alt="Mona demo">
+<img src="https://github.com/user-attachments/assets/ecf7b3cd-499d-459e-8fa6-333669f2308c" width="100%" alt="Mona demo">
+</td>
+<td align="center">
+<img src="https://github.com/user-attachments/assets/30f05b6c-11b6-4a79-a96f-fa404ddd8080" width="100%" alt="ASCII demo">
 </td>
 </tr>
 </table>
@@ -24,16 +27,10 @@ A desktop pet that shows your AI coding assistant's working status in real time.
 <table>
 <tr>
 <td align="center">
-
-<!-- TODO: add screenshot URL here -->
-*Screenshot 4*
-
+<img src="https://private-user-images.githubusercontent.com/11503525/573129288-f8174efa-99a5-4891-93db-5b269d7965ed.gif?jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NzUxNDE1ODQsIm5iZiI6MTc3NTE0MTI4NCwicGF0aCI6Ii8xMTUwMzUyNS81NzMxMjkyODgtZjgxNzRlZmEtOTlhNS00ODkxLTkzZGItNWIyNjlkNzk2NWVkLmdpZj9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNjA0MDIlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjYwNDAyVDE0NDgwNFomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPWUwOWYwMDgyNWNmZTQ1MjQyYmQ0NjYxMmJmMzgxZmVkZDcxZDQ1NTNjNWJhZjE4MmNmNjg4ZWFjNjU5MGFjYWImWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.foI_BXUkPZWJygwzZC9Zqr_xvAKIJT1qgwB6euqEnlA" width="100%" alt="Ferris in action">
 </td>
 <td align="center">
-
-<!-- TODO: add screenshot URL here -->
-*Screenshot 5*
-
+<img src="https://private-user-images.githubusercontent.com/11503525/573126825-645fea27-ef66-46ee-974b-bf0161a8de98.gif?jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NzUxNDEyOTUsIm5iZiI6MTc3NTE0MDk5NSwicGF0aCI6Ii8xMTUwMzUyNS81NzMxMjY4MjUtNjQ1ZmVhMjctZWY2Ni00NmVlLTk3NGItYmYwMTYxYThkZTk4LmdpZj9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNjA0MDIlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjYwNDAyVDE0NDMxNVomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPTNjOTJmMzU3NWQ0YThjNTNiMzBlYTRkYjNhNjVjZmM0N2FlOTc4ZWI0ZjA2NzIzMWZmYTJmOTY5Nzc0YTczMGQmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.XOh_64SqQcR-b-TJLexjU9fyZu03HiaiS35hEgJ6WD4" width="100%" alt="Kuromi in action">
 </td>
 </tr>
 </table>
