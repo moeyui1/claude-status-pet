@@ -27,10 +27,10 @@ A desktop pet that shows your AI coding assistant's working status in real time.
 <table>
 <tr>
 <td align="center">
-<img src="https://private-user-images.githubusercontent.com/11503525/573129288-f8174efa-99a5-4891-93db-5b269d7965ed.gif?jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NzUxNDE1ODQsIm5iZiI6MTc3NTE0MTI4NCwicGF0aCI6Ii8xMTUwMzUyNS81NzMxMjkyODgtZjgxNzRlZmEtOTlhNS00ODkxLTkzZGItNWIyNjlkNzk2NWVkLmdpZj9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNjA0MDIlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjYwNDAyVDE0NDgwNFomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPWUwOWYwMDgyNWNmZTQ1MjQyYmQ0NjYxMmJmMzgxZmVkZDcxZDQ1NTNjNWJhZjE4MmNmNjg4ZWFjNjU5MGFjYWImWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.foI_BXUkPZWJygwzZC9Zqr_xvAKIJT1qgwB6euqEnlA" width="100%" alt="Ferris in action">
+<img src="https://github.com/user-attachments/assets/f8174efa-99a5-4891-93db-5b269d7965ed" width="100%" alt="Ferris in action">
 </td>
 <td align="center">
-<img src="https://private-user-images.githubusercontent.com/11503525/573126825-645fea27-ef66-46ee-974b-bf0161a8de98.gif?jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NzUxNDEyOTUsIm5iZiI6MTc3NTE0MDk5NSwicGF0aCI6Ii8xMTUwMzUyNS81NzMxMjY4MjUtNjQ1ZmVhMjctZWY2Ni00NmVlLTk3NGItYmYwMTYxYThkZTk4LmdpZj9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNjA0MDIlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjYwNDAyVDE0NDMxNVomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPTNjOTJmMzU3NWQ0YThjNTNiMzBlYTRkYjNhNjVjZmM0N2FlOTc4ZWI0ZjA2NzIzMWZmYTJmOTY5Nzc0YTczMGQmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.XOh_64SqQcR-b-TJLexjU9fyZu03HiaiS35hEgJ6WD4" width="100%" alt="Kuromi in action">
+<img src="https://github.com/user-attachments/assets/645fea27-ef66-46ee-974b-bf0161a8de98" width="100%" alt="Kuromi in action">
 </td>
 </tr>
 </table>
