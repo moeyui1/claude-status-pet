@@ -3,10 +3,16 @@ use serde::Serialize;
 use std::fs;
 use std::io::Write;
 use std::path::PathBuf;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 use tauri::{Emitter, Manager};
 
+static DEBUG_ENABLED: AtomicBool = AtomicBool::new(false);
+
 fn debug_log(status_path: &PathBuf, msg: &str) {
+    if !DEBUG_ENABLED.load(Ordering::Relaxed) {
+        return;
+    }
     let log_path = status_path
         .parent()
         .unwrap_or(status_path)
@@ -16,7 +22,6 @@ fn debug_log(status_path: &PathBuf, msg: &str) {
         .map(|d| {
             let secs = d.as_secs();
             let millis = d.subsec_millis();
-            // Format as HH:MM:SS.mmm (UTC)
             let h = (secs % 86400) / 3600;
             let m = (secs % 3600) / 60;
             let s = secs % 60;
@@ -135,6 +140,10 @@ fn load_asset(assets_dir: tauri::State<'_, Option<PathBuf>>, path: String) -> Op
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let args: Vec<String> = std::env::args().collect();
+
+    if args.iter().any(|a| a == "--debug") {
+        DEBUG_ENABLED.store(true, Ordering::Relaxed);
+    }
 
     let status_path = args
         .windows(2)

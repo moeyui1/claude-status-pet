@@ -287,10 +287,7 @@ function updateStatus(status) {
   const detail = status.detail || '';
   const sessionName = status.session_name || '';
 
-  console.log(`[pet] updateStatus: state=${state}, detail=${detail}, event=${status.event || ''}`);
-
   if (state === 'closed' && window.__TAURI__) {
-    console.log('[pet] Received closed state — closing window');
     window.__TAURI__.window.getCurrentWindow().close();
     return;
   }
