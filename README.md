@@ -1,5 +1,7 @@
 # Claude Status Pet
 
+[English](README.md) | [中文](README.zh-CN.md)
+
 A desktop pet that shows what your AI coding assistant is doing — in real time. 🦀
 
 <table>
