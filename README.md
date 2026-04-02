@@ -7,16 +7,16 @@ A desktop pet that shows your AI coding assistant's working status in real time.
 <table>
 <tr>
 <td align="center">
-<img src="https://github.com/user-attachments/assets/ffa59b1d-ad7f-47a7-869a-a2e31ff0c353" width="100%" alt="Ferris demo">
+<img src="docs/images/showcase-ferris.gif" width="100%" alt="Ferris demo">
 </td>
 <td align="center">
-<img src="https://github.com/user-attachments/assets/1df49ae1-d6ae-439d-9549-3c65135f3adf" width="100%" alt="Kuromi demo">
+<img src="docs/images/showcase-kuromi.gif" width="100%" alt="Kuromi demo">
 </td>
 <td align="center">
-<img src="https://github.com/user-attachments/assets/ecf7b3cd-499d-459e-8fa6-333669f2308c" width="100%" alt="Mona demo">
+<img src="docs/images/showcase-mona.gif" width="100%" alt="Mona demo">
 </td>
 <td align="center">
-<img src="https://github.com/user-attachments/assets/30f05b6c-11b6-4a79-a96f-fa404ddd8080" width="100%" alt="ASCII demo">
+<img src="docs/images/showcase-ascii.gif" width="100%" alt="ASCII demo">
 </td>
 </tr>
 </table>
