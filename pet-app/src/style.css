@@ -389,6 +389,13 @@ html, body {
   margin: 4px 10px;
 }
 
+.menu-version {
+  text-align: center;
+  font-size: 9px;
+  color: #bbb;
+  padding: 4px 0 2px;
+}
+
 /* State-specific label colors */
 .anim-thinking #state-label { color: #f39c12; }
 .anim-reading #state-label { color: #3498db; }

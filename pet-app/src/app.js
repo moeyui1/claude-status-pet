@@ -189,6 +189,7 @@ let bubbleTimeout = null;
 let asciiFrame = 0;
 let asciiInterval = null;
 let menuPage = 'main';
+let appVersion = '0.0.0';
 const dlcInstalledCache = {};
 
 function pickRandom(arr) {
@@ -440,6 +441,12 @@ function buildMenu() {
     closeMenu();
     if (window.__TAURI__) window.__TAURI__.window.getCurrentWindow().close();
   }, 'menu-item-danger');
+
+  // Version label at bottom
+  const verLabel = document.createElement('div');
+  verLabel.className = 'menu-version';
+  verLabel.textContent = 'v' + appVersion;
+  charMenu.appendChild(verLabel);
 }
 
 function buildConfigPage() {
@@ -585,6 +592,11 @@ async function preloadAssets() {
 // ── Init ──
 (async () => {
   await initAssets();
+
+  // Get app version
+  if (window.__TAURI__) {
+    try { appVersion = await window.__TAURI__.app.getVersion(); } catch(e) {}
+  }
 
   // Check which DLCs are installed
   if (window.__TAURI__) {
