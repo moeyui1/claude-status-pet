@@ -12,28 +12,15 @@ echo "=== Claude Status Pet — Copilot Setup ==="
 # 1. Install the status writer script
 echo "Installing status writer..."
 mkdir -p "$SCRIPTS_DIR"
-if command -v gh &>/dev/null; then
-  gh api "repos/$REPO/contents/copilot/status-writer.sh" \
-    -H "Accept: application/vnd.github.raw+json" > "$SCRIPTS_DIR/copilot-status-writer.sh"
-elif command -v curl &>/dev/null; then
-  curl -sL "https://raw.githubusercontent.com/$REPO/main/copilot/status-writer.sh" \
-    -o "$SCRIPTS_DIR/copilot-status-writer.sh"
-else
-  echo "ERROR: Need gh or curl to download files" >&2
-  exit 1
-fi
+curl -sLo "$SCRIPTS_DIR/copilot-status-writer.sh" \
+  "https://raw.githubusercontent.com/$REPO/main/copilot/status-writer.sh"
 chmod +x "$SCRIPTS_DIR/copilot-status-writer.sh"
 
 # 2. Add hooks to current repo
 echo "Adding hooks to $HOOKS_DIR..."
 mkdir -p "$HOOKS_DIR"
-if command -v gh &>/dev/null; then
-  gh api "repos/$REPO/contents/copilot/hooks.json" \
-    -H "Accept: application/vnd.github.raw+json" > "$HOOKS_DIR/status-pet.json"
-elif command -v curl &>/dev/null; then
-  curl -sL "https://raw.githubusercontent.com/$REPO/main/copilot/hooks.json" \
-    -o "$HOOKS_DIR/status-pet.json"
-fi
+curl -sLo "$HOOKS_DIR/status-pet.json" \
+  "https://raw.githubusercontent.com/$REPO/main/copilot/hooks.json"
 
 echo ""
 echo "Done! Next steps:"

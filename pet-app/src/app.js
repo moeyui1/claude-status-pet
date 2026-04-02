@@ -177,7 +177,7 @@ const ASCII_ANIM_SPEED = {
 const DEFAULT_ANIM_SPEED = 800;
 
 // ── State ──
-let mode = localStorage.getItem('petMode') || 'mona';
+let mode = localStorage.getItem('petMode') || 'ferris';
 let eye = localStorage.getItem('petEye') || '·';
 let petColor = localStorage.getItem('petColor') || '';
 let petBgColor = localStorage.getItem('petBgColor') || '';

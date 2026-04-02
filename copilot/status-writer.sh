@@ -88,4 +88,42 @@ const status = {
 };
 
 fs.writeFileSync(statusFile, JSON.stringify(status));
+
+// On sessionStart, auto-launch the pet binary if not already running
+if (hookEvent === 'sessionStart') {
+  const os = require('os');
+  const { execSync, spawn } = require('child_process');
+  const isWin = os.platform() === 'win32';
+  const binName = isWin ? 'claude-status-pet-windows-x64.exe' : 'claude-status-pet';
+  const binAlt = isWin ? 'claude-status-pet.exe' : 'claude-status-pet';
+  const binDir = path.join(statusDir, 'bin');
+  const assetsDir = path.join(statusDir, 'assets');
+
+  // Find the binary
+  let petBin = null;
+  for (const name of [binAlt, binName]) {
+    const p = path.join(binDir, name);
+    if (fs.existsSync(p)) { petBin = p; break; }
+  }
+
+  if (petBin) {
+    // Check if already running for this session
+    let alreadyRunning = false;
+    try {
+      const psOut = isWin
+        ? execSync('tasklist /FI \"IMAGENAME eq ' + path.basename(petBin) + '\" /NH', { encoding: 'utf8', timeout: 3000 })
+        : execSync('pgrep -f claude-status-pet', { encoding: 'utf8', timeout: 3000 });
+      alreadyRunning = psOut.includes(path.basename(petBin)) || psOut.trim().length > 0;
+    } catch(e) {}
+
+    if (!alreadyRunning) {
+      const args = ['--status-file', statusFile, '--session-id', sessionId];
+      if (fs.existsSync(assetsDir)) {
+        args.push('--assets-dir', assetsDir);
+      }
+      const child = spawn(petBin, args, { detached: true, stdio: 'ignore' });
+      child.unref();
+    }
+  }
+}
 " "$INPUT" "$HOOK_EVENT" "$STATUS_DIR"

@@ -68,21 +68,18 @@ fn is_dlc_installed(assets_dir: tauri::State<'_, Option<PathBuf>>, dlc_name: Str
 #[tauri::command]
 fn download_dlc(assets_dir: tauri::State<'_, Option<PathBuf>>, dlc_name: String) -> Result<bool, String> {
     let dir = assets_dir.inner().as_ref().ok_or("No assets dir")?;
-    let scripts_dir = dir.parent().unwrap_or(dir).parent().unwrap_or(dir);
 
-    // Try multiple script locations
+    // Try multiple script locations (JS preferred for cross-platform)
     let possible_scripts = vec![
-        dir.join("../../scripts/download-gifs.sh"),
-        PathBuf::from(std::env::var("CLAUDE_PLUGIN_ROOT").unwrap_or_default()).join("scripts/download-gifs.sh"),
+        dir.join("../../scripts/download-gifs.js"),
+        PathBuf::from(std::env::var("CLAUDE_PLUGIN_ROOT").unwrap_or_default()).join("scripts/download-gifs.js"),
     ];
 
-    let script = possible_scripts.iter().find(|p| p.exists());
-    if script.is_none() {
-        return Err("download-gifs.sh not found".to_string());
-    }
+    let script = possible_scripts.iter().find(|p| p.exists())
+        .ok_or("download-gifs.js not found")?;
 
-    let output = std::process::Command::new("bash")
-        .arg(script.unwrap())
+    let output = std::process::Command::new("node")
+        .arg(script)
         .arg(dir.to_string_lossy().to_string())
         .output()
         .map_err(|e| e.to_string())?;

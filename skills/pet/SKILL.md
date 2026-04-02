@@ -49,7 +49,7 @@ For `update`:
      # Read installed version from plugin.json
      INSTALLED=$(node -e "try{console.log(JSON.parse(require('fs').readFileSync('$PET_ROOT/.claude-plugin/plugin.json','utf8')).version)}catch(e){console.log('unknown')}")
      # Get latest release tag
-     LATEST=$(gh release view --repo moeyui1/claude-status-pet --json tagName -q '.tagName' 2>/dev/null || echo 'unknown')
+     LATEST=$(curl -sL https://api.github.com/repos/moeyui1/claude-status-pet/releases/latest | node -e "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{try{process.stdout.write(JSON.parse(d).tag_name||'unknown')}catch(e){process.stdout.write('unknown')}})" 2>/dev/null || echo 'unknown')
      ```
      Report both versions to the user. If they match, say "Already up to date." and stop.
   2. If outdated, update plugin: suggest the user run `/plugin install claude-status-pet`

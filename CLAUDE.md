@@ -23,7 +23,9 @@ claude-status-pet/
 │   ├── status-writer.sh     # Core: parses hook JSON → writes status file (uses node, NOT jq)
 │   ├── launch-pet.sh        # SessionStart: downloads binary + assets, launches pet
 │   ├── open-pet.sh          # Manual launcher for all active sessions
-│   └── download-assets.sh   # Downloads pet-assets.zip from GitHub Releases
+│   ├── download-assets.sh   # Downloads pet-assets.zip from GitHub Releases (bash)
+│   ├── download-assets.js   # Same as above (Node.js, cross-platform)
+│   ├── download-gifs.js     # Downloads GIFs from GIPHY (Node.js, cross-platform)
 ├── skills/
 │   └── pet/SKILL.md         # /pet slash command definition
 ├── copilot/                 # GitHub Copilot CLI adapter
@@ -55,8 +57,8 @@ Hook scripts use `node` for JSON parsing. Every Claude Code / Copilot environmen
 
 ### Image licensing
 - **Ferris SVGs** (CC0) are bundled in the repo — safe to redistribute
-- **Mona GIFs** (GitHub/GIPHY) and **Kuromi GIFs** (Sanrio/GIPHY) are NOT in the repo — downloaded at runtime from GIPHY via `download-gifs.sh`
-- Never commit GIPHY-sourced GIFs to git. Add new GIF characters to `download-gifs.sh` instead
+- **Mona GIFs** (GitHub/GIPHY) and **Kuromi GIFs** (Sanrio/GIPHY) are NOT in the repo — downloaded at runtime from GIPHY via `download-gifs.js`
+- Never commit GIPHY-sourced GIFs to git. Add new GIF characters to `download-gifs.js` instead
 - `pet-assets.zip` in releases only contains CC0-licensed Ferris SVGs
 
 ### No PostToolUse hook
@@ -114,7 +116,7 @@ Binary output: `pet-app/src-tauri/target/release/claude-status-pet(.exe)`
 2. Commit and push
 3. Tag: `git tag v0.X.0 && git push origin v0.X.0`
 4. CI builds binaries + asset zip and uploads to GitHub Releases
-5. Users get updates automatically via `download-assets.sh` version check
+5. Users get updates automatically via `download-assets.js` version check
 
 ## Status File Format
 

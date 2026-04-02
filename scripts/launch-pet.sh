@@ -51,16 +51,15 @@ esac
 
 # Auto-download binary if not present
 if [ ! -f "$PET_BIN" ]; then
-  if ! command -v gh &>/dev/null; then
-    echo "ERROR: gh CLI not found. Install it from https://cli.github.com/" >&2
-    echo "  The pet binary needs to be downloaded from GitHub Releases." >&2
+  if ! command -v curl &>/dev/null; then
+    echo "ERROR: curl not found." >&2
     exit 1
   fi
 
   echo "Downloading pet binary ($ASSET)..."
-  if ! gh release download --repo "$REPO" --pattern "$ASSET" --dir "$BIN_DIR" --clobber 2>&1; then
+  if ! curl -sLo "$BIN_DIR/$ASSET" "https://github.com/$REPO/releases/latest/download/$ASSET"; then
     echo "ERROR: Failed to download $ASSET from $REPO." >&2
-    echo "  Is the repo public? Try: gh release download --repo $REPO --pattern '$ASSET'" >&2
+    echo "  Check: https://github.com/$REPO/releases" >&2
     exit 1
   fi
 

@@ -1,6 +1,7 @@
 #!/bin/bash
 # Download pet assets (character images) from GitHub Releases
 # Checks version to skip re-download if already up to date
+# Uses curl + node (no gh CLI required)
 set -e
 
 ASSETS_DIR="${1:-${CLAUDE_PLUGIN_DATA:-$HOME/.claude/pet-data}/assets}"
@@ -9,16 +10,27 @@ REPO="moeyui1/claude-status-pet"
 
 mkdir -p "$ASSETS_DIR"
 
-if ! command -v gh &>/dev/null; then
-  echo "ERROR: gh CLI not found. Install it from https://cli.github.com/" >&2
+if ! command -v curl &>/dev/null; then
+  echo "ERROR: curl not found." >&2
   exit 1
 fi
 
-# Get latest release tag
-LATEST=$(gh release view --repo "$REPO" --json tagName -q '.tagName' 2>&1)
-if [ $? -ne 0 ] || [ -z "$LATEST" ]; then
-  echo "ERROR: Failed to fetch latest release from $REPO. Is the repo public and gh authenticated?" >&2
-  echo "  Detail: $LATEST" >&2
+if ! command -v node &>/dev/null; then
+  echo "ERROR: node not found. Install Node.js to continue." >&2
+  exit 1
+fi
+
+# Get latest release tag via GitHub API + node for JSON parsing
+LATEST=$(curl -sL "https://api.github.com/repos/$REPO/releases/latest" | node -e "
+  let d='';
+  process.stdin.on('data',c=>d+=c);
+  process.stdin.on('end',()=>{
+    try { process.stdout.write(JSON.parse(d).tag_name || ''); }
+    catch(e) { process.exit(1); }
+  });
+")
+if [ -z "$LATEST" ]; then
+  echo "ERROR: Failed to fetch latest release from $REPO." >&2
   exit 1
 fi
 
@@ -30,7 +42,7 @@ fi
 # Download
 TMPDIR=$(mktemp -d)
 echo "Downloading pet assets $LATEST..."
-if ! gh release download "$LATEST" --repo "$REPO" --pattern "pet-assets.zip" --dir "$TMPDIR" 2>&1; then
+if ! curl -sLo "$TMPDIR/pet-assets.zip" "https://github.com/$REPO/releases/download/$LATEST/pet-assets.zip"; then
   echo "ERROR: Failed to download pet-assets.zip from $REPO release $LATEST" >&2
   rm -rf "$TMPDIR"
   exit 1

@@ -5,7 +5,7 @@
       {
         "type": "command",
         "bash": "COPILOT_HOOK_EVENT=sessionStart bash ~/.claude/pet-data/scripts/copilot-status-writer.sh",
-        "powershell": "$env:COPILOT_HOOK_EVENT='sessionStart'; bash ~/.claude/pet-data/scripts/copilot-status-writer.sh",
+        "powershell": "$env:COPILOT_HOOK_EVENT='sessionStart'; node \"$env:USERPROFILE\\.claude\\pet-data\\scripts\\copilot-status-writer.js\"",
         "timeoutSec": 10
       }
     ],
@@ -13,7 +13,7 @@
       {
         "type": "command",
         "bash": "COPILOT_HOOK_EVENT=sessionEnd bash ~/.claude/pet-data/scripts/copilot-status-writer.sh",
-        "powershell": "$env:COPILOT_HOOK_EVENT='sessionEnd'; bash ~/.claude/pet-data/scripts/copilot-status-writer.sh",
+        "powershell": "$env:COPILOT_HOOK_EVENT='sessionEnd'; node \"$env:USERPROFILE\\.claude\\pet-data\\scripts\\copilot-status-writer.js\"",
         "timeoutSec": 10
       }
     ],
@@ -21,7 +21,7 @@
       {
         "type": "command",
         "bash": "COPILOT_HOOK_EVENT=userPromptSubmitted bash ~/.claude/pet-data/scripts/copilot-status-writer.sh",
-        "powershell": "$env:COPILOT_HOOK_EVENT='userPromptSubmitted'; bash ~/.claude/pet-data/scripts/copilot-status-writer.sh",
+        "powershell": "$env:COPILOT_HOOK_EVENT='userPromptSubmitted'; node \"$env:USERPROFILE\\.claude\\pet-data\\scripts\\copilot-status-writer.js\"",
         "timeoutSec": 10
       }
     ],
@@ -29,7 +29,7 @@
       {
         "type": "command",
         "bash": "COPILOT_HOOK_EVENT=preToolUse bash ~/.claude/pet-data/scripts/copilot-status-writer.sh",
-        "powershell": "$env:COPILOT_HOOK_EVENT='preToolUse'; bash ~/.claude/pet-data/scripts/copilot-status-writer.sh",
+        "powershell": "$env:COPILOT_HOOK_EVENT='preToolUse'; node \"$env:USERPROFILE\\.claude\\pet-data\\scripts\\copilot-status-writer.js\"",
         "timeoutSec": 10
       }
     ],
@@ -37,7 +37,7 @@
       {
         "type": "command",
         "bash": "COPILOT_HOOK_EVENT=postToolUse bash ~/.claude/pet-data/scripts/copilot-status-writer.sh",
-        "powershell": "$env:COPILOT_HOOK_EVENT='postToolUse'; bash ~/.claude/pet-data/scripts/copilot-status-writer.sh",
+        "powershell": "$env:COPILOT_HOOK_EVENT='postToolUse'; node \"$env:USERPROFILE\\.claude\\pet-data\\scripts\\copilot-status-writer.js\"",
         "timeoutSec": 10
       }
     ],
@@ -45,7 +45,7 @@
       {
         "type": "command",
         "bash": "COPILOT_HOOK_EVENT=errorOccurred bash ~/.claude/pet-data/scripts/copilot-status-writer.sh",
-        "powershell": "$env:COPILOT_HOOK_EVENT='errorOccurred'; bash ~/.claude/pet-data/scripts/copilot-status-writer.sh",
+        "powershell": "$env:COPILOT_HOOK_EVENT='errorOccurred'; node \"$env:USERPROFILE\\.claude\\pet-data\\scripts\\copilot-status-writer.js\"",
         "timeoutSec": 10
       }
     ]
