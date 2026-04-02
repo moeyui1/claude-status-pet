@@ -172,12 +172,10 @@ rm -rf ~/.claude/pet-data    # optional: remove downloaded assets
 
 ## How It Works
 
-```
-┌─────────────┐     hook events      ┌──────────────────┐     file watch     ┌─────────────┐
-│  Claude Code │ ──────────────────> │  status-writer.sh │ ────────────────> │  Desktop Pet │
-│  (or other)  │  PreToolUse, Stop,  │  writes JSON to   │  notify crate     │  (Tauri app) │
-│              │  UserPromptSubmit   │  ~/.claude/pet-data│  watches changes  │              │
-└─────────────┘                      └──────────────────┘                    └─────────────┘
+```mermaid
+graph LR
+    A["🤖 AI Assistant<br/>(Claude Code, Copilot, ...)"] -- "hook events<br/>PreToolUse, Stop,<br/>UserPromptSubmit" --> B["📝 status-writer<br/>writes JSON to<br/>~/.claude/pet-data/"]
+    B -- "file watch<br/>(notify crate)" --> C["🦀 Desktop Pet<br/>(Tauri app)"]
 ```
 
 The pet is **decoupled from any specific tool** — it just watches a JSON status file. To support another assistant (Cursor, Aider, Windsurf, etc.), write a hook/adapter that writes to `~/.claude/pet-data/status-{session_id}.json`. See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
