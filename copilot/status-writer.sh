@@ -45,27 +45,33 @@ switch (hookEvent) {
     detail = 'Processing prompt...';
     break;
   case 'preToolUse':
-    state = 'working';
     switch (toolName) {
       case 'bash':
+        state = 'running';
         detail = 'Running: ' + (toolArgs.command || '').slice(0, 40); break;
       case 'edit':
       case 'edit_file':
+        state = 'editing';
         detail = 'Editing ' + path.basename(toolArgs.file || toolArgs.path || ''); break;
       case 'view':
       case 'read_file':
+        state = 'reading';
         detail = 'Reading ' + path.basename(toolArgs.file || toolArgs.path || ''); break;
       case 'write':
       case 'write_file':
       case 'create_file':
+        state = 'editing';
         detail = 'Writing ' + path.basename(toolArgs.file || toolArgs.path || ''); break;
       case 'search':
       case 'grep':
+        state = 'searching';
         detail = 'Searching: ' + (toolArgs.pattern || toolArgs.query || ''); break;
       case 'glob':
       case 'find':
+        state = 'searching';
         detail = 'Finding: ' + (toolArgs.pattern || toolArgs.glob || ''); break;
       default:
+        state = 'running';
         detail = 'Using ' + toolName;
     }
     break;
@@ -78,7 +84,7 @@ switch (hookEvent) {
     detail = 'Done';
     break;
   case 'errorOccurred':
-    state = 'working';
+    state = 'error';
     const errMsg = (input.error && input.error.message) || 'Unknown error';
     detail = 'Error: ' + errMsg.slice(0, 40);
     break;

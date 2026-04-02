@@ -53,36 +53,44 @@ function run(input) {
       detail = 'Processing prompt...';
       break;
     case 'preToolUse':
-      state = 'working';
       switch (toolName) {
         case 'bash':
         case 'run_in_terminal':
+          state = 'running';
           detail = 'Running: ' + (toolArgs.command || '').slice(0, 40); break;
         case 'edit':
         case 'edit_file':
         case 'replace_string_in_file':
+          state = 'editing';
           detail = 'Editing ' + path.basename(toolArgs.file || toolArgs.filePath || toolArgs.path || ''); break;
         case 'view':
         case 'read_file':
+          state = 'reading';
           detail = 'Reading ' + path.basename(toolArgs.file || toolArgs.filePath || toolArgs.path || ''); break;
         case 'write':
         case 'write_file':
         case 'create_file':
+          state = 'editing';
           detail = 'Writing ' + path.basename(toolArgs.file || toolArgs.filePath || toolArgs.path || ''); break;
         case 'search':
         case 'grep':
         case 'grep_search':
         case 'semantic_search':
+          state = 'searching';
           detail = 'Searching: ' + (toolArgs.pattern || toolArgs.query || '').slice(0, 30); break;
         case 'glob':
         case 'find':
         case 'file_search':
+          state = 'searching';
           detail = 'Finding: ' + (toolArgs.pattern || toolArgs.glob || toolArgs.query || '').slice(0, 30); break;
         case 'fetch_webpage':
+          state = 'reading';
           detail = 'Fetching web page...'; break;
         case 'list_dir':
+          state = 'reading';
           detail = 'Listing ' + path.basename(toolArgs.path || ''); break;
         default:
+          state = 'running';
           detail = 'Using ' + toolName;
       }
       break;

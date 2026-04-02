@@ -4,10 +4,11 @@ This document explains how hook events from different AI assistants are mapped t
 
 ## Supported Assistants
 
-| | Claude Code | VS Code Copilot |
+| | Claude Code | GitHub Copilot |
 |---|---|---|
 | **Hook config** | `hooks/hooks.json` | `copilot/hooks.json` |
 | **Status writer** | `scripts/status-writer.sh` (bash + node) | `copilot/status-writer.js` (node) |
+| **Platforms** | Claude Code CLI | VS Code Copilot Chat, Copilot CLI, Copilot Coding Agent |
 | **Event naming** | PascalCase (`PreToolUse`) | camelCase (`preToolUse`) |
 | **Tool names** | `Edit`, `Read`, `Bash`, `Grep` | `replace_string_in_file`, `read_file`, `run_in_terminal`, `grep_search` |
 | **Tool input keys** | snake_case (`file_path`) | camelCase (`filePath`) |
@@ -39,21 +40,21 @@ This document explains how hook events from different AI assistants are mapped t
 | `StopFailure` | `error` | "Something went wrong" | |
 | `SessionEnd` | `offline` | "Session ended" | Writes offline, does NOT delete file |
 
-### VS Code Copilot
+### GitHub Copilot
 
 | Hook Event | Status State | Detail | Notes |
 |---|---|---|---|
 | `sessionStart` | `idle` | "Session started" | Also auto-launches pet binary |
 | `userPromptSubmitted` | `thinking` | "Processing prompt..." | |
-| `preToolUse` — run_in_terminal | `working` | "Running: {command}" | |
-| `preToolUse` — replace_string_in_file, edit_file | `working` | "Editing {filename}" | |
-| `preToolUse` — read_file | `working` | "Reading {filename}" | |
-| `preToolUse` — create_file, write_file | `working` | "Writing {filename}" | |
-| `preToolUse` — grep_search, semantic_search | `working` | "Searching: {query}" | |
-| `preToolUse` — file_search, glob | `working` | "Finding: {pattern}" | |
-| `preToolUse` — fetch_webpage | `working` | "Fetching web page..." | |
-| `preToolUse` — list_dir | `working` | "Listing {path}" | |
-| `preToolUse` — other | `working` | "Using {toolName}" | Fallback |
+| `preToolUse` — run_in_terminal | `running` | "Running: {command}" | |
+| `preToolUse` — replace_string_in_file, edit_file | `editing` | "Editing {filename}" | |
+| `preToolUse` — read_file | `reading` | "Reading {filename}" | |
+| `preToolUse` — create_file, write_file | `editing` | "Writing {filename}" | |
+| `preToolUse` — grep_search, semantic_search | `searching` | "Searching: {query}" | |
+| `preToolUse` — file_search, glob | `searching` | "Finding: {pattern}" | |
+| `preToolUse` — fetch_webpage | `reading` | "Fetching web page..." | |
+| `preToolUse` — list_dir | `reading` | "Listing {path}" | |
+| `preToolUse` — other | `running` | "Using {toolName}" | Fallback |
 | `postToolUse` | `thinking` | "Processing..." | Avoids idle flash between tools |
 | `stop` | `idle` | "Done" | Fires after each response |
 | `errorOccurred` | `error` | "Error: {message}" | |
@@ -76,7 +77,7 @@ All states the pet can display, with their visual behavior:
 | `error` | shake 3× | red | 9 | StopFailure, errorOccurred |
 | `offline` | slow breathing | grey | 7 | SessionEnd |
 
-> **Note:** Copilot uses a single `working` state for all tool use (maps to `running` animation). Claude Code has fine-grained states (`reading`, `editing`, `searching`, etc.) based on tool categories.
+Both Claude Code and GitHub Copilot now use the same fine-grained states for tool use.
 
 ## Adding a New AI Assistant
 
