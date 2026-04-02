@@ -134,41 +134,17 @@ const ASCII_SPECIES = {
   },
 };
 
-const FERRIS_SVG_MAP = {
-  idle: [1], thinking: [3, 14], reading: [10], editing: [19],
-  searching: [20], running: [2], delegating: [15], waiting: [5],
-  error: [9], offline: [7], unknown: [1],
-};
+// GIF character maps loaded from character.json files (populated at init)
+const GIF_MODES = {};
 
-const MONA_GIF_MAP = {
-  idle:       ['mona/love.gif', 'mona/hearts.gif', 'mona/smirk.gif'],
-  thinking:   ['mona/looking.gif', 'mona/mona.gif'],
-  reading:    ['mona/mona.gif', 'mona/looking.gif'],
-  editing:    ['mona/tongue.gif', 'mona/laugh.gif'],
-  searching:  ['mona/tech.gif', 'mona/looking.gif'],
-  running:    ['mona/tongue.gif', 'mona/tech.gif'],
-  delegating: ['mona/ducks.gif', 'mona/smirk.gif'],
-  waiting:    ['mona/shocked.gif', 'mona/mona.gif'],
-  error:      ['mona/angry.gif', 'mona/sick.gif'],
-  offline:    ['mona/ohbrother.gif', 'mona/mona.gif'],
-  unknown:    ['mona/love.gif'],
+// Ferris SVG map loaded from character.json (populated at init, fallback to hardcoded)
+let FERRIS_SVG_MAP = {
+  idle: ['ferris/1.svg'], thinking: ['ferris/3.svg', 'ferris/14.svg'],
+  reading: ['ferris/10.svg'], editing: ['ferris/19.svg'],
+  searching: ['ferris/20.svg'], running: ['ferris/2.svg'],
+  delegating: ['ferris/15.svg'], waiting: ['ferris/5.svg'],
+  error: ['ferris/9.svg'], offline: ['ferris/7.svg'], unknown: ['ferris/1.svg'],
 };
-
-const KUROMI_GIF_MAP = {
-  idle:       ['kuromi/charming.gif', 'kuromi/lilrya.gif'],
-  thinking:   ['kuromi/think.gif', 'kuromi/bling.gif'],
-  reading:    ['kuromi/kuromi.gif'],
-  editing:    ['kuromi/jump.gif', 'kuromi/charming.gif'],
-  searching:  ['kuromi/think.gif'],
-  running:    ['kuromi/jump.gif', 'kuromi/charming.gif'],
-  delegating: ['kuromi/heart.gif', 'kuromi/lilrya.gif'],
-  waiting:    ['kuromi/bling.gif', 'kuromi/lilrya.gif'],
-  error:      ['kuromi/angry.gif'],
-  offline:    ['kuromi/sleeping.gif'],
-  unknown:    ['kuromi/charming.gif'],
-};
-
-const GIF_MODES = { mona: MONA_GIF_MAP, kuromi: KUROMI_GIF_MAP };
 
 const ASCII_ANIM_SPEED = {
   working: 300, editing: 300, running: 300,
@@ -298,7 +274,7 @@ function updateStatus(status) {
   if (mode === 'ferris') {
     showImage();
     const sprites = FERRIS_SVG_MAP[state] || FERRIS_SVG_MAP.idle;
-    setImage(`ferris/${pickRandom(sprites)}.svg`);
+    setImage(pickRandom(sprites));
   } else if (GIF_MODES[mode]) {
     showImage();
     const map = GIF_MODES[mode];
@@ -424,13 +400,14 @@ function buildMenu() {
   dlcLabel.textContent = 'DLC';
   charMenu.appendChild(dlcLabel);
 
-  for (const [key, label] of [['mona', 'Mona (GitHub)'], ['kuromi', 'Kuromi (Sanrio)']]) {
+  const knownDlcs = [['mona', 'Mona (GitHub)'], ['kuromi', 'Kuromi (Sanrio)']];
+  for (const [key, fallbackLabel] of knownDlcs) {
     const installed = isDlcInstalled(key);
     const cls = mode === key ? 'active' : '';
     if (installed) {
-      addMenuItem(charMenu, label, () => selectChar(key), cls);
+      addMenuItem(charMenu, fallbackLabel, () => selectChar(key), cls);
     } else {
-      addMenuItem(charMenu, label + ' ↓', () => downloadAndSelectDlc(key), cls);
+      addMenuItem(charMenu, fallbackLabel + ' ↓', () => downloadAndSelectDlc(key), cls);
     }
   }
   addDivider(charMenu);
@@ -584,7 +561,7 @@ async function preloadAssets() {
   if (GIF_MODES[mode]) {
     for (const gifs of Object.values(GIF_MODES[mode])) for (const g of gifs) paths.push(g);
   } else if (mode === 'ferris') {
-    for (const nums of Object.values(FERRIS_SVG_MAP)) for (const n of nums) paths.push(`ferris/${n}.svg`);
+    for (const svgs of Object.values(FERRIS_SVG_MAP)) for (const s of svgs) paths.push(s);
   }
   await Promise.all([...new Set(paths)].map(p => loadAsset(p)));
 }
@@ -598,12 +575,32 @@ async function preloadAssets() {
     try { appVersion = await window.__TAURI__.app.getVersion(); } catch(e) {}
   }
 
-  // Check which DLCs are installed
-  if (window.__TAURI__) {
-    for (const dlc of Object.keys(GIF_MODES)) {
+  // Load Ferris character.json (bundled with frontend)
+  try {
+    const resp = await fetch('ferris/character.json');
+    if (resp.ok) {
+      const config = await resp.json();
+      FERRIS_SVG_MAP = config.states;
+    }
+  } catch(e) {}
+
+  // Discover DLC characters from external assets
+  if (window.__TAURI__ && hasExternalAssets) {
+    for (const dlcName of ['mona', 'kuromi']) {
       try {
-        dlcInstalledCache[dlc] = await window.__TAURI__.core.invoke('is_dlc_installed', { dlcName: dlc });
-      } catch(e) { dlcInstalledCache[dlc] = false; }
+        const installed = await window.__TAURI__.core.invoke('is_dlc_installed', { dlcName });
+        dlcInstalledCache[dlcName] = installed;
+        if (installed) {
+          // Load character.json from assets dir
+          try {
+            const jsonStr = await window.__TAURI__.core.invoke('load_text_asset', { path: dlcName + '/character.json' });
+            if (jsonStr) {
+              const config = JSON.parse(jsonStr);
+              GIF_MODES[dlcName] = config.states;
+            }
+          } catch(e) {}
+        }
+      } catch(e) { dlcInstalledCache[dlcName] = false; }
     }
   }
 

@@ -1,0 +1,17 @@
+{
+  "name": "Ferris",
+  "type": "svg",
+  "states": {
+    "idle":       ["ferris/1.svg"],
+    "thinking":   ["ferris/3.svg", "ferris/14.svg"],
+    "reading":    ["ferris/10.svg"],
+    "editing":    ["ferris/19.svg"],
+    "searching":  ["ferris/20.svg"],
+    "running":    ["ferris/2.svg"],
+    "delegating": ["ferris/15.svg"],
+    "waiting":    ["ferris/5.svg"],
+    "error":      ["ferris/9.svg"],
+    "offline":    ["ferris/7.svg"],
+    "unknown":    ["ferris/1.svg"]
+  }
+}

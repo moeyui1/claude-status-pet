@@ -94,6 +94,49 @@ async function main() {
     console.error(`WARNING: ${failed.length} GIF(s) failed to download.`);
     process.exit(1);
   } else {
+    // Generate character.json for each DLC character
+    const characters = {
+      mona: {
+        name: 'Mona (GitHub)',
+        type: 'gif',
+        states: {
+          idle:       ['mona/love.gif', 'mona/hearts.gif', 'mona/smirk.gif'],
+          thinking:   ['mona/looking.gif', 'mona/mona.gif'],
+          reading:    ['mona/mona.gif', 'mona/looking.gif'],
+          editing:    ['mona/tongue.gif', 'mona/laugh.gif'],
+          searching:  ['mona/tech.gif', 'mona/looking.gif'],
+          running:    ['mona/tongue.gif', 'mona/tech.gif'],
+          delegating: ['mona/ducks.gif', 'mona/smirk.gif'],
+          waiting:    ['mona/shocked.gif', 'mona/mona.gif'],
+          error:      ['mona/angry.gif', 'mona/sick.gif'],
+          offline:    ['mona/ohbrother.gif', 'mona/mona.gif'],
+          unknown:    ['mona/love.gif'],
+        }
+      },
+      kuromi: {
+        name: 'Kuromi (Sanrio)',
+        type: 'gif',
+        states: {
+          idle:       ['kuromi/charming.gif', 'kuromi/lilrya.gif'],
+          thinking:   ['kuromi/think.gif', 'kuromi/bling.gif'],
+          reading:    ['kuromi/kuromi.gif'],
+          editing:    ['kuromi/jump.gif', 'kuromi/charming.gif'],
+          searching:  ['kuromi/think.gif'],
+          running:    ['kuromi/jump.gif', 'kuromi/charming.gif'],
+          delegating: ['kuromi/heart.gif', 'kuromi/lilrya.gif'],
+          waiting:    ['kuromi/bling.gif', 'kuromi/lilrya.gif'],
+          error:      ['kuromi/angry.gif'],
+          offline:    ['kuromi/sleeping.gif'],
+          unknown:    ['kuromi/charming.gif'],
+        }
+      }
+    };
+
+    for (const [dir, config] of Object.entries(characters)) {
+      const configPath = path.join(ASSETS_DIR, dir, 'character.json');
+      fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
+    }
+
     fs.writeFileSync(VERSION_FILE, CURRENT_VERSION);
     console.log(`GIFs downloaded to ${ASSETS_DIR}`);
   }

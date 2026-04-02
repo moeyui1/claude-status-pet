@@ -137,6 +137,12 @@ fn load_asset(assets_dir: tauri::State<'_, Option<PathBuf>>, path: String) -> Op
     Some(format!("data:{};base64,{}", mime, b64))
 }
 
+#[tauri::command]
+fn load_text_asset(assets_dir: tauri::State<'_, Option<PathBuf>>, path: String) -> Option<String> {
+    let dir = assets_dir.inner().as_ref()?;
+    fs::read_to_string(dir.join(&path)).ok()
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let args: Vec<String> = std::env::args().collect();
@@ -175,7 +181,7 @@ pub fn run() {
         .manage(status_path_shared)
         .manage(session_id)
         .manage(assets_dir)
-        .invoke_handler(tauri::generate_handler![get_status, get_session_id, get_assets_dir, load_asset, is_dlc_installed, download_dlc])
+        .invoke_handler(tauri::generate_handler![get_status, get_session_id, get_assets_dir, load_asset, load_text_asset, is_dlc_installed, download_dlc])
         .setup(move |app| {
             let window = app.get_webview_window("main").unwrap();
 

@@ -4,96 +4,153 @@ Want to add a new character to Claude Status Pet? Here's how.
 
 ## Character Types
 
-The pet supports three character formats:
+| Format | Example | Config | Best for |
+|--------|---------|--------|----------|
+| **SVG images** | Ferris | `character.json` in bundled frontend | Detailed vector illustrations |
+| **GIF animations** | Mona, Kuromi | `character.json` in assets dir | Animated mascots, stickers |
+| **ASCII art** | Chonk, Cat, Ghost | Hardcoded in `app.js` | Lightweight text art |
 
-| Format | Example | Best for |
-|--------|---------|----------|
-| **SVG images** | Ferris | Detailed vector illustrations |
-| **GIF animations** | Mona (GitHub) | Animated mascots, stickers |
-| **ASCII art** | Chonk, Cat, Ghost | Lightweight text art |
+## The `character.json` Format
 
-## Adding an SVG/GIF Character
+Every SVG/GIF character is defined by a `character.json` file:
 
-### 1. Prepare your images
+```json
+{
+  "name": "My Character",
+  "type": "gif",
+  "states": {
+    "idle":       ["mychar/happy.gif", "mychar/wave.gif"],
+    "thinking":   ["mychar/curious.gif"],
+    "reading":    ["mychar/reading.gif"],
+    "editing":    ["mychar/typing.gif"],
+    "searching":  ["mychar/looking.gif"],
+    "running":    ["mychar/busy.gif"],
+    "delegating": ["mychar/pointing.gif"],
+    "waiting":    ["mychar/waiting.gif"],
+    "error":      ["mychar/sad.gif"],
+    "offline":    ["mychar/sleeping.gif"],
+    "unknown":    ["mychar/happy.gif"]
+  }
+}
+```
 
-You need one image per state:
+**Fields:**
+- **`name`** — Display name shown in the right-click menu
+- **`type`** — `"gif"` or `"svg"` (determines rendering mode)
+- **`states`** — Maps each pet state to an array of image paths (one is picked randomly)
+
+**States reference:**
 
 | State | When it shows | Suggested pose |
 |-------|--------------|----------------|
-| `idle` | Waiting for input | Relaxed, happy, waving |
-| `thinking` | Processing a prompt | Curious, looking up, question mark |
-| `working` | Using a tool | Busy, typing, focused |
+| `idle` | Waiting for input | Relaxed, happy |
+| `thinking` | Processing a prompt | Curious, looking up |
+| `reading` | Reading files | Focused, calm |
+| `editing` | Writing/editing files | Typing, busy |
+| `searching` | Searching code | Looking around |
+| `running` | Running commands | Energetic |
 | `delegating` | Spawning sub-agents | Pointing, directing |
-| `offline` | Session ended | Sleeping, faded, zzz |
+| `waiting` | Awaiting approval | Anxious, alert |
+| `error` | Something failed | Sad, angry |
+| `offline` | Session ended | Sleeping, faded |
+| `unknown` | Unmapped state | Fallback (usually same as idle) |
 
-**Guidelines:**
-- Transparent background (PNG or GIF with transparency)
-- Square aspect ratio works best (the display area is ~140x140px)
-- Keep file sizes reasonable (<2MB per image, <10MB total per character)
-- SVGs are preferred for static images (infinitely scalable, tiny file size)
-- GIFs are great for animated characters
+Multiple images per state adds variety — the app randomly picks one each time.
 
-### 2. Add your images
+## Adding a Bundled SVG Character
 
-Create a directory under `pet-app/src/`:
+For characters bundled with the app (like Ferris):
 
+1. Create a directory: `pet-app/src/mychar/`
+2. Add SVG files: `mychar/1.svg`, `mychar/2.svg`, etc.
+3. Create `pet-app/src/mychar/character.json`:
+
+```json
+{
+  "name": "My Character",
+  "type": "svg",
+  "states": {
+    "idle": ["mychar/1.svg"],
+    "thinking": ["mychar/2.svg"],
+    ...
+  }
+}
 ```
-pet-app/src/my-character/
-├── idle.gif       (or .svg / .png)
-├── thinking.gif
-├── working.gif
-├── delegating.gif
-└── offline.gif
-```
 
-### 3. Register in app.js
+4. The app will auto-discover it from the bundled frontend.
 
-Add a state-to-image mapping:
+## Adding a GIF DLC Character
+
+For characters downloaded at runtime (like Mona, Kuromi):
+
+### 1. Add GIF URLs to `scripts/download-gifs.js`
 
 ```javascript
-const MY_CHARACTER_MAP = {
-  idle: 'my-character/idle.gif',
-  thinking: 'my-character/thinking.gif',
-  working: 'my-character/working.gif',
-  delegating: 'my-character/delegating.gif',
-  offline: 'my-character/offline.gif',
-  unknown: 'my-character/idle.gif',
+const GIFS = {
+  // ... existing entries ...
+  'mychar/happy.gif': 'https://media.giphy.com/media/.../giphy.gif',
+  'mychar/typing.gif': 'https://media.giphy.com/media/.../giphy.gif',
+  // ...
 };
 ```
 
-Add the rendering branch in `updateStatus()`:
+### 2. Add character config in the same file
+
+In the `characters` object inside `main()`:
 
 ```javascript
-} else if (mode === 'my-character') {
-    showFerris(); // reuses the <img> element
-    const img = MY_CHARACTER_MAP[state] || MY_CHARACTER_MAP.idle;
-    if (!ferrisImg.src.endsWith(img)) {
-      ferrisImg.style.opacity = '0';
-      setTimeout(() => {
-        ferrisImg.src = img;
-        ferrisImg.style.opacity = '1';
-      }, 150);
+const characters = {
+  // ... existing entries ...
+  mychar: {
+    name: 'My Character',
+    type: 'gif',
+    states: {
+      idle: ['mychar/happy.gif'],
+      thinking: ['mychar/curious.gif'],
+      // ...
     }
+  }
+};
 ```
 
-Add to the right-click menu in `buildMenu()`:
+### 3. Register in the DLC menu
+
+In `pet-app/src/app.js`, add to the `knownDlcs` array in `buildMenu()`:
 
 ```javascript
-addMenuItem(charMenu, 'My Character', () => selectChar('my-character'),
-  mode === 'my-character' ? 'active' : '');
+const knownDlcs = [
+  ['mona', 'Mona (GitHub)'],
+  ['kuromi', 'Kuromi (Sanrio)'],
+  ['mychar', 'My Character'],  // ← add here
+];
 ```
 
-### 4. Test
+### 4. Bump the GIF version
+
+Increment `CURRENT_VERSION` in `download-gifs.js` to force re-download:
+
+```javascript
+const CURRENT_VERSION = '3';  // was '2'
+```
+
+### 5. Test
 
 ```bash
 cd pet-app && npx tauri build
 ```
 
-Then right-click the pet and select your character.
+Right-click the pet → select your character from the DLC section.
+
+**Image guidelines:**
+- Transparent background (GIF with transparency)
+- Square aspect ratio (~140x140px display area)
+- Keep file sizes reasonable (<2MB per image, <10MB total)
 
 ---
 
 ## Adding an ASCII Art Character
+
+ASCII characters are hardcoded in `app.js` (they're just text, no external files needed).
 
 ### 1. Define your frames
 
@@ -103,9 +160,7 @@ Each state needs 1-3 animation frames. Each frame is 5 lines of 12 characters:
 const MY_ASCII = {
   name: 'My Character',
   idle: [
-    // Frame 1
     ['            ', '   .----.   ', '  ( {E}  {E} )  ', '  (      )  ', '   `----´   '],
-    // Frame 2 (optional)
     ['            ', '   .----.   ', '  ( {E}  {E} )  ', '  (  --  )  ', '   `----´   '],
   ],
   thinking: [ /* frames */ ],
@@ -116,37 +171,25 @@ const MY_ASCII = {
 
 `{E}` is replaced with the user's chosen eye style (·, ✦, ×, ◉, @, °).
 
-### 2. Register in app.js
+### 2. Register in `app.js`
 
-Add your character to the `ASCII_SPECIES` object:
-
-```javascript
-ASCII_SPECIES.mychar = {
-  name: 'My Character',
-  idle: [ /* ... */ ],
-  thinking: [ /* ... */ ],
-  working: [ /* ... */ ],
-  offline: [ /* ... */ ],
-};
-```
-
-It will automatically appear in the right-click menu.
+Add your character to the `ASCII_SPECIES` object. It will automatically appear in the menu.
 
 ---
 
 ## Submitting Your Character
 
 1. Fork the repo
-2. Add your character files and code changes
+2. Add your character files and `character.json`
 3. Open a PR with:
    - Screenshot/GIF of your character in action
    - Credit/attribution for the art (if not original)
-   - License compatibility (must be compatible with MIT)
+   - License compatibility (must be compatible with the project license)
 
 ## Art Credits
 
 Please ensure you have the right to use the images:
 - **CC0 / Public Domain** — always ok
-- **CC-BY** — ok with attribution (add to Credits section in README)
+- **CC-BY** — ok with attribution (add to Credits in README)
 - **Original art** — always welcome!
 - **Copyrighted** — not allowed without explicit permission
