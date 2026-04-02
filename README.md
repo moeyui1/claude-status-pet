@@ -178,7 +178,7 @@ graph LR
     B -- "file watch<br/>(notify crate)" --> C["🦀 Desktop Pet<br/>(Tauri app)"]
 ```
 
-The pet is **decoupled from any specific tool** — it just watches a JSON status file. To support another assistant (Cursor, Aider, Windsurf, etc.), write a hook/adapter that writes to `~/.claude/pet-data/status-{session_id}.json`. See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
+The pet is **decoupled from any specific tool** — it just watches a JSON status file. See [`docs/HOOKS.md`](docs/HOOKS.md) for the full hook event → status mapping and how to add support for other assistants.
 
 ## Credits
 
