@@ -145,6 +145,8 @@ pub fn run() {
         DEBUG_ENABLED.store(true, Ordering::Relaxed);
     }
 
+    let demo_mode = args.iter().any(|a| a == "--demo");
+
     let status_path = args
         .windows(2)
         .find(|w| w[0] == "--status-file")
@@ -200,7 +202,39 @@ pub fn run() {
             let watch_path = status_path.clone();
             let log_path = status_path.clone();
 
-            std::thread::spawn(move || {
+            if demo_mode {
+                // Demo mode: cycle through all states for recording
+                std::thread::spawn(move || {
+                    let demos = vec![
+                        ("idle", "Waiting for input..."),
+                        ("thinking", "Processing prompt..."),
+                        ("reading", "Reading lib.rs"),
+                        ("editing", "Editing app.js"),
+                        ("searching", "Searching: TODO"),
+                        ("running", "Running npm test"),
+                        ("delegating", "Spawning agent..."),
+                        ("waiting", "Waiting for response..."),
+                        ("error", "Build failed"),
+                        ("offline", "Zzz..."),
+                    ];
+                    let mut i = 0;
+                    loop {
+                        let (state, detail) = demos[i % demos.len()];
+                        let _ = handle.emit("status-update", StatusPayload {
+                            state: state.to_string(),
+                            detail: detail.to_string(),
+                            tool: String::new(),
+                            event: "Demo".to_string(),
+                            session_id: "demo".to_string(),
+                            session_name: "Demo Mode".to_string(),
+                        });
+                        i += 1;
+                        std::thread::sleep(std::time::Duration::from_millis(1500));
+                    }
+                });
+            } else {
+                // Normal mode: watch status file
+                std::thread::spawn(move || {
                 let (tx, rx) = std::sync::mpsc::channel();
                 let mut watcher = match notify::recommended_watcher(tx) {
                     Ok(w) => w,
@@ -282,7 +316,8 @@ pub fn run() {
                     }
                 }
                 debug_log(&log_path, "Watcher loop ended (channel closed)");
-            });
+                });
+            } // end if demo_mode / else
 
             Ok(())
         })
