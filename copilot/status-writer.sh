@@ -26,7 +26,9 @@ const toolName = input.toolName || '';
 const toolArgs = (() => { try { return JSON.parse(input.toolArgs || '{}'); } catch(e) { return {}; } })();
 
 if (hookEvent === 'sessionEnd') {
-  try { fs.unlinkSync(statusFile); } catch(e) {}
+  // Don't delete — write offline state so pet shows sleeping instead of closing
+  const status = { state: 'offline', detail: 'Session ended', tool: '', event: hookEvent, session_id: sessionId, session_name: path.basename(cwd || sessionId), timestamp: new Date().toISOString() };
+  fs.writeFileSync(statusFile, JSON.stringify(status));
   process.exit(0);
 }
 
