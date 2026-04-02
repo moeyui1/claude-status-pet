@@ -94,7 +94,7 @@ fn is_dlc_installed(assets_dir: tauri::State<'_, Option<PathBuf>>, dlc_name: Str
 }
 
 #[tauri::command]
-fn download_dlc(assets_dir: tauri::State<'_, Option<PathBuf>>, dlc_name: String) -> Result<bool, String> {
+fn download_dlc(assets_dir: tauri::State<'_, Option<PathBuf>>, _dlc_name: String) -> Result<bool, String> {
     let dir = assets_dir.inner().as_ref().ok_or("No assets dir")?;
 
     // Try multiple script locations (JS preferred for cross-platform)
