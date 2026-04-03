@@ -204,7 +204,6 @@ mod tests {
             tool_input,
             session_id: session_id.map(|s| s.to_string()),
             cwd: cwd.map(|s| s.to_string()),
-            tool_name_copilot: None,
             tool_args: None,
             error: None,
         }

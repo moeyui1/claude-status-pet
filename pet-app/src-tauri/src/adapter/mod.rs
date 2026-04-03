@@ -27,19 +27,17 @@ pub struct NormalizedEvent {
 /// Raw JSON from stdin (loosely typed for all adapters)
 #[derive(Deserialize, Default)]
 pub struct StdinInput {
-    #[serde(default)]
+    #[serde(alias = "hookEventName", default)]
     pub hook_event_name: Option<String>,
-    #[serde(default)]
+    #[serde(alias = "toolName", default)]
     pub tool_name: Option<String>,
     #[serde(default)]
     pub tool_input: Option<serde_json::Value>,
-    #[serde(default)]
+    #[serde(alias = "sessionId", default)]
     pub session_id: Option<String>,
     #[serde(default)]
     pub cwd: Option<String>,
-    // Copilot fields
-    #[serde(alias = "toolName", default)]
-    pub tool_name_copilot: Option<String>,
+    // Copilot toolArgs (JSON string, needs secondary parse)
     #[serde(alias = "toolArgs", default)]
     pub tool_args: Option<String>,
     // Error info
