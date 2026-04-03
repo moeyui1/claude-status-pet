@@ -2,6 +2,7 @@
 name = "claude-status-pet"
 version = "0.7.0"
 edition = "2021"
+license = "AGPL-3.0-only"
 
 [dependencies]
 tauri = { version = "2", features = [] }
