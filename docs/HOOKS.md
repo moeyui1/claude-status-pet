@@ -81,18 +81,17 @@ Both Claude Code and GitHub Copilot now use the same fine-grained states for too
 
 ## Adding a New AI Assistant
 
-The pet watches a JSON file — no code changes needed. Write a hook/adapter that outputs:
+No scripts needed — just call the binary with CLI args from your hooks:
 
-```json
-{
-  "state": "editing",
-  "detail": "Editing main.rs",
-  "tool": "edit",
-  "event": "preToolUse",
-  "session_id": "my-session-123",
-  "session_name": "my-project",
-  "timestamp": "2025-04-02T10:30:00Z"
-}
+```bash
+claude-status-pet write-status \
+  --event tool \
+  --tool edit \
+  --detail "Editing main.rs" \
+  --session-id my-session-123 \
+  --session-name my-project
 ```
 
-to `~/.claude/pet-data/status-{session_id}.json`. See [CONTRIBUTING.md](../CONTRIBUTING.md) for details.
+The binary handles everything: tool→state mapping, status file writing, and auto-launching the GUI.
+
+For deeper integration (parsing native stdin JSON), create a built-in adapter. See [CONTRIBUTING.md](../CONTRIBUTING.md#adding-a-new-ai-agent-adapter) for details.
