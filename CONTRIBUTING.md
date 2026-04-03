@@ -162,6 +162,8 @@ Users can install character packs **without rebuilding** — just drop a folder 
 
 The pet will auto-discover it on next launch and show it under **Custom** in the right-click menu.
 
+> **Note:** You must restart the pet for new packs to appear. Close via right-click → Exit, then relaunch. Or use `/pet close` then `/pet open` if using Claude Code.
+
 ### Sharing Packs
 
 To share a character pack:
