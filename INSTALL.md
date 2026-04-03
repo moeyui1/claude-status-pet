@@ -85,7 +85,6 @@ Merge these hooks (do not overwrite existing hooks):
 ### Prerequisites
 
 - VS Code with GitHub Copilot extension
-- Node.js (used by the hook script for JSON parsing)
 
 ### Steps
 
@@ -155,27 +154,34 @@ Add this setting (merge, do not replace the file):
 
 This tells VS Code to load all `*.json` hook files from `~/.copilot/hooks/` globally, across all workspaces.
 
-#### 5. Download assets
+#### 4. Download assets
 
-**macOS / Linux:**
+**macOS / Linux / Git Bash:**
 
 ```bash
-node "$HOME/.claude/pet-data/scripts/download-assets.js"
+ASSETS_DIR="$HOME/.claude/pet-data/assets"
+SCRIPTS_DIR="$HOME/.claude/pet-data/scripts"
+mkdir -p "$ASSETS_DIR" "$SCRIPTS_DIR"
+curl -sLo /tmp/pet-assets.zip "https://github.com/moeyui1/claude-status-pet/releases/latest/download/pet-assets.zip"
+unzip -o /tmp/pet-assets.zip -d "$ASSETS_DIR"
+rm -f /tmp/pet-assets.zip
+# Download DLC helper script (needed for Mona/Kuromi GIF download)
+curl -sLo "$SCRIPTS_DIR/download-gifs.js" "https://raw.githubusercontent.com/moeyui1/claude-status-pet/main/scripts/download-gifs.js"
 ```
 
 **Windows PowerShell:**
 
 ```powershell
-node "$env:USERPROFILE\.claude\pet-data\scripts\download-assets.js"
+$assetsDir = "$env:USERPROFILE\.claude\pet-data\assets"
+$scriptsDir = "$env:USERPROFILE\.claude\pet-data\scripts"
+New-Item -ItemType Directory -Path $assetsDir -Force | Out-Null
+New-Item -ItemType Directory -Path $scriptsDir -Force | Out-Null
+Invoke-WebRequest -Uri "https://github.com/moeyui1/claude-status-pet/releases/latest/download/pet-assets.zip" -OutFile "$env:TEMP\pet-assets.zip"
+Expand-Archive -Path "$env:TEMP\pet-assets.zip" -DestinationPath $assetsDir -Force
+Remove-Item "$env:TEMP\pet-assets.zip"
+# Download DLC helper script (needed for Mona/Kuromi GIF download)
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/moeyui1/claude-status-pet/main/scripts/download-gifs.js" -OutFile "$scriptsDir\download-gifs.js"
 ```
-
-> If `download-assets.js` fails to extract the zip, manually download and extract:
->
-> ```powershell
-> Invoke-WebRequest -Uri "https://github.com/moeyui1/claude-status-pet/releases/latest/download/pet-assets.zip" -OutFile "$env:TEMP\pet-assets.zip"
-> Expand-Archive -Path "$env:TEMP\pet-assets.zip" -DestinationPath "$env:USERPROFILE\.claude\pet-data\assets" -Force
-> Remove-Item "$env:TEMP\pet-assets.zip"
-> ```
 
 ---
 
@@ -198,7 +204,11 @@ git commit -m "Add status pet hooks for Copilot"
 #### 4. Download assets
 
 ```bash
-node ~/.claude/pet-data/scripts/download-assets.js
+ASSETS_DIR="$HOME/.claude/pet-data/assets"
+mkdir -p "$ASSETS_DIR"
+curl -sLo /tmp/pet-assets.zip "https://github.com/moeyui1/claude-status-pet/releases/latest/download/pet-assets.zip"
+unzip -o /tmp/pet-assets.zip -d "$ASSETS_DIR"
+rm -f /tmp/pet-assets.zip
 ```
 
 ---

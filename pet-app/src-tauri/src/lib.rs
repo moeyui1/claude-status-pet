@@ -103,28 +103,109 @@ fn is_dlc_installed(assets_dir: tauri::State<'_, Option<PathBuf>>, dlc_name: Str
 }
 
 #[tauri::command]
-fn download_dlc(assets_dir: tauri::State<'_, Option<PathBuf>>, _dlc_name: String) -> Result<bool, String> {
+fn download_dlc(assets_dir: tauri::State<'_, Option<PathBuf>>, dlc_name: String) -> Result<bool, String> {
     let dir = assets_dir.inner().as_ref().ok_or("No assets dir")?;
 
-    // Try multiple script locations (JS preferred for cross-platform)
-    let possible_scripts = vec![
-        dir.join("../../scripts/download-gifs.js"),
-        PathBuf::from(std::env::var("CLAUDE_PLUGIN_ROOT").unwrap_or_default()).join("scripts/download-gifs.js"),
-    ];
+    let gifs: Vec<(&str, &str)> = match dlc_name.as_str() {
+        "mona" => vec![
+            ("mona/love.gif",      "https://media.giphy.com/media/jrdgDVFrcgJpNlonWO/giphy.gif"),
+            ("mona/angry.gif",     "https://media.giphy.com/media/kmCCrDo2vlIu6Kswop/giphy.gif"),
+            ("mona/looking.gif",   "https://media.giphy.com/media/9f8mk4P3X2Nvch1z2o/giphy.gif"),
+            ("mona/mona.gif",      "https://media.giphy.com/media/OFEabGCcVqsckIGn8G/giphy.gif"),
+            ("mona/tongue.gif",    "https://media.giphy.com/media/WcYnTzdrjQphdu33xs/giphy.gif"),
+            ("mona/shocked.gif",   "https://media.giphy.com/media/JdQFsdoJBcHaPOANdK/giphy.gif"),
+            ("mona/smirk.gif",     "https://media.giphy.com/media/0vTOscboHgOyBSuK4r/giphy.gif"),
+            ("mona/laugh.gif",     "https://media.giphy.com/media/RgutegYIHk2Nhxj4m5/giphy.gif"),
+            ("mona/ohbrother.gif", "https://media.giphy.com/media/pMzEfC42AYlqT2WPaf/giphy.gif"),
+            ("mona/hearts.gif",    "https://media.giphy.com/media/wJBYx2Yh84XS4sTzmz/giphy.gif"),
+            ("mona/sick.gif",      "https://media.giphy.com/media/nfL2nlWacI8d9jgVXb/giphy.gif"),
+            ("mona/tech.gif",      "https://media.giphy.com/media/cDZJ17fbzWVle68VCB/giphy.gif"),
+            ("mona/ducks.gif",     "https://media.giphy.com/media/QxT6pLq6ekKiCkLkf0/giphy.gif"),
+        ],
+        "kuromi" => vec![
+            ("kuromi/bling.gif",    "https://media.giphy.com/media/JNxq0xOWfidCDzqUH3/giphy.gif"),
+            ("kuromi/charming.gif", "https://media.giphy.com/media/gkLG3Ki3OTXDwVb4rY/giphy.gif"),
+            ("kuromi/kuromi.gif",   "https://media.giphy.com/media/MphoCSnXeA6wR4L8IS/giphy.gif"),
+            ("kuromi/lilrya.gif",   "https://media.giphy.com/media/4G0nkrrXm8Xe1VgPzF/giphy.gif"),
+            ("kuromi/jump.gif",     "https://media.giphy.com/media/cQSjIBgUC2NbMKEm9q/giphy.gif"),
+            ("kuromi/sleeping.gif", "https://media.giphy.com/media/ZIskbLAG8Qeiq2dbV5/giphy.gif"),
+            ("kuromi/heart.gif",    "https://media.giphy.com/media/VpCEcS3ZJ4qlKcD8LF/giphy.gif"),
+            ("kuromi/think.gif",    "https://media.giphy.com/media/dCRVRbdbZUlNt1sRPd/giphy.gif"),
+            ("kuromi/angry.gif",    "https://media.giphy.com/media/Qtvvgwbl1svKYcUGIT/giphy.gif"),
+        ],
+        _ => return Err(format!("Unknown DLC: {}", dlc_name)),
+    };
 
-    let script = possible_scripts.iter().find(|p| p.exists())
-        .ok_or("download-gifs.js not found")?;
+    let dlc_dir = dir.join(&dlc_name);
+    let _ = fs::create_dir_all(&dlc_dir);
 
-    let output = std::process::Command::new("node")
-        .arg(script)
-        .arg(dir.to_string_lossy().to_string())
-        .output()
-        .map_err(|e| e.to_string())?;
-
-    if !output.status.success() {
-        let stderr = String::from_utf8_lossy(&output.stderr);
-        return Err(format!("Download failed: {}", stderr));
+    // Download each GIF using platform-native commands
+    let mut failed = Vec::new();
+    for (name, url) in &gifs {
+        let dest = dir.join(name);
+        let ok = if cfg!(windows) {
+            std::process::Command::new("powershell")
+                .args(["-Command", &format!(
+                    "Invoke-WebRequest -Uri '{}' -OutFile '{}' -MaximumRedirection 5",
+                    url, dest.to_string_lossy()
+                )])
+                .output()
+                .map(|o| o.status.success())
+                .unwrap_or(false)
+        } else {
+            std::process::Command::new("curl")
+                .args(["-sLo", &dest.to_string_lossy(), url])
+                .output()
+                .map(|o| o.status.success())
+                .unwrap_or(false)
+        };
+        if !ok {
+            failed.push(*name);
+        }
     }
+
+    if !failed.is_empty() {
+        return Err(format!("Failed to download: {}", failed.join(", ")));
+    }
+
+    // Write character.json
+    let config = match dlc_name.as_str() {
+        "mona" => serde_json::json!({
+            "name": "Mona (GitHub)", "type": "gif",
+            "states": {
+                "idle": ["mona/love.gif", "mona/hearts.gif", "mona/smirk.gif"],
+                "thinking": ["mona/looking.gif", "mona/mona.gif"],
+                "reading": ["mona/mona.gif", "mona/looking.gif"],
+                "editing": ["mona/tongue.gif", "mona/laugh.gif"],
+                "searching": ["mona/tech.gif", "mona/looking.gif"],
+                "running": ["mona/tongue.gif", "mona/tech.gif"],
+                "delegating": ["mona/ducks.gif", "mona/smirk.gif"],
+                "waiting": ["mona/shocked.gif", "mona/mona.gif"],
+                "error": ["mona/angry.gif", "mona/sick.gif"],
+                "offline": ["mona/ohbrother.gif", "mona/mona.gif"],
+                "unknown": ["mona/love.gif"]
+            }
+        }),
+        "kuromi" => serde_json::json!({
+            "name": "Kuromi (Sanrio)", "type": "gif",
+            "states": {
+                "idle": ["kuromi/charming.gif", "kuromi/lilrya.gif"],
+                "thinking": ["kuromi/think.gif", "kuromi/bling.gif"],
+                "reading": ["kuromi/kuromi.gif"],
+                "editing": ["kuromi/jump.gif", "kuromi/charming.gif"],
+                "searching": ["kuromi/think.gif"],
+                "running": ["kuromi/jump.gif", "kuromi/charming.gif"],
+                "delegating": ["kuromi/heart.gif", "kuromi/lilrya.gif"],
+                "waiting": ["kuromi/bling.gif", "kuromi/lilrya.gif"],
+                "error": ["kuromi/angry.gif"],
+                "offline": ["kuromi/sleeping.gif"],
+                "unknown": ["kuromi/charming.gif"]
+            }
+        }),
+        _ => unreachable!(),
+    };
+
+    let _ = fs::write(dlc_dir.join("character.json"), serde_json::to_string_pretty(&config).unwrap());
 
     Ok(true)
 }
