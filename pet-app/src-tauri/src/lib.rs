@@ -145,10 +145,13 @@ fn download_dlc(assets_dir: tauri::State<'_, Option<PathBuf>>, dlc_name: String)
         let dest = dir.join(name);
         let ok = if cfg!(windows) {
             std::process::Command::new("powershell")
-                .args(["-Command", &format!(
-                    "Invoke-WebRequest -Uri '{}' -OutFile '{}' -MaximumRedirection 5",
-                    url, dest.to_string_lossy()
-                )])
+                .args([
+                    "-Command",
+                    "Invoke-WebRequest",
+                    "-Uri", url,
+                    "-OutFile", &dest.to_string_lossy(),
+                    "-MaximumRedirection", "5",
+                ])
                 .output()
                 .map(|o| o.status.success())
                 .unwrap_or(false)
