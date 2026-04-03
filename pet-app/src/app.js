@@ -166,6 +166,7 @@ let asciiFrame = 0;
 let asciiInterval = null;
 let menuPage = 'main';
 let appVersion = '0.0.0';
+let customPacks = [];
 const dlcInstalledCache = {};
 
 function pickRandom(arr) {
@@ -385,16 +386,18 @@ function addSliderRow(parent, label, currentVal, min, max, step, onchange, unit)
 function buildMenu() {
   charMenu.innerHTML = '';
   if (menuPage === 'config') { buildConfigPage(); return; }
+  if (menuPage === 'ascii') { buildAsciiPage(); return; }
 
-  // Bundled characters
+  // Bundled: Ferris
   addMenuItem(charMenu, 'Ferris (SVG)', () => selectChar('ferris'), mode === 'ferris' ? 'active' : '');
   addDivider(charMenu);
-  for (const [key, species] of Object.entries(ASCII_SPECIES)) {
-    addMenuItem(charMenu, species.name, () => selectChar(key), mode === key ? 'active' : '');
-  }
+
+  // ASCII Buddies → submenu
+  const asciiActive = Object.keys(ASCII_SPECIES).includes(mode);
+  addMenuItem(charMenu, 'ASCII Buddies ' + (asciiActive ? '(' + ASCII_SPECIES[mode].name + ')' : '') + ' ▸', () => { menuPage = 'ascii'; buildMenu(); }, asciiActive ? 'active' : '');
   addDivider(charMenu);
 
-  // DLC characters (downloaded on demand)
+  // DLC characters
   const dlcLabel = document.createElement('div');
   dlcLabel.className = 'menu-section-label';
   dlcLabel.textContent = 'DLC';
@@ -410,6 +413,19 @@ function buildMenu() {
       addMenuItem(charMenu, fallbackLabel + ' ↓', () => downloadAndSelectDlc(key), cls);
     }
   }
+
+  // Custom character packs
+  if (customPacks.length > 0) {
+    addDivider(charMenu);
+    const customLabel = document.createElement('div');
+    customLabel.className = 'menu-section-label';
+    customLabel.textContent = 'Custom';
+    charMenu.appendChild(customLabel);
+    for (const pack of customPacks) {
+      addMenuItem(charMenu, pack.name, () => selectChar(pack.id), mode === pack.id ? 'active' : '');
+    }
+  }
+
   addDivider(charMenu);
   addMenuItem(charMenu, 'Settings...', () => { menuPage = 'config'; buildMenu(); });
   addDivider(charMenu);
@@ -419,11 +435,18 @@ function buildMenu() {
     if (window.__TAURI__) window.__TAURI__.window.getCurrentWindow().close();
   }, 'menu-item-danger');
 
-  // Version label at bottom
   const verLabel = document.createElement('div');
   verLabel.className = 'menu-version';
   verLabel.textContent = 'v' + appVersion;
   charMenu.appendChild(verLabel);
+}
+
+function buildAsciiPage() {
+  addMenuItem(charMenu, '← Back', () => { menuPage = 'main'; buildMenu(); });
+  addDivider(charMenu);
+  for (const [key, species] of Object.entries(ASCII_SPECIES)) {
+    addMenuItem(charMenu, species.name, () => { selectChar(key); menuPage = 'main'; }, mode === key ? 'active' : '');
+  }
 }
 
 function buildConfigPage() {
@@ -545,7 +568,12 @@ async function loadAsset(path) {
   if (!hasExternalAssets || !window.__TAURI__) return path;
   if (assetCache[path]) return assetCache[path];
   try {
+    // load_asset checks assets/ then characters/ dirs
     const dataUrl = await window.__TAURI__.core.invoke('load_asset', { path });
+    if (dataUrl) { assetCache[path] = dataUrl; return dataUrl; }
+  } catch(e) {}
+  try {
+    const dataUrl = await window.__TAURI__.core.invoke('load_custom_asset', { path });
     if (dataUrl) { assetCache[path] = dataUrl; return dataUrl; }
   } catch(e) {}
   return path;
@@ -584,14 +612,14 @@ async function preloadAssets() {
     }
   } catch(e) {}
 
-  // Discover DLC characters from external assets
+  // Discover DLC and custom characters
   if (window.__TAURI__ && hasExternalAssets) {
+    // DLC characters
     for (const dlcName of ['mona', 'kuromi']) {
       try {
         const installed = await window.__TAURI__.core.invoke('is_dlc_installed', { dlcName });
         dlcInstalledCache[dlcName] = installed;
         if (installed) {
-          // Load character.json from assets dir
           try {
             const jsonStr = await window.__TAURI__.core.invoke('load_text_asset', { path: dlcName + '/character.json' });
             if (jsonStr) {
@@ -602,6 +630,21 @@ async function preloadAssets() {
         }
       } catch(e) { dlcInstalledCache[dlcName] = false; }
     }
+
+    // Custom character packs
+    try {
+      const packs = await window.__TAURI__.core.invoke('list_character_packs');
+      customPacks = packs.filter(p => p.group === 'custom' && p.installed);
+      for (const pack of customPacks) {
+        try {
+          const jsonStr = await window.__TAURI__.core.invoke('load_text_asset', { path: pack.id + '/character.json' });
+          if (jsonStr) {
+            const config = JSON.parse(jsonStr);
+            GIF_MODES[pack.id] = config.states;
+          }
+        } catch(e) {}
+      }
+    } catch(e) {}
   }
 
   // If current mode is a DLC that's installed, preload it

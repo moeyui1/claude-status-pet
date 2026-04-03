@@ -140,7 +140,104 @@ fn load_asset(assets_dir: tauri::State<'_, Option<PathBuf>>, path: String) -> Op
 #[tauri::command]
 fn load_text_asset(assets_dir: tauri::State<'_, Option<PathBuf>>, path: String) -> Option<String> {
     let dir = assets_dir.inner().as_ref()?;
-    fs::read_to_string(dir.join(&path)).ok()
+    // Try assets dir first, then custom characters dir
+    let asset_path = dir.join(&path);
+    if let Ok(content) = fs::read_to_string(&asset_path) {
+        return Some(content);
+    }
+    let custom_path = dir.parent()?.join("characters").join(&path);
+    fs::read_to_string(&custom_path).ok()
+}
+
+#[tauri::command]
+fn load_custom_asset(assets_dir: tauri::State<'_, Option<PathBuf>>, path: String) -> Option<String> {
+    use base64::Engine;
+    let dir = assets_dir.inner().as_ref()?;
+    // Try assets dir, then custom characters dir
+    let file_path = dir.join(&path);
+    let file_path = if file_path.exists() { file_path } else { dir.parent()?.join("characters").join(&path) };
+    let bytes = fs::read(&file_path).ok()?;
+    let ext = file_path.extension().and_then(|e| e.to_str()).unwrap_or("png");
+    let mime = match ext {
+        "svg" => "image/svg+xml",
+        "gif" => "image/gif",
+        "png" => "image/png",
+        _ => "application/octet-stream",
+    };
+    let b64 = base64::engine::general_purpose::STANDARD.encode(&bytes);
+    Some(format!("data:{};base64,{}", mime, b64))
+}
+
+#[derive(Clone, Serialize)]
+struct CharacterPack {
+    id: String,
+    name: String,
+    #[serde(rename = "type")]
+    char_type: String,
+    group: String,
+    installed: bool,
+    config_path: String,
+}
+
+#[tauri::command]
+fn list_character_packs(assets_dir: tauri::State<'_, Option<PathBuf>>) -> Vec<CharacterPack> {
+    let mut packs = Vec::new();
+
+    if let Some(dir) = assets_dir.inner().as_ref() {
+        // Scan assets dir (DLC: mona, kuromi, etc.)
+        scan_packs_in_dir(dir, "dlc", &mut packs);
+
+        // Scan custom characters dir (sibling to assets)
+        let custom_dir = dir.parent().map(|p| p.join("characters")).unwrap_or_default();
+        if custom_dir.is_dir() {
+            scan_packs_in_dir(&custom_dir, "custom", &mut packs);
+        }
+    }
+
+    packs
+}
+
+fn scan_packs_in_dir(dir: &PathBuf, group: &str, packs: &mut Vec<CharacterPack>) {
+    if let Ok(entries) = fs::read_dir(dir) {
+        for entry in entries.filter_map(|e| e.ok()) {
+            let path = entry.path();
+            if !path.is_dir() {
+                continue;
+            }
+            let config_path = path.join("character.json");
+            let id = path.file_name().unwrap_or_default().to_string_lossy().to_string();
+            if let Ok(content) = fs::read_to_string(&config_path) {
+                if let Ok(v) = serde_json::from_str::<serde_json::Value>(&content) {
+                    packs.push(CharacterPack {
+                        id: id.clone(),
+                        name: v["name"].as_str().unwrap_or(&id).to_string(),
+                        char_type: v["type"].as_str().unwrap_or("gif").to_string(),
+                        group: group.to_string(),
+                        installed: true,
+                        config_path: config_path.to_string_lossy().to_string(),
+                    });
+                }
+            } else {
+                // Directory exists but no character.json — check if has image files
+                let has_images = fs::read_dir(&path).ok().map_or(false, |entries| {
+                    entries.filter_map(|e| e.ok()).any(|e| {
+                        let ext = e.path().extension().and_then(|x| x.to_str()).unwrap_or("").to_lowercase();
+                        ext == "gif" || ext == "svg" || ext == "png"
+                    })
+                });
+                if has_images {
+                    packs.push(CharacterPack {
+                        id,
+                        name: path.file_name().unwrap_or_default().to_string_lossy().to_string(),
+                        char_type: "gif".to_string(),
+                        group: group.to_string(),
+                        installed: true,
+                        config_path: String::new(),
+                    });
+                }
+            }
+        }
+    }
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -181,7 +278,7 @@ pub fn run() {
         .manage(status_path_shared)
         .manage(session_id)
         .manage(assets_dir)
-        .invoke_handler(tauri::generate_handler![get_status, get_session_id, get_assets_dir, load_asset, load_text_asset, is_dlc_installed, download_dlc])
+        .invoke_handler(tauri::generate_handler![get_status, get_session_id, get_assets_dir, load_asset, load_text_asset, load_custom_asset, is_dlc_installed, download_dlc, list_character_packs])
         .setup(move |app| {
             let window = app.get_webview_window("main").unwrap();
 
