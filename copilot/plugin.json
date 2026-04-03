@@ -1,7 +1,7 @@
 {
   "name": "claude-status-pet",
   "description": "A desktop pet that shows your AI assistant's working status in real time",
-  "version": "0.10.0",
+  "version": "1.0.0",
   "author": {
     "name": "moeyui1"
   },
