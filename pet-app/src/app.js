@@ -172,11 +172,7 @@ let appVersion = '0.0.0';
 let customPacks = [];
 let boundSessionId = '';
 let sessionPoll = null;
-let lastStateTime = 0;
-let pendingUpdate = null;
 const dlcInstalledCache = {};
-const TOOL_STATES = new Set(['reading', 'editing', 'searching', 'running', 'delegating']);
-const MIN_STATE_MS = 1000;
 
 function pickRandom(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
@@ -304,18 +300,6 @@ function updateStatus(status) {
   const state = status.state || 'idle';
   const detail = status.detail || '';
   const sessionName = status.session_name || '';
-
-  // Hold tool states for at least MIN_STATE_MS before allowing thinking
-  if (state === 'thinking' && TOOL_STATES.has(currentState)) {
-    const elapsed = Date.now() - lastStateTime;
-    if (elapsed < MIN_STATE_MS) {
-      clearTimeout(pendingUpdate);
-      pendingUpdate = setTimeout(() => updateStatus(status), MIN_STATE_MS - elapsed);
-      return;
-    }
-  }
-  clearTimeout(pendingUpdate);
-  if (state !== currentState) lastStateTime = Date.now();
 
   if (state === 'closed' && window.__TAURI__) {
     window.__TAURI__.window.getCurrentWindow().close();
