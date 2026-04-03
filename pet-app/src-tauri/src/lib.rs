@@ -7,6 +7,11 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 use tauri::{Emitter, Manager};
 
+pub mod adapter;
+pub mod status_map;
+#[cfg(test)]
+mod tests;
+
 static DEBUG_ENABLED: AtomicBool = AtomicBool::new(false);
 
 fn debug_log(status_path: &PathBuf, msg: &str) {
@@ -140,12 +145,289 @@ fn load_asset(assets_dir: tauri::State<'_, Option<PathBuf>>, path: String) -> Op
 #[tauri::command]
 fn load_text_asset(assets_dir: tauri::State<'_, Option<PathBuf>>, path: String) -> Option<String> {
     let dir = assets_dir.inner().as_ref()?;
-    fs::read_to_string(dir.join(&path)).ok()
+    // Try assets dir first, then custom characters dir
+    let asset_path = dir.join(&path);
+    if let Ok(content) = fs::read_to_string(&asset_path) {
+        return Some(content);
+    }
+    let custom_path = dir.parent()?.join("characters").join(&path);
+    fs::read_to_string(&custom_path).ok()
+}
+
+#[tauri::command]
+fn load_custom_asset(assets_dir: tauri::State<'_, Option<PathBuf>>, path: String) -> Option<String> {
+    use base64::Engine;
+    let dir = assets_dir.inner().as_ref()?;
+    // Try assets dir, then custom characters dir
+    let file_path = dir.join(&path);
+    let file_path = if file_path.exists() { file_path } else { dir.parent()?.join("characters").join(&path) };
+    let bytes = fs::read(&file_path).ok()?;
+    let ext = file_path.extension().and_then(|e| e.to_str()).unwrap_or("png");
+    let mime = match ext {
+        "svg" => "image/svg+xml",
+        "gif" => "image/gif",
+        "png" => "image/png",
+        _ => "application/octet-stream",
+    };
+    let b64 = base64::engine::general_purpose::STANDARD.encode(&bytes);
+    Some(format!("data:{};base64,{}", mime, b64))
+}
+
+#[derive(Clone, Serialize)]
+struct CharacterPack {
+    id: String,
+    name: String,
+    #[serde(rename = "type")]
+    char_type: String,
+    group: String,
+    installed: bool,
+    config_path: String,
+}
+
+#[tauri::command]
+fn list_character_packs(assets_dir: tauri::State<'_, Option<PathBuf>>) -> Vec<CharacterPack> {
+    let mut packs = Vec::new();
+
+    if let Some(dir) = assets_dir.inner().as_ref() {
+        // Scan assets dir (DLC: mona, kuromi, etc.)
+        scan_packs_in_dir(dir, "dlc", &mut packs);
+
+        // Scan custom characters dir (sibling to assets)
+        let custom_dir = dir.parent().map(|p| p.join("characters")).unwrap_or_default();
+        if custom_dir.is_dir() {
+            scan_packs_in_dir(&custom_dir, "custom", &mut packs);
+        }
+    }
+
+    packs
+}
+
+fn scan_packs_in_dir(dir: &PathBuf, group: &str, packs: &mut Vec<CharacterPack>) {
+    if let Ok(entries) = fs::read_dir(dir) {
+        for entry in entries.filter_map(|e| e.ok()) {
+            let path = entry.path();
+            if !path.is_dir() {
+                continue;
+            }
+            let config_path = path.join("character.json");
+            let id = path.file_name().unwrap_or_default().to_string_lossy().to_string();
+            if let Ok(content) = fs::read_to_string(&config_path) {
+                if let Ok(v) = serde_json::from_str::<serde_json::Value>(&content) {
+                    packs.push(CharacterPack {
+                        id: id.clone(),
+                        name: v["name"].as_str().unwrap_or(&id).to_string(),
+                        char_type: v["type"].as_str().unwrap_or("gif").to_string(),
+                        group: group.to_string(),
+                        installed: true,
+                        config_path: config_path.to_string_lossy().to_string(),
+                    });
+                }
+            } else {
+                // Directory exists but no character.json — check if has image files
+                let has_images = fs::read_dir(&path).ok().map_or(false, |entries| {
+                    entries.filter_map(|e| e.ok()).any(|e| {
+                        let ext = e.path().extension().and_then(|x| x.to_str()).unwrap_or("").to_lowercase();
+                        ext == "gif" || ext == "svg" || ext == "png"
+                    })
+                });
+                if has_images {
+                    packs.push(CharacterPack {
+                        id,
+                        name: path.file_name().unwrap_or_default().to_string_lossy().to_string(),
+                        char_type: "gif".to_string(),
+                        group: group.to_string(),
+                        installed: true,
+                        config_path: String::new(),
+                    });
+                }
+            }
+        }
+    }
+}
+
+/// CLI: write-status subcommand
+/// Reads event info from CLI args or stdin (via adapter), writes status JSON, exits.
+fn cmd_write_status(args: &[String]) {
+    let pet_dir = default_pet_dir();
+    let _ = fs::create_dir_all(&pet_dir);
+
+    // Parse CLI args
+    let adapter_name = get_arg(args, "--adapter");
+    let event_arg = get_arg(args, "--event");
+    let tool_arg = get_arg(args, "--tool").unwrap_or_default();
+    let detail_arg = get_arg(args, "--detail").unwrap_or_default();
+    let session_id_arg = get_arg(args, "--session-id");
+    let session_name_arg = get_arg(args, "--session-name");
+
+    let (event, tool, detail, session_id, session_name, launch_only) =
+        if let Some(adapter_name) = &adapter_name {
+            // Adapter mode: read stdin JSON
+            let stdin_data = read_stdin();
+            let stdin: adapter::StdinInput = serde_json::from_str(&stdin_data).unwrap_or_default();
+
+            if let Some(adapter) = adapter::get_adapter(adapter_name) {
+                if let Some(ev) = adapter.parse(&stdin) {
+                    (ev.event, ev.tool, ev.detail, ev.session_id, ev.session_name, ev.launch_only)
+                } else {
+                    return;
+                }
+            } else {
+                eprintln!("Unknown adapter: {}", adapter_name);
+                std::process::exit(1);
+            }
+        } else if let Some(event) = event_arg {
+            // CLI args mode
+            let sid = session_id_arg.unwrap_or_else(|| "cli".to_string());
+            let sname = session_name_arg.unwrap_or_else(|| sid.clone());
+            let detail = if detail_arg.is_empty() {
+                status_map::tool_detail(&tool_arg, "", "")
+            } else {
+                detail_arg
+            };
+            (event, tool_arg, detail, sid, sname, false)
+        } else {
+            eprintln!("Usage: claude-status-pet write-status --event <prompt|tool|done|error|offline> [--tool <name>] [--detail <text>] [--session-id <id>]");
+            eprintln!("   or: claude-status-pet write-status --adapter <claude|copilot> < stdin.json");
+            std::process::exit(1);
+        };
+
+    // Determine state from event + tool
+    let state = if event == "tool" && !tool.is_empty() {
+        status_map::tool_to_state(&tool)
+    } else {
+        status_map::event_to_state(&event)
+    };
+
+    let status_file = pet_dir.join(format!("status-{}.json", session_id));
+
+    // If launch_only (e.g. Copilot sessionStart), only create file if missing
+    if launch_only {
+        if !status_file.exists() {
+            let status = serde_json::json!({
+                "state": "idle", "detail": "Session started", "tool": "",
+                "event": event, "session_id": session_id,
+                "session_name": session_name, "timestamp": timestamp()
+            });
+            let _ = fs::write(&status_file, status.to_string());
+        }
+    } else {
+        let status = serde_json::json!({
+            "state": state, "detail": detail, "tool": tool,
+            "event": event, "session_id": session_id,
+            "session_name": session_name, "timestamp": timestamp()
+        });
+        let _ = fs::write(&status_file, status.to_string());
+    }
+
+    // Auto-launch GUI if not running
+    auto_launch_gui(&pet_dir, &status_file, &session_id);
+}
+
+/// Check if pet GUI is running, launch if not
+fn auto_launch_gui(pet_dir: &PathBuf, status_file: &PathBuf, session_id: &str) {
+    // Check if a GUI instance is already running (not just this CLI process)
+    let is_running = if cfg!(windows) {
+        std::process::Command::new("tasklist")
+            .args(["/NH"])
+            .output()
+            .map(|o| {
+                let output = String::from_utf8_lossy(&o.stdout);
+                // Count instances — if >1, a GUI is already running (1 = just us)
+                output.matches("claude-status-pet").count() > 1
+            })
+            .unwrap_or(false)
+    } else {
+        // pgrep -c counts processes; >1 means GUI is running
+        std::process::Command::new("pgrep")
+            .args(["-fc", "claude-status-pet"])
+            .output()
+            .map(|o| {
+                let count: usize = String::from_utf8_lossy(&o.stdout).trim().parse().unwrap_or(0);
+                count > 1
+            })
+            .unwrap_or(false)
+    };
+
+    if is_running {
+        return;
+    }
+
+    // Find the binary (self)
+    let self_bin = std::env::current_exe().unwrap_or_default();
+    let assets_dir = pet_dir.join("assets");
+
+    let mut cmd = std::process::Command::new(&self_bin);
+    cmd.args(["run", "--status-file"])
+        .arg(status_file.to_string_lossy().as_ref())
+        .args(["--session-id", session_id]);
+
+    if assets_dir.is_dir() {
+        cmd.args(["--assets-dir"]).arg(assets_dir.to_string_lossy().as_ref());
+    }
+
+    // Detach the process
+    #[cfg(windows)]
+    {
+        use std::os::windows::process::CommandExt;
+        const CREATE_NO_WINDOW: u32 = 0x08000000;
+        const DETACHED_PROCESS: u32 = 0x00000008;
+        cmd.creation_flags(CREATE_NO_WINDOW | DETACHED_PROCESS);
+    }
+
+    let _ = cmd.stdin(std::process::Stdio::null())
+        .stdout(std::process::Stdio::null())
+        .stderr(std::process::Stdio::null())
+        .spawn();
+}
+
+fn read_stdin() -> String {
+    use std::io::Read;
+    let mut buf = String::new();
+    let _ = std::io::stdin().read_to_string(&mut buf);
+    buf
+}
+
+fn get_arg(args: &[String], flag: &str) -> Option<String> {
+    args.windows(2).find(|w| w[0] == flag).map(|w| w[1].clone())
+}
+
+fn default_pet_dir() -> PathBuf {
+    let home = std::env::var_os("USERPROFILE")
+        .or_else(|| std::env::var_os("HOME"))
+        .map(PathBuf::from)
+        .unwrap_or_else(|| PathBuf::from("."));
+    home.join(".claude").join("pet-data")
+}
+
+fn timestamp() -> String {
+    // ISO 8601 UTC timestamp
+    let d = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap_or_default();
+    let secs = d.as_secs();
+    // Simple UTC format without chrono dependency
+    let days = secs / 86400;
+    let time_secs = secs % 86400;
+    let h = time_secs / 3600;
+    let m = (time_secs % 3600) / 60;
+    let s = time_secs % 60;
+    // Approximate date (good enough for timestamps)
+    let y = 1970 + days / 365;
+    let remaining = days % 365;
+    let month = remaining / 30 + 1;
+    let day = remaining % 30 + 1;
+    format!("{:04}-{:02}-{:02}T{:02}:{:02}:{:02}Z", y, month, day, h, m, s)
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let args: Vec<String> = std::env::args().collect();
+
+    // Subcommand dispatch: write-status runs without GUI
+    if args.iter().any(|a| a == "write-status") {
+        cmd_write_status(&args);
+        return;
+    }
 
     if args.iter().any(|a| a == "--debug") {
         DEBUG_ENABLED.store(true, Ordering::Relaxed);
@@ -181,7 +463,7 @@ pub fn run() {
         .manage(status_path_shared)
         .manage(session_id)
         .manage(assets_dir)
-        .invoke_handler(tauri::generate_handler![get_status, get_session_id, get_assets_dir, load_asset, load_text_asset, is_dlc_installed, download_dlc])
+        .invoke_handler(tauri::generate_handler![get_status, get_session_id, get_assets_dir, load_asset, load_text_asset, load_custom_asset, is_dlc_installed, download_dlc, list_character_packs])
         .setup(move |app| {
             let window = app.get_webview_window("main").unwrap();
 

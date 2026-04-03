@@ -4,56 +4,56 @@
     "sessionStart": [
       {
         "type": "command",
-        "bash": "COPILOT_HOOK_EVENT=sessionStart bash ~/.claude/pet-data/scripts/copilot-status-writer.sh",
-        "powershell": "$env:COPILOT_HOOK_EVENT='sessionStart'; node \"$env:USERPROFILE\\.claude\\pet-data\\scripts\\copilot-status-writer.js\"",
+        "bash": "COPILOT_HOOK_EVENT=sessionStart ~/.claude/pet-data/bin/claude-status-pet write-status --adapter copilot",
+        "powershell": "$env:COPILOT_HOOK_EVENT='sessionStart'; & \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" write-status --adapter copilot",
         "timeoutSec": 10
       }
     ],
     "sessionEnd": [
       {
         "type": "command",
-        "bash": "COPILOT_HOOK_EVENT=sessionEnd bash ~/.claude/pet-data/scripts/copilot-status-writer.sh",
-        "powershell": "$env:COPILOT_HOOK_EVENT='sessionEnd'; node \"$env:USERPROFILE\\.claude\\pet-data\\scripts\\copilot-status-writer.js\"",
+        "bash": "COPILOT_HOOK_EVENT=sessionEnd ~/.claude/pet-data/bin/claude-status-pet write-status --adapter copilot",
+        "powershell": "$env:COPILOT_HOOK_EVENT='sessionEnd'; & \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" write-status --adapter copilot",
         "timeoutSec": 10
       }
     ],
     "userPromptSubmitted": [
       {
         "type": "command",
-        "bash": "COPILOT_HOOK_EVENT=userPromptSubmitted bash ~/.claude/pet-data/scripts/copilot-status-writer.sh",
-        "powershell": "$env:COPILOT_HOOK_EVENT='userPromptSubmitted'; node \"$env:USERPROFILE\\.claude\\pet-data\\scripts\\copilot-status-writer.js\"",
+        "bash": "COPILOT_HOOK_EVENT=userPromptSubmitted ~/.claude/pet-data/bin/claude-status-pet write-status --adapter copilot",
+        "powershell": "$env:COPILOT_HOOK_EVENT='userPromptSubmitted'; & \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" write-status --adapter copilot",
         "timeoutSec": 10
       }
     ],
     "preToolUse": [
       {
         "type": "command",
-        "bash": "COPILOT_HOOK_EVENT=preToolUse bash ~/.claude/pet-data/scripts/copilot-status-writer.sh",
-        "powershell": "$env:COPILOT_HOOK_EVENT='preToolUse'; node \"$env:USERPROFILE\\.claude\\pet-data\\scripts\\copilot-status-writer.js\"",
+        "bash": "COPILOT_HOOK_EVENT=preToolUse ~/.claude/pet-data/bin/claude-status-pet write-status --adapter copilot",
+        "powershell": "$env:COPILOT_HOOK_EVENT='preToolUse'; & \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" write-status --adapter copilot",
         "timeoutSec": 10
       }
     ],
     "postToolUse": [
       {
         "type": "command",
-        "bash": "COPILOT_HOOK_EVENT=postToolUse bash ~/.claude/pet-data/scripts/copilot-status-writer.sh",
-        "powershell": "$env:COPILOT_HOOK_EVENT='postToolUse'; node \"$env:USERPROFILE\\.claude\\pet-data\\scripts\\copilot-status-writer.js\"",
+        "bash": "COPILOT_HOOK_EVENT=postToolUse ~/.claude/pet-data/bin/claude-status-pet write-status --adapter copilot",
+        "powershell": "$env:COPILOT_HOOK_EVENT='postToolUse'; & \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" write-status --adapter copilot",
         "timeoutSec": 10
       }
     ],
     "errorOccurred": [
       {
         "type": "command",
-        "bash": "COPILOT_HOOK_EVENT=errorOccurred bash ~/.claude/pet-data/scripts/copilot-status-writer.sh",
-        "powershell": "$env:COPILOT_HOOK_EVENT='errorOccurred'; node \"$env:USERPROFILE\\.claude\\pet-data\\scripts\\copilot-status-writer.js\"",
+        "bash": "COPILOT_HOOK_EVENT=errorOccurred ~/.claude/pet-data/bin/claude-status-pet write-status --adapter copilot",
+        "powershell": "$env:COPILOT_HOOK_EVENT='errorOccurred'; & \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" write-status --adapter copilot",
         "timeoutSec": 10
       }
     ],
     "stop": [
       {
         "type": "command",
-        "bash": "COPILOT_HOOK_EVENT=stop bash ~/.claude/pet-data/scripts/copilot-status-writer.sh",
-        "powershell": "$env:COPILOT_HOOK_EVENT='stop'; node \"$env:USERPROFILE\\.claude\\pet-data\\scripts\\copilot-status-writer.js\"",
+        "bash": "COPILOT_HOOK_EVENT=stop ~/.claude/pet-data/bin/claude-status-pet write-status --adapter copilot",
+        "powershell": "$env:COPILOT_HOOK_EVENT='stop'; & \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" write-status --adapter copilot",
         "timeoutSec": 10
       }
     ]

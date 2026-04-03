@@ -91,7 +91,7 @@ fi
 # Download/update Ferris SVGs (CC0, always available)
 SCRIPTS_DIR="$PLUGIN_ROOT/scripts"
 ASSETS_DIR="$PET_DIR/assets"
-bash "$SCRIPTS_DIR/download-assets.sh" "$ASSETS_DIR" &
+node "$SCRIPTS_DIR/download-assets.js" "$ASSETS_DIR" &
 # GIFs (Mona/Kuromi) downloaded on-demand when user selects them
 
 # Write initial status
