@@ -195,6 +195,13 @@ function applyConfig() {
   asciiPre.style.fontSize = petFontSize + 'px';
   container.style.transform = petScale !== 1 ? `scale(${petScale})` : '';
   container.style.transformOrigin = 'center bottom';
+
+  // Resize window to match scale
+  if (window.__TAURI__) {
+    const w = Math.round(200 * petScale);
+    const h = Math.round(240 * petScale);
+    window.__TAURI__.window.getCurrentWindow().setSize(new window.__TAURI__.window.LogicalSize(w, h));
+  }
 }
 
 function saveConfig(key, value) {

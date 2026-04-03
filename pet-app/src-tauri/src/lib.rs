@@ -356,7 +356,7 @@ fn read_stdin() -> String {
     // Does NOT wait for EOF — returns as soon as JSON is complete.
     let (tx, rx) = std::sync::mpsc::channel();
     std::thread::spawn(move || {
-        let mut buf = String::new();
+        let mut buf = Vec::new();
         let mut depth = 0i32;
         let mut in_string = false;
         let mut escape = false;
@@ -364,23 +364,24 @@ fn read_stdin() -> String {
 
         for byte in std::io::stdin().bytes() {
             let Ok(b) = byte else { break };
-            let c = b as char;
-            buf.push(c);
+            buf.push(b);
 
+            // JSON structure tracking (only for ASCII control chars, safe for UTF-8
+            // since multi-byte sequences never contain bytes < 0x80)
             if escape { escape = false; continue; }
-            if c == '\\' && in_string { escape = true; continue; }
-            if c == '"' { in_string = !in_string; continue; }
+            if b == b'\\' && in_string { escape = true; continue; }
+            if b == b'"' { in_string = !in_string; continue; }
             if in_string { continue; }
-            if c == '{' { depth += 1; started = true; }
-            if c == '}' {
+            if b == b'{' { depth += 1; started = true; }
+            if b == b'}' {
                 depth -= 1;
                 if started && depth == 0 {
-                    let _ = tx.send(buf);
+                    let _ = tx.send(String::from_utf8_lossy(&buf).into_owned());
                     return;
                 }
             }
         }
-        let _ = tx.send(buf);
+        let _ = tx.send(String::from_utf8_lossy(&buf).into_owned());
     });
     rx.recv_timeout(std::time::Duration::from_millis(100)).unwrap_or_default()
 }

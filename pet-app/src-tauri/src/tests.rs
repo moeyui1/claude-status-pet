@@ -138,21 +138,21 @@ mod tests {
     // ── Copilot adapter tests ──
 
     #[test]
-    fn test_copilot_session_start_is_launch_only() {
+    fn test_copilot_session_start_writes_thinking() {
         std::env::set_var("COPILOT_HOOK_EVENT", "sessionStart");
-        let stdin = make_stdin(None, None, None, None, Some("/proj"));
-        let ev = adapter::copilot::CopilotAdapter.parse(&stdin).unwrap();
-        assert!(ev.launch_only);
-        assert!(ev.session_id.starts_with("copilot-"));
-    }
-
-    #[test]
-    fn test_copilot_prompt() {
-        std::env::set_var("COPILOT_HOOK_EVENT", "userPromptSubmitted");
         let stdin = make_stdin(None, None, None, None, Some("/proj"));
         let ev = adapter::copilot::CopilotAdapter.parse(&stdin).unwrap();
         assert_eq!(ev.event, "prompt");
         assert!(!ev.launch_only);
+        assert!(ev.session_id.starts_with("copilot-"));
+    }
+
+    #[test]
+    fn test_copilot_prompt_ignored() {
+        std::env::set_var("COPILOT_HOOK_EVENT", "userPromptSubmitted");
+        let stdin = make_stdin(None, None, None, None, Some("/proj"));
+        let ev = adapter::copilot::CopilotAdapter.parse(&stdin);
+        assert!(ev.is_none());
     }
 
     #[test]
@@ -172,17 +172,16 @@ mod tests {
     }
 
     #[test]
-    fn test_copilot_session_end_offline() {
+    fn test_copilot_session_end_complete_is_idle() {
         std::env::set_var("COPILOT_HOOK_EVENT", "sessionEnd");
         let stdin = make_stdin(None, None, None, None, Some("/proj"));
         let ev = adapter::copilot::CopilotAdapter.parse(&stdin).unwrap();
-        assert_eq!(ev.event, "offline");
-        assert!(!ev.launch_only);
+        assert_eq!(ev.event, "done"); // complete → idle
     }
 
     #[test]
     fn test_copilot_session_name_has_suffix() {
-        std::env::set_var("COPILOT_HOOK_EVENT", "userPromptSubmitted");
+        std::env::set_var("COPILOT_HOOK_EVENT", "sessionStart");
         let stdin = make_stdin(None, None, None, None, Some("/projects/my-app"));
         let ev = adapter::copilot::CopilotAdapter.parse(&stdin).unwrap();
         assert!(ev.session_name.contains("Copilot"));
@@ -206,6 +205,7 @@ mod tests {
             cwd: cwd.map(|s| s.to_string()),
             tool_args: None,
             error: None,
+            reason: None,
         }
     }
 }
