@@ -500,6 +500,14 @@ async function downloadAndSelectDlc(dlcName) {
   try {
     await window.__TAURI__.core.invoke('download_dlc', { dlcName });
     dlcInstalledCache[dlcName] = true;
+    // Load character.json for the newly downloaded DLC
+    try {
+      const jsonStr = await window.__TAURI__.core.invoke('load_text_asset', { path: dlcName + '/character.json' });
+      if (jsonStr) {
+        const config = JSON.parse(jsonStr);
+        GIF_MODES[dlcName] = config.states;
+      }
+    } catch(e) {}
     await selectChar(dlcName);
   } catch (e) {
     statusText.textContent = 'Download failed: ' + (e || 'unknown error');
@@ -668,6 +676,27 @@ async function preloadAssets() {
         } catch(e) {}
       }
     } catch(e) {}
+  }
+
+  // If current mode is a DLC that's not installed, auto-download it
+  const knownDlcs = ['mona', 'kuromi'];
+  if (knownDlcs.includes(mode) && !dlcInstalledCache[mode] && window.__TAURI__) {
+    statusText.textContent = 'Downloading ' + mode + '...';
+    bubble.classList.remove('hidden');
+    try {
+      await window.__TAURI__.core.invoke('download_dlc', { dlcName: mode });
+      dlcInstalledCache[mode] = true;
+      const jsonStr = await window.__TAURI__.core.invoke('load_text_asset', { path: mode + '/character.json' });
+      if (jsonStr) {
+        GIF_MODES[mode] = JSON.parse(jsonStr).states;
+      } else {
+        throw new Error('character.json not found after download');
+      }
+    } catch(e) {
+      statusText.textContent = 'Download failed, using Ferris';
+      mode = 'ferris';
+      localStorage.setItem('petMode', mode);
+    }
   }
 
   // If current mode is a DLC that's installed, preload it

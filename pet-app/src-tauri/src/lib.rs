@@ -103,10 +103,18 @@ fn is_dlc_installed(assets_dir: tauri::State<'_, Option<PathBuf>>, dlc_name: Str
 }
 
 #[tauri::command]
-fn download_dlc(assets_dir: tauri::State<'_, Option<PathBuf>>, dlc_name: String) -> Result<bool, String> {
-    let dir = assets_dir.inner().as_ref().ok_or("No assets dir")?;
+async fn download_dlc(assets_dir: tauri::State<'_, Option<PathBuf>>, dlc_name: String) -> Result<bool, String> {
+    let dir = assets_dir.inner().as_ref().ok_or("No assets dir")?.clone();
+    let dlc = dlc_name.clone();
 
-    let gifs: Vec<(&str, &str)> = match dlc_name.as_str() {
+    tauri::async_runtime::spawn_blocking(move || {
+        download_dlc_blocking(&dir, &dlc)
+    }).await.map_err(|e| e.to_string())?
+}
+
+fn download_dlc_blocking(dir: &PathBuf, dlc_name: &str) -> Result<bool, String> {
+
+    let gifs: Vec<(&str, &str)> = match dlc_name {
         "mona" => vec![
             ("mona/love.gif",      "https://media.giphy.com/media/jrdgDVFrcgJpNlonWO/giphy.gif"),
             ("mona/angry.gif",     "https://media.giphy.com/media/kmCCrDo2vlIu6Kswop/giphy.gif"),
@@ -157,7 +165,7 @@ fn download_dlc(assets_dir: tauri::State<'_, Option<PathBuf>>, dlc_name: String)
     }
 
     // Write character.json
-    let config = match dlc_name.as_str() {
+    let config = match dlc_name {
         "mona" => serde_json::json!({
             "name": "Mona (GitHub)", "type": "gif",
             "states": {
@@ -424,9 +432,20 @@ fn cleanup_stale_status(pet_dir: &PathBuf) {
 
 fn download_file(url: &str, dest: &PathBuf) -> Result<(), String> {
     use std::io::Read;
-    let resp = ureq::get(url).call().map_err(|e| e.to_string())?;
+    let agent = ureq::Agent::config_builder()
+        .timeout_global(Some(std::time::Duration::from_secs(30)))
+        .build()
+        .new_agent();
+    let resp = agent.get(url).call().map_err(|e| e.to_string())?;
+    let status = resp.status();
+    if status != 200 {
+        return Err(format!("HTTP {}", status));
+    }
     let mut bytes: Vec<u8> = Vec::new();
     resp.into_body().into_reader().read_to_end(&mut bytes).map_err(|e| e.to_string())?;
+    if bytes.is_empty() {
+        return Err("Empty response".into());
+    }
     fs::write(dest, &bytes).map_err(|e| e.to_string())
 }
 

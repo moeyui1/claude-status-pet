@@ -40,11 +40,12 @@ impl Adapter for CopilotAdapter {
 
         let tool_name = stdin.tool_name.as_deref().unwrap_or("");
 
-        // Parse toolArgs (may be a JSON string)
-        let tool_args: serde_json::Value = stdin.tool_args.as_ref()
-            .and_then(|s| serde_json::from_str(s).ok())
-            .or_else(|| stdin.tool_input.clone())
-            .unwrap_or(serde_json::Value::Null);
+        // Parse toolArgs (may be a JSON string or object)
+        let tool_args: serde_json::Value = match &stdin.tool_args {
+            Some(serde_json::Value::String(s)) => serde_json::from_str(s).unwrap_or(serde_json::Value::Null),
+            Some(v) => v.clone(),
+            None => stdin.tool_input.clone().unwrap_or(serde_json::Value::Null),
+        };
 
         let (event, tool, detail, launch_only) = match hook.as_str() {
             "sessionStart" => {
