@@ -15,6 +15,7 @@ pub fn event_to_state(event: &str) -> &'static str {
         "done" => "idle",
         "error" => "error",
         "offline" => "offline",
+        "closed" => "closed",
         "wait" => "waiting",
         "subagent" => "delegating",
         _ => "thinking",

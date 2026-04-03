@@ -43,6 +43,9 @@ pub struct StdinInput {
     // Error info
     #[serde(default)]
     pub error: Option<serde_json::Value>,
+    // Session end reason (complete, error, abort, timeout, user_exit)
+    #[serde(default)]
+    pub reason: Option<String>,
 }
 
 pub trait Adapter {

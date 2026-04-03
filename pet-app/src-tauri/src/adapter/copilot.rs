@@ -100,8 +100,14 @@ impl Adapter for CopilotAdapter {
                 ("error".into(), String::new(), format!("Error: {}", truncate(msg, 40)), false)
             }
             "sessionEnd" => {
-                // Quirk: write offline, don't close window
-                ("offline".into(), String::new(), "Session ended".into(), false)
+                let reason = stdin.reason.as_deref().unwrap_or("complete");
+                match reason {
+                    "complete" => ("done".into(), String::new(), "Done".into(), false),
+                    "error" => ("error".into(), String::new(), "Session error".into(), false),
+                    "abort" | "user_exit" => ("closed".into(), String::new(), "Session closed".into(), false),
+                    // "timeout" or unknown → offline (sleep animation)
+                    _ => ("offline".into(), String::new(), "Session ended".into(), false),
+                }
             }
             _ => {
                 ("done".into(), String::new(), "Waiting for input".into(), false)
