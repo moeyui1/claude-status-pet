@@ -4,56 +4,56 @@
     "sessionStart": [
       {
         "type": "command",
-        "command": "~/.claude/pet-data/bin/claude-status-pet write-status --adapter copilot",
-        "windows": "$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe write-status --adapter copilot",
+        "bash": "~/.claude/pet-data/bin/claude-status-pet write-status --adapter copilot --copilot-event sessionStart",
+        "powershell": "& \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" write-status --adapter copilot --copilot-event sessionStart",
         "timeoutSec": 5
       }
     ],
     "sessionEnd": [
       {
         "type": "command",
-        "command": "~/.claude/pet-data/bin/claude-status-pet write-status --adapter copilot",
-        "windows": "$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe write-status --adapter copilot",
+        "bash": "~/.claude/pet-data/bin/claude-status-pet write-status --adapter copilot --copilot-event sessionEnd",
+        "powershell": "& \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" write-status --adapter copilot --copilot-event sessionEnd",
         "timeoutSec": 5
       }
     ],
     "userPromptSubmitted": [
       {
         "type": "command",
-        "command": "~/.claude/pet-data/bin/claude-status-pet write-status --adapter copilot",
-        "windows": "$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe write-status --adapter copilot",
+        "bash": "~/.claude/pet-data/bin/claude-status-pet write-status --adapter copilot --copilot-event userPromptSubmitted",
+        "powershell": "& \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" write-status --adapter copilot --copilot-event userPromptSubmitted",
         "timeoutSec": 5
       }
     ],
     "preToolUse": [
       {
         "type": "command",
-        "command": "~/.claude/pet-data/bin/claude-status-pet write-status --adapter copilot",
-        "windows": "$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe write-status --adapter copilot",
+        "bash": "~/.claude/pet-data/bin/claude-status-pet write-status --adapter copilot --copilot-event preToolUse",
+        "powershell": "& \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" write-status --adapter copilot --copilot-event preToolUse",
         "timeoutSec": 5
       }
     ],
     "postToolUse": [
       {
         "type": "command",
-        "command": "~/.claude/pet-data/bin/claude-status-pet write-status --adapter copilot",
-        "windows": "$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe write-status --adapter copilot",
+        "bash": "~/.claude/pet-data/bin/claude-status-pet write-status --adapter copilot --copilot-event postToolUse",
+        "powershell": "& \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" write-status --adapter copilot --copilot-event postToolUse",
         "timeoutSec": 5
       }
     ],
     "errorOccurred": [
       {
         "type": "command",
-        "command": "~/.claude/pet-data/bin/claude-status-pet write-status --adapter copilot",
-        "windows": "$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe write-status --adapter copilot",
+        "bash": "~/.claude/pet-data/bin/claude-status-pet write-status --adapter copilot --copilot-event errorOccurred",
+        "powershell": "& \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" write-status --adapter copilot --copilot-event errorOccurred",
         "timeoutSec": 5
       }
     ],
     "stop": [
       {
         "type": "command",
-        "command": "~/.claude/pet-data/bin/claude-status-pet write-status --adapter copilot",
-        "windows": "$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe write-status --adapter copilot",
+        "bash": "~/.claude/pet-data/bin/claude-status-pet write-status --adapter copilot --copilot-event stop",
+        "powershell": "& \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" write-status --adapter copilot --copilot-event stop",
         "timeoutSec": 5
       }
     ]

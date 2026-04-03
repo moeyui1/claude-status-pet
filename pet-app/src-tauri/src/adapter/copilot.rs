@@ -18,10 +18,15 @@ pub struct CopilotAdapter;
 
 impl Adapter for CopilotAdapter {
     fn parse(&self, stdin: &StdinInput) -> Option<NormalizedEvent> {
-        // Read event name from stdin JSON (hookEventName) or env var (legacy)
+        // Event name comes from --copilot-event CLI arg (Copilot CLI doesn't put it in stdin)
+        // Fallback: stdin hookEventName (VS Code), then env var (legacy)
+        let hook_from_arg = std::env::args().collect::<Vec<_>>()
+            .windows(2)
+            .find(|w| w[0] == "--copilot-event")
+            .map(|w| w[1].clone());
         let hook_from_stdin = stdin.hook_event_name.as_deref().filter(|s| !s.is_empty()).map(|s| s.to_string());
         let hook_from_env = std::env::var("COPILOT_HOOK_EVENT").ok();
-        let hook = hook_from_stdin.or(hook_from_env).unwrap_or_else(|| "unknown".into());
+        let hook = hook_from_arg.or(hook_from_stdin).or(hook_from_env).unwrap_or_else(|| "unknown".into());
         let cwd = stdin.cwd.as_deref().unwrap_or("");
         // Use sessionId from stdin if available, otherwise hash from cwd
         let session_id = stdin.session_id.as_deref()
