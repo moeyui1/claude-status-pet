@@ -29,138 +29,179 @@ The user will run `/pet` with an optional subcommand. Parse the arguments and ex
 
 ## Implementation
 
-Use Bash to execute the actions. First, determine the plugin root directory:
+> **All commands use `node` for cross-platform compatibility** (Node.js is guaranteed in all environments: Claude Code, Copilot, etc.). Do NOT use bash-only or PowerShell-only commands.
 
-```bash
-# Try plugin root, then common install locations
-PET_ROOT="${CLAUDE_PLUGIN_ROOT:-$(find "$HOME" -maxdepth 3 -name "claude-status-pet" -type d 2>/dev/null | head -1)}"
-```
-
-Key paths:
+Key paths (use `os.homedir()` in node, or `~` in bash):
+- **Pet data dir**: `~/.claude/pet-data/`
 - **Pet binary**: `~/.claude/pet-data/bin/claude-status-pet*`
 - **Status files**: `~/.claude/pet-data/status-*.json` (one per session)
 - **Config file**: `~/.claude/pet-data/config.json`
 - **Assets dir**: `~/.claude/pet-data/assets/` (DLC characters: mona, kuromi)
 - **Custom packs dir**: `~/.claude/pet-data/characters/` (user-installed packs)
-- **Open script**: `bash $PET_ROOT/scripts/open-pet.sh`
 
 ### Basic commands
 
-For `open`: run the open-pet.sh script.
-For `close`: run `taskkill //F //IM claude-status-pet.exe` on Windows, or `pkill claude-status-pet` on macOS/Linux.
-For `set <char>`: update `config.json` with the character name, and inform the user to right-click the pet to switch in the current session.
-For `auto on/off`: update `config.json` field `auto_start` to true/false.
-For `status`: read config.json, list status-*.json files, and list installed packs from `assets/` and `characters/` dirs.
-For `update`:
-  1. Delete old binary and version files:
-     ```bash
-     rm -f ~/.claude/pet-data/assets/.version ~/.claude/pet-data/bin/claude-status-pet*
-     node $PET_ROOT/scripts/download-assets.js ~/.claude/pet-data/assets
-     ```
-  2. Close and reopen: kill all pet processes then `bash $PET_ROOT/scripts/open-pet.sh`
+For `open`: launch the pet binary for each status file:
+```js
+node -e "
+const fs=require('fs'),path=require('path'),{execSync,spawn}=require('child_process'),os=require('os');
+const dir=path.join(os.homedir(),'.claude','pet-data');
+const bin=fs.readdirSync(path.join(dir,'bin')).find(f=>f.startsWith('claude-status-pet'));
+if(!bin){console.log('Pet binary not found');process.exit(1)}
+const binPath=path.join(dir,'bin',bin);
+const assets=path.join(dir,'assets');
+fs.readdirSync(dir).filter(f=>f.startsWith('status-')&&f.endsWith('.json')).forEach(f=>{
+  const sid=f.replace('status-','').replace('.json','');
+  const args=['--status-file',path.join(dir,f),'--session-id',sid];
+  if(fs.existsSync(assets))args.push('--assets-dir',assets);
+  spawn(binPath,args,{detached:true,stdio:'ignore'}).unref();
+});
+console.log('Pet(s) launched');
+"
+```
+
+For `close`: kill all pet processes:
+```js
+node -e "
+const{execSync}=require('child_process'),os=require('os');
+if(os.platform()==='win32'){try{execSync('tasklist /NH',{encoding:'utf8'}).split('\\n').filter(l=>l.includes('claude-status-pet')).forEach(l=>{const pid=l.trim().split(/\\s+/)[1];execSync('taskkill /F /PID '+pid)});console.log('Closed')}catch(e){console.log('No pets running')}}
+else{try{execSync('pkill -f claude-status-pet');console.log('Closed')}catch(e){console.log('No pets running')}}
+"
+```
+
+For `set <char>`: update config.json:
+```js
+node -e "
+const fs=require('fs'),path=require('path'),os=require('os');
+const cfg=path.join(os.homedir(),'.claude','pet-data','config.json');
+let c={};try{c=JSON.parse(fs.readFileSync(cfg,'utf8'))}catch(e){}
+c.character='<CHAR>';
+fs.writeFileSync(cfg,JSON.stringify(c,null,2));
+console.log('Default character set to: <CHAR>');
+"
+```
+
+For `auto on/off`: update config.json field `auto_start`:
+```js
+node -e "
+const fs=require('fs'),path=require('path'),os=require('os');
+const cfg=path.join(os.homedir(),'.claude','pet-data','config.json');
+let c={};try{c=JSON.parse(fs.readFileSync(cfg,'utf8'))}catch(e){}
+c.auto_start=<true|false>;
+fs.writeFileSync(cfg,JSON.stringify(c,null,2));
+console.log('Auto-start: <on|off>');
+"
+```
+
+For `status`: show config and installed packs:
+```js
+node -e "
+const fs=require('fs'),path=require('path'),os=require('os');
+const dir=path.join(os.homedir(),'.claude','pet-data');
+const cfg=path.join(dir,'config.json');
+let c={};try{c=JSON.parse(fs.readFileSync(cfg,'utf8'))}catch(e){}
+console.log('Config:',JSON.stringify(c,null,2));
+const sessions=fs.readdirSync(dir).filter(f=>f.startsWith('status-')&&f.endsWith('.json'));
+console.log('Active sessions:',sessions.length);
+sessions.forEach(f=>console.log('  '+f));
+for(const sub of ['assets','characters']){
+  const d=path.join(dir,sub);
+  if(!fs.existsSync(d))continue;
+  fs.readdirSync(d).filter(f=>fs.existsSync(path.join(d,f,'character.json'))).forEach(f=>{
+    const cfg2=JSON.parse(fs.readFileSync(path.join(d,f,'character.json'),'utf8'));
+    console.log((sub==='assets'?'DLC':'Custom')+': '+cfg2.name+' ('+f+')');
+  });
+}
+"
+```
 
 ### Character Pack commands
 
 #### `/pet pack list`
 
-List all installed character packs:
-
-```bash
-echo "=== DLC Characters ==="
-for d in ~/.claude/pet-data/assets/*/; do
-  [ -f "$d/character.json" ] && node -e "const c=JSON.parse(require('fs').readFileSync('$d/character.json','utf8'));console.log('  ' + c.name + ' (' + c.type + ')')"
-done
-echo "=== Custom Characters ==="
-for d in ~/.claude/pet-data/characters/*/; do
-  [ -f "$d/character.json" ] && node -e "const c=JSON.parse(require('fs').readFileSync('$d/character.json','utf8'));console.log('  ' + c.name + ' (' + c.type + ')')"
-done
+```js
+node -e "
+const fs=require('fs'),path=require('path'),os=require('os');
+const dir=path.join(os.homedir(),'.claude','pet-data');
+for(const[label,sub]of[['DLC','assets'],['Custom','characters']]){
+  const d=path.join(dir,sub);
+  if(!fs.existsSync(d))continue;
+  const packs=fs.readdirSync(d).filter(f=>fs.existsSync(path.join(d,f,'character.json')));
+  if(packs.length){console.log('=== '+label+' ===');packs.forEach(f=>{
+    const c=JSON.parse(fs.readFileSync(path.join(d,f,'character.json'),'utf8'));
+    console.log('  '+c.name+' ('+c.type+', '+Object.keys(c.states).length+' states)');
+  })}
+}
+"
 ```
 
 #### `/pet pack install <url-or-path>`
 
-Install a custom character pack from a URL (zip) or local path:
+Install a custom character pack from a URL (zip) or local directory:
 
-**From URL (GitHub release, direct zip link, etc.):**
-```bash
-PACK_URL="<user-provided-url>"
-CHARS_DIR="$HOME/.claude/pet-data/characters"
-mkdir -p "$CHARS_DIR"
-TMPZIP="$(mktemp).zip"
-curl -sLo "$TMPZIP" "$PACK_URL"
-unzip -o "$TMPZIP" -d "$CHARS_DIR/"
-rm -f "$TMPZIP"
+**From URL:**
+```js
+node -e "
+const https=require('https'),fs=require('fs'),path=require('path'),os=require('os'),{execSync}=require('child_process');
+const url='<USER_URL>';
+const charsDir=path.join(os.homedir(),'.claude','pet-data','characters');
+fs.mkdirSync(charsDir,{recursive:true});
+const tmp=path.join(os.tmpdir(),'pet-pack.zip');
+const file=fs.createWriteStream(tmp);
+const get=(u)=>https.get(u,r=>{if(r.statusCode>=300&&r.headers.location)get(r.headers.location);else r.pipe(file).on('finish',()=>{
+  file.close();
+  if(os.platform()==='win32')execSync('powershell -Command \"Expand-Archive -Path \\\"'+tmp+'\\\" -DestinationPath \\\"'+charsDir+'\\\" -Force\"');
+  else execSync('unzip -o \"'+tmp+'\" -d \"'+charsDir+'\"');
+  fs.unlinkSync(tmp);
+  console.log('Pack installed to '+charsDir);
+})});
+get(url);
+"
 ```
 
-On Windows PowerShell:
-```powershell
-$charsDir = "$env:USERPROFILE\.claude\pet-data\characters"
-New-Item -ItemType Directory -Path $charsDir -Force | Out-Null
-$tmpZip = "$env:TEMP\pet-pack.zip"
-Invoke-WebRequest -Uri "<url>" -OutFile $tmpZip
-Expand-Archive -Path $tmpZip -DestinationPath $charsDir -Force
-Remove-Item $tmpZip
+**From local path:** copy directory to `~/.claude/pet-data/characters/`:
+```js
+node -e "
+const fs=require('fs'),path=require('path'),os=require('os');
+const src='<LOCAL_PATH>';
+const name=path.basename(src);
+const dest=path.join(os.homedir(),'.claude','pet-data','characters',name);
+fs.cpSync(src,dest,{recursive:true});
+const c=JSON.parse(fs.readFileSync(path.join(dest,'character.json'),'utf8'));
+console.log('Installed: '+c.name+' ('+Object.keys(c.states).length+' states)');
+"
 ```
 
-**From local path:**
-```bash
-cp -r "<local-path>" "$HOME/.claude/pet-data/characters/"
-```
-
-After installing, verify the pack has a valid `character.json`:
-```bash
-PACK_DIR="$HOME/.claude/pet-data/characters/<pack-name>"
-node -e "const c=JSON.parse(require('fs').readFileSync('$PACK_DIR/character.json','utf8'));console.log('Installed: ' + c.name + ' (' + c.type + ', ' + Object.keys(c.states).length + ' states)')"
-```
-
-Tell the user: "Character pack installed! Right-click the pet → look under **Custom** section to select it. If the pet is not running, use `/pet open`."
+Tell the user: "Character pack installed! Right-click the pet → look under **Custom** to select it."
 
 #### `/pet pack remove <name>`
 
-Remove a custom character pack:
-
-```bash
-PACK_DIR="$HOME/.claude/pet-data/characters/<name>"
-if [ -d "$PACK_DIR" ]; then
-  rm -rf "$PACK_DIR"
-  echo "Removed character pack: <name>"
-else
-  echo "Pack not found: <name>"
-fi
+```js
+node -e "
+const fs=require('fs'),path=require('path'),os=require('os');
+const dir=path.join(os.homedir(),'.claude','pet-data','characters','<NAME>');
+if(fs.existsSync(dir)){fs.rmSync(dir,{recursive:true});console.log('Removed: <NAME>')}
+else{console.log('Pack not found: <NAME>')}
+"
 ```
 
 #### `/pet pack create <name>`
 
-Create a character pack template for the user to fill in:
+Create a character pack template:
 
-```bash
-PACK_DIR="$HOME/.claude/pet-data/characters/<name>"
-mkdir -p "$PACK_DIR"
-cat > "$PACK_DIR/character.json" << 'EOF'
-{
-  "name": "<Name>",
-  "type": "gif",
-  "states": {
-    "idle":       ["<name>/idle.gif"],
-    "thinking":   ["<name>/thinking.gif"],
-    "reading":    ["<name>/reading.gif"],
-    "editing":    ["<name>/editing.gif"],
-    "searching":  ["<name>/searching.gif"],
-    "running":    ["<name>/running.gif"],
-    "delegating": ["<name>/delegating.gif"],
-    "waiting":    ["<name>/waiting.gif"],
-    "error":      ["<name>/error.gif"],
-    "offline":    ["<name>/offline.gif"],
-    "unknown":    ["<name>/idle.gif"]
-  }
-}
-EOF
+```js
+node -e "
+const fs=require('fs'),path=require('path'),os=require('os');
+const name='<NAME>';
+const dir=path.join(os.homedir(),'.claude','pet-data','characters',name);
+fs.mkdirSync(dir,{recursive:true});
+fs.writeFileSync(path.join(dir,'character.json'),JSON.stringify({
+  name:name,type:'gif',
+  states:{idle:[name+'/idle.gif'],thinking:[name+'/thinking.gif'],reading:[name+'/reading.gif'],editing:[name+'/editing.gif'],searching:[name+'/searching.gif'],running:[name+'/running.gif'],delegating:[name+'/delegating.gif'],waiting:[name+'/waiting.gif'],error:[name+'/error.gif'],offline:[name+'/offline.gif'],unknown:[name+'/idle.gif']}
+},null,2));
+console.log('Template created at: '+dir);
+console.log('Next: add images, edit character.json, restart pet');
+"
 ```
-
-Tell the user:
-1. Template created at `~/.claude/pet-data/characters/<name>/`
-2. Add your GIF/SVG/PNG images to that directory
-3. Edit `character.json` to match your image filenames
-4. Restart the pet to see it in the Custom menu section
-5. To share: zip the `<name>/` directory and send it to others
 
 Always give a short confirmation after executing.
