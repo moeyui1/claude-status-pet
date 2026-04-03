@@ -325,7 +325,29 @@ fn cmd_write_status(args: &[String]) {
     }
 
     debug_log(&log_path, &format!("file written in {:?}", t0.elapsed()));
+
+    // Clean up stale status files (older than 24 hours)
+    cleanup_stale_status(&pet_dir);
+
     debug_log(&log_path, &format!("write-status DONE in {:?}", t0.elapsed()));
+}
+
+fn cleanup_stale_status(pet_dir: &PathBuf) {
+    let Ok(entries) = fs::read_dir(pet_dir) else { return };
+    let cutoff = std::time::SystemTime::now() - std::time::Duration::from_secs(24 * 3600);
+    for entry in entries.filter_map(|e| e.ok()) {
+        let name = entry.file_name();
+        let name_str = name.to_string_lossy();
+        if name_str.starts_with("status-") && name_str.ends_with(".json") {
+            if let Ok(meta) = entry.metadata() {
+                if let Ok(modified) = meta.modified() {
+                    if modified < cutoff {
+                        let _ = fs::remove_file(entry.path());
+                    }
+                }
+            }
+        }
+    }
 }
 
 fn read_stdin() -> String {
