@@ -248,6 +248,10 @@ fn scan_packs_in_dir(dir: &PathBuf, group: &str, packs: &mut Vec<CharacterPack>)
 /// CLI: write-status subcommand
 /// Reads event info from CLI args or stdin (via adapter), writes status JSON, exits.
 fn cmd_write_status(args: &[String]) {
+    // Enable debug if --debug is passed
+    if args.iter().any(|a| a == "--debug") {
+        DEBUG_ENABLED.store(true, Ordering::Relaxed);
+    }
     let pet_dir = default_pet_dir();
     let _ = fs::create_dir_all(&pet_dir);
     let log_path = pet_dir.clone();
@@ -461,7 +465,7 @@ pub fn run() {
     // Subcommand dispatch: write-status runs without GUI
     if args.iter().any(|a| a == "write-status") {
         cmd_write_status(&args);
-        return;
+        std::process::exit(0); // Force exit — don't wait for stdin reader thread
     }
 
     if args.iter().any(|a| a == "--debug") {
