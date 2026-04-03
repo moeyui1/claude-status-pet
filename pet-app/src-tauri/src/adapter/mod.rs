@@ -5,6 +5,7 @@
 
 pub mod claude;
 pub mod copilot;
+pub mod vscode;
 
 use serde::Deserialize;
 
@@ -57,6 +58,7 @@ pub fn get_adapter(name: &str) -> Option<Box<dyn Adapter>> {
     match name {
         "claude" => Some(Box::new(claude::ClaudeAdapter)),
         "copilot" => Some(Box::new(copilot::CopilotAdapter)),
+        "vscode" => Some(Box::new(vscode::VscodeAdapter)),
         _ => None,
     }
 }

@@ -160,27 +160,20 @@ This tells VS Code to load all `*.json` hook files from `~/.copilot/hooks/` glob
 
 ```bash
 ASSETS_DIR="$HOME/.claude/pet-data/assets"
-SCRIPTS_DIR="$HOME/.claude/pet-data/scripts"
-mkdir -p "$ASSETS_DIR" "$SCRIPTS_DIR"
+mkdir -p "$ASSETS_DIR"
 curl -sLo /tmp/pet-assets.zip "https://github.com/moeyui1/claude-status-pet/releases/latest/download/pet-assets.zip"
 unzip -o /tmp/pet-assets.zip -d "$ASSETS_DIR"
 rm -f /tmp/pet-assets.zip
-# Download DLC helper script (needed for Mona/Kuromi GIF download)
-curl -sLo "$SCRIPTS_DIR/download-gifs.js" "https://raw.githubusercontent.com/moeyui1/claude-status-pet/main/scripts/download-gifs.js"
 ```
 
 **Windows PowerShell:**
 
 ```powershell
 $assetsDir = "$env:USERPROFILE\.claude\pet-data\assets"
-$scriptsDir = "$env:USERPROFILE\.claude\pet-data\scripts"
 New-Item -ItemType Directory -Path $assetsDir -Force | Out-Null
-New-Item -ItemType Directory -Path $scriptsDir -Force | Out-Null
 Invoke-WebRequest -Uri "https://github.com/moeyui1/claude-status-pet/releases/latest/download/pet-assets.zip" -OutFile "$env:TEMP\pet-assets.zip"
 Expand-Archive -Path "$env:TEMP\pet-assets.zip" -DestinationPath $assetsDir -Force
 Remove-Item "$env:TEMP\pet-assets.zip"
-# Download DLC helper script (needed for Mona/Kuromi GIF download)
-Invoke-WebRequest -Uri "https://raw.githubusercontent.com/moeyui1/claude-status-pet/main/scripts/download-gifs.js" -OutFile "$scriptsDir\download-gifs.js"
 ```
 
 ---
