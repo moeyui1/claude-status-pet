@@ -139,31 +139,16 @@ fn download_dlc(assets_dir: tauri::State<'_, Option<PathBuf>>, dlc_name: String)
     let dlc_dir = dir.join(&dlc_name);
     let _ = fs::create_dir_all(&dlc_dir);
 
-    // Download each GIF using platform-native commands
+    // Download each GIF using ureq HTTP client
     let mut failed = Vec::new();
     for (name, url) in &gifs {
         let dest = dir.join(name);
-        let ok = if cfg!(windows) {
-            std::process::Command::new("powershell")
-                .args([
-                    "-Command",
-                    "Invoke-WebRequest",
-                    "-Uri", url,
-                    "-OutFile", &dest.to_string_lossy(),
-                    "-MaximumRedirection", "5",
-                ])
-                .output()
-                .map(|o| o.status.success())
-                .unwrap_or(false)
-        } else {
-            std::process::Command::new("curl")
-                .args(["-sLo", &dest.to_string_lossy(), url])
-                .output()
-                .map(|o| o.status.success())
-                .unwrap_or(false)
-        };
-        if !ok {
-            failed.push(*name);
+        match download_file(url, &dest) {
+            Ok(_) => {}
+            Err(e) => {
+                eprintln!("Failed to download {}: {}", name, e);
+                failed.push(*name);
+            }
         }
     }
 
@@ -435,6 +420,14 @@ fn cleanup_stale_status(pet_dir: &PathBuf) {
             }
         }
     }
+}
+
+fn download_file(url: &str, dest: &PathBuf) -> Result<(), String> {
+    use std::io::Read;
+    let resp = ureq::get(url).call().map_err(|e| e.to_string())?;
+    let mut bytes: Vec<u8> = Vec::new();
+    resp.into_body().into_reader().read_to_end(&mut bytes).map_err(|e| e.to_string())?;
+    fs::write(dest, &bytes).map_err(|e| e.to_string())
 }
 
 fn read_stdin() -> String {
