@@ -198,10 +198,14 @@ function applyConfig() {
     el.style[prop] = val || '';
   }
   asciiPre.style.fontSize = petFontSize + 'px';
-  container.style.transform = petScale !== 1 ? `scale(${petScale})` : '';
-  container.style.transformOrigin = 'center bottom';
+  container.style.width = Math.round(200 * petScale) + 'px';
+  container.style.height = Math.round(240 * petScale) + 'px';
 
-  // Resize window to match scale
+  // Scale inner elements
+  imgWrapper.style.width = Math.round(140 * petScale) + 'px';
+  imgWrapper.style.height = Math.round(140 * petScale) + 'px';
+
+  // Resize window to match
   if (window.__TAURI__) {
     const w = Math.round(200 * petScale);
     const h = Math.round(240 * petScale);
