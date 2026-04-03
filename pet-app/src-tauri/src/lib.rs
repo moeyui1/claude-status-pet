@@ -126,13 +126,6 @@ fn download_dlc(assets_dir: tauri::State<'_, Option<PathBuf>>, _dlc_name: String
 }
 
 #[tauri::command]
-fn user_exit_pet() {
-    // User explicitly chose "Exit" from menu — write disabled marker
-    let pet_dir = default_pet_dir();
-    let _ = fs::write(pet_dir.join(".pet-disabled"), "");
-}
-
-#[tauri::command]
 fn load_asset(assets_dir: tauri::State<'_, Option<PathBuf>>, path: String) -> Option<String> {
     use base64::Engine;
     let dir = assets_dir.inner().as_ref()?;
@@ -339,64 +332,7 @@ fn cmd_write_status(args: &[String]) {
     }
 
     debug_log(&log_path, &format!("file written in {:?}", t0.elapsed()));
-
-    // NOTE: auto_launch_gui is NOT called from write-status.
-    // GUI launch is handled by sessionStart hook using Start-Process (non-blocking).
-    // Spawning GUI from & call chain causes PowerShell to wait for child process.
-
     debug_log(&log_path, &format!("write-status DONE in {:?}", t0.elapsed()));
-}
-
-/// Check if pet GUI is running for this session, launch if not.
-/// Respects auto_start config. Uses per-session lock files.
-fn auto_launch_gui(pet_dir: &PathBuf, status_file: &PathBuf, session_id: &str) {
-    // Check config: if auto_start is explicitly false, don't launch
-    let config_file = pet_dir.join("config.json");
-    if let Ok(content) = fs::read_to_string(&config_file) {
-        if let Ok(v) = serde_json::from_str::<serde_json::Value>(&content) {
-            if v["auto_start"] == serde_json::Value::Bool(false) {
-                return;
-            }
-        }
-    }
-
-    let lock_file = pet_dir.join(format!(".pet-gui-{}.lock", session_id));
-
-    // Fast check: if lock file exists, assume GUI is running (no tasklist/pgrep!)
-    if lock_file.exists() {
-        return;
-    }
-
-    // Find the binary (self)
-    let self_bin = std::env::current_exe().unwrap_or_default();
-    let assets_dir = pet_dir.join("assets");
-
-    let mut cmd = std::process::Command::new(&self_bin);
-    cmd.args(["run", "--status-file"])
-        .arg(status_file.to_string_lossy().as_ref())
-        .args(["--session-id", session_id]);
-
-    if assets_dir.is_dir() {
-        cmd.args(["--assets-dir"]).arg(assets_dir.to_string_lossy().as_ref());
-    }
-
-    // Detach the process
-    #[cfg(windows)]
-    {
-        use std::os::windows::process::CommandExt;
-        const CREATE_NO_WINDOW: u32 = 0x08000000;
-        const DETACHED_PROCESS: u32 = 0x00000008;
-        cmd.creation_flags(CREATE_NO_WINDOW | DETACHED_PROCESS);
-    }
-
-    if let Ok(child) = cmd.stdin(std::process::Stdio::null())
-        .stdout(std::process::Stdio::null())
-        .stderr(std::process::Stdio::null())
-        .spawn()
-    {
-        // Write PID to per-session lock file
-        let _ = fs::write(&lock_file, child.id().to_string());
-    }
 }
 
 fn read_stdin() -> String {
@@ -494,12 +430,9 @@ pub fn run() {
         .map(|w| w[1].clone())
         .unwrap_or_else(|| "unknown".to_string());
 
-    // Write per-session PID lock file so write-status knows this GUI is running
-    // Clear .pet-disabled — user explicitly launched, so re-enable auto-start
+    // Write per-session PID lock file
     let pet_dir = default_pet_dir();
     let _ = fs::create_dir_all(&pet_dir);
-    let _ = fs::write(pet_dir.join(format!(".pet-gui-{}.lock", session_id)), std::process::id().to_string());
-    let _ = fs::remove_file(pet_dir.join(".pet-disabled"));
 
     let assets_dir: Option<PathBuf> = args
         .windows(2)
@@ -517,7 +450,7 @@ pub fn run() {
         .manage(status_path_shared)
         .manage(session_id)
         .manage(assets_dir)
-        .invoke_handler(tauri::generate_handler![get_status, get_session_id, get_assets_dir, load_asset, load_text_asset, load_custom_asset, is_dlc_installed, download_dlc, list_character_packs, user_exit_pet])
+        .invoke_handler(tauri::generate_handler![get_status, get_session_id, get_assets_dir, load_asset, load_text_asset, load_custom_asset, is_dlc_installed, download_dlc, list_character_packs])
         .setup(move |app| {
             let window = app.get_webview_window("main").unwrap();
 
@@ -664,16 +597,8 @@ pub fn run() {
             Ok(())
         })
         .on_window_event(move |_window, event| {
-            // Clean up status file and lock file when window is closed
             if let tauri::WindowEvent::Destroyed = event {
                 let _ = fs::remove_file(&status_path_for_cleanup);
-                if let Some(parent) = status_path_for_cleanup.parent() {
-                    // Extract session ID from status filename: status-{id}.json → {id}
-                    if let Some(fname) = status_path_for_cleanup.file_stem().and_then(|s| s.to_str()) {
-                        let sid = fname.strip_prefix("status-").unwrap_or(fname);
-                        let _ = fs::remove_file(parent.join(format!(".pet-gui-{}.lock", sid)));
-                    }
-                }
             }
         })
         .run(tauri::generate_context!())
