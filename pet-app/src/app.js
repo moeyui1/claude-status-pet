@@ -158,6 +158,7 @@ let eye = localStorage.getItem('petEye') || '·';
 let petColor = localStorage.getItem('petColor') || '';
 let petBgColor = localStorage.getItem('petBgColor') || '';
 let petFillColor = localStorage.getItem('petFillColor') || '';
+let petTextColor = localStorage.getItem('petTextColor') || '';
 let petFontSize = parseInt(localStorage.getItem('petFontSize') || '16');
 let petScale = parseFloat(localStorage.getItem('petScale') || '1');
 let currentState = 'idle';
@@ -185,6 +186,7 @@ function applyConfig() {
     [stateLabel, 'color', petColor],
     [bubble, 'borderColor', petColor],
     [sessionNameEl, 'background', petColor],
+    [sessionNameEl, 'color', petTextColor],
     [container, 'background', petBgColor],
     [container, 'borderRadius', petBgColor ? '12px' : ''],
     [asciiPre, 'background', petFillColor],
@@ -200,7 +202,7 @@ function applyConfig() {
   if (window.__TAURI__) {
     const w = Math.round(200 * petScale);
     const h = Math.round(240 * petScale);
-    window.__TAURI__.window.getCurrentWindow().setSize(new window.__TAURI__.window.LogicalSize(w, h));
+    window.__TAURI__.window.getCurrentWindow().setSize({ type: 'Logical', width: w, height: h });
   }
 }
 
@@ -475,9 +477,8 @@ function buildConfigPage() {
   addMenuItem(charMenu, '← Back', () => { menuPage = 'main'; buildMenu(); });
   addDivider(charMenu);
   addSliderRow(charMenu, 'Scale', petScale, 0.5, 2, 0.1, (v) => { petScale = v; saveConfig('petScale', String(v)); }, '%');
-  addColorRow(charMenu, 'Accent', petColor, '#e06c3c', (v) => { petColor = v; saveConfig('petColor', v); });
+  addColorRow(charMenu, 'Text', petTextColor, '#ffffff', (v) => { petTextColor = v; saveConfig('petTextColor', v); });
   addColorRow(charMenu, 'ASCII Fill', petFillColor, '#ffffff', (v) => { petFillColor = v; saveConfig('petFillColor', v); });
-  addSliderRow(charMenu, 'ASCII Size', petFontSize, 10, 24, 1, (v) => { petFontSize = v; saveConfig('petFontSize', String(v)); }, 'px');
   addColorRow(charMenu, 'Background', petBgColor, '#ffffff', (v) => { petBgColor = v; saveConfig('petBgColor', v); });
 }
 
