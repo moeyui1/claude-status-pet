@@ -491,7 +491,7 @@ function buildAsciiPage() {
 function buildConfigPage() {
   addMenuItem(charMenu, '← Back', () => { menuPage = 'main'; buildMenu(); });
   addDivider(charMenu);
-  addSliderRow(charMenu, 'Scale', petScale, 0.5, 2, 0.1, (v) => { petScale = v; saveConfig('petScale', String(v)); }, '%');
+  addSliderRow(charMenu, 'Scale', petScale, 1, 2, 0.1, (v) => { petScale = v; saveConfig('petScale', String(v)); }, '%');
   addColorRow(charMenu, 'Text', petTextColor, '#ffffff', (v) => { petTextColor = v; saveConfig('petTextColor', v); });
   addColorRow(charMenu, 'Label', petSessionBg, '#e06c3c', (v) => { petSessionBg = v; saveConfig('petSessionBg', v); });
   addColorRow(charMenu, 'ASCII Fill', petFillColor, '#ffffff', (v) => { petFillColor = v; saveConfig('petFillColor', v); });
