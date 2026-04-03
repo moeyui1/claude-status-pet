@@ -1,6 +1,6 @@
 ---
 name: pet
-description: Manage your desktop pet — on, update, toggle auto-start, install character packs
+description: Manage your desktop pet — on, update, toggle auto-start, status
 user-invocable: true
 ---
 
@@ -19,9 +19,6 @@ The user will run `/pet` with an optional subcommand. Parse the arguments and ex
 - `/pet auto on` — Enable auto-start on new sessions (Claude Code only; not supported under Copilot — use `/pet on` manually)
 - `/pet auto off` — Disable auto-start
 - `/pet status` — Show current config, active sessions, and installed character packs
-- `/pet pack install <url-or-path>` — Install a custom character pack
-- `/pet pack list` — List all installed character packs
-- `/pet pack remove <name>` — Remove a custom character pack
 - `/pet help` — Show available commands
 
 > **Note on auto-start:** Auto-start relies on `sessionStart` hooks, which only work in Claude Code. Under GitHub Copilot CLI, auto-start has no effect — use `/pet on` to manually launch the pet each session.
@@ -29,6 +26,8 @@ The user will run `/pet` with an optional subcommand. Parse the arguments and ex
 > **Closing the pet:** Right-click the pet → Exit. There is no `/pet off` command.
 >
 > **Switching characters:** Right-click the pet to open the character menu.
+>
+> **Custom characters:** To create, install, or share custom character packs, read https://raw.githubusercontent.com/moeyui1/claude-status-pet/main/docs/CUSTOM-CHARACTERS.md
 
 ## Implementation
 
@@ -208,42 +207,6 @@ foreach ($sub in @("assets","characters")) {
         Write-Host "${label}: $($cfg.name) ($($_.Name))"
     }
 }
-```
-
-### /pet pack list
-
-Same as the status command's pack listing section above.
-
-### /pet pack install <url-or-path>
-
-**From URL (zip):**
-
-**PowerShell:**
-```powershell
-$charsDir = "$env:USERPROFILE\.claude\pet-data\characters"
-New-Item -ItemType Directory -Path $charsDir -Force | Out-Null
-$tmp = "$env:TEMP\pet-pack.zip"
-Invoke-WebRequest -Uri "<URL>" -OutFile $tmp
-Expand-Archive -Path $tmp -DestinationPath $charsDir -Force
-Remove-Item $tmp
-Write-Host "Pack installed. Restart pet to see it."
-```
-
-**From local path:**
-```powershell
-Copy-Item -Recurse "<LOCAL_PATH>" "$env:USERPROFILE\.claude\pet-data\characters\"
-Write-Host "Pack installed. Restart pet to see it."
-```
-
-Tell the user: "Restart the pet (right-click → Exit, then `/pet on`) to see the new character under Custom."
-
-### /pet pack remove <name>
-
-**PowerShell:**
-```powershell
-$dir = "$env:USERPROFILE\.claude\pet-data\characters\<NAME>"
-if (Test-Path $dir) { Remove-Item $dir -Recurse -Force; Write-Host "Removed: <NAME>" }
-else { Write-Host "Pack not found: <NAME>" }
 ```
 
 Always give a short confirmation after executing.

@@ -84,9 +84,14 @@ That's it! A pet will appear on your next session. 🎉
 | `/pet update` | Update binary, hooks, skill, and assets |
 | `/pet auto on/off` | Toggle auto-start (Claude Code only) |
 | `/pet status` | Show config and active sessions |
-| `/pet pack install <url>` | Install a custom character pack |
 
 > **Tip:** Switch characters and customize colors via the right-click menu.
+
+### Create Your Own Character
+
+Ask your AI assistant:
+
+> Read https://raw.githubusercontent.com/moeyui1/claude-status-pet/main/docs/CUSTOM-CHARACTERS.md and create a custom character pack for me
 
 ## GitHub Copilot Support
 

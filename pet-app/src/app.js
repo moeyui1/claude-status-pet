@@ -550,14 +550,13 @@ async function selectChar(newMode) {
   currentImgSrc = '';
   imgEl.src = '';
 
-  // Preload assets for the new mode if needed
-  if (GIF_MODES[mode] && hasExternalAssets) {
-    statusText.textContent = 'Loading...';
-    bubble.classList.remove('hidden');
-    await preloadAssets();
-  }
-
+  // Show the character immediately with whatever is available
   updateStatus({ state: currentState, detail: statusText.textContent });
+
+  // Preload remaining assets in the background
+  if (GIF_MODES[mode] && hasExternalAssets) {
+    preloadAssets();
+  }
 }
 
 function openMenu() {

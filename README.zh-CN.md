@@ -84,9 +84,14 @@ copilot plugin install claude-status-pet-copilot
 | `/pet update` | 更新二进制、钩子、技能和资源 |
 | `/pet auto on/off` | 开关会话自动启动（仅 Claude Code） |
 | `/pet status` | 查看配置和活跃会话 |
-| `/pet pack install <url>` | 安装自定义角色包 |
 
 > **提示：** 通过右键菜单切换角色和自定义颜色。
+
+### 创建你自己的角色
+
+让你的 AI 助手执行：
+
+> Read https://raw.githubusercontent.com/moeyui1/claude-status-pet/main/docs/CUSTOM-CHARACTERS.md and create a custom character pack for me
 
 ## GitHub Copilot 支持
 

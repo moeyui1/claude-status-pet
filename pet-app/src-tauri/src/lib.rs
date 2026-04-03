@@ -192,10 +192,12 @@ fn bind_session(
             if let Ok(event) = event {
                 let is_our_file = event.paths.iter().any(|p| *p == watch_path);
                 if !is_our_file { continue; }
+                debug_log(&log_path, &format!("bind_session event: {:?}, paths: {:?}", event.kind, event.paths));
                 match event.kind {
                     EventKind::Modify(_) | EventKind::Create(_) => {
                         std::thread::sleep(std::time::Duration::from_millis(50));
                         if let Some(status) = read_status(&watch_path) {
+                            debug_log(&log_path, &format!("bind_session emit: state={}, detail={}", status.state, status.detail));
                             let _ = handle.emit("status-update", status);
                         }
                     }
