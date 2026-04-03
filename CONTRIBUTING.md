@@ -148,6 +148,53 @@ Right-click the pet → select your character from the DLC section.
 
 ---
 
+## Installing a Custom Character Pack
+
+Users can install character packs **without rebuilding** — just drop a folder into the custom characters directory:
+
+```
+~/.claude/pet-data/characters/my-pack/
+├── character.json
+├── idle.gif
+├── thinking.gif
+└── ...
+```
+
+The pet will auto-discover it on next launch and show it under **Custom** in the right-click menu.
+
+### Sharing Packs
+
+To share a character pack:
+1. Zip the character directory (e.g., `my-pack/`)
+2. Share the zip file
+3. Recipients extract it to `~/.claude/pet-data/characters/`
+
+```bash
+# Install a shared pack
+unzip my-pack.zip -d ~/.claude/pet-data/characters/
+# Restart pet to see it
+```
+
+### Directory Structure
+
+```
+~/.claude/pet-data/
+├── assets/              ← DLC characters (mona, kuromi)
+│   ├── mona/
+│   │   ├── character.json
+│   │   └── *.gif
+│   └── kuromi/
+│       ├── character.json
+│       └── *.gif
+├── characters/          ← Custom user packs (drop packs here)
+│   └── my-pack/
+│       ├── character.json
+│       └── *.gif
+└── bin/                 ← Pet binary
+```
+
+---
+
 ## Adding an ASCII Art Character
 
 ASCII characters are hardcoded in `app.js` (they're just text, no external files needed).
@@ -173,7 +220,7 @@ const MY_ASCII = {
 
 ### 2. Register in `app.js`
 
-Add your character to the `ASCII_SPECIES` object. It will automatically appear in the menu.
+Add your character to the `ASCII_SPECIES` object. It will automatically appear in the ASCII Buddies submenu.
 
 ---
 
