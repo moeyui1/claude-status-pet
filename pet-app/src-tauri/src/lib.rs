@@ -14,14 +14,18 @@ mod tests;
 
 static DEBUG_ENABLED: AtomicBool = AtomicBool::new(false);
 
-fn debug_log(status_path: &PathBuf, msg: &str) {
+fn debug_log(path: &PathBuf, msg: &str) {
     if !DEBUG_ENABLED.load(Ordering::Relaxed) {
         return;
     }
-    let log_path = status_path
-        .parent()
-        .unwrap_or(status_path)
-        .join("pet-debug.log");
+    // path can be a status file or the log file itself — resolve to pet-debug.log in same dir
+    let log_path = if path.is_dir() {
+        path.join("pet-debug.log")
+    } else if path.file_name().map_or(false, |f| f == "pet-debug.log") {
+        path.clone()
+    } else {
+        path.parent().unwrap_or(path).join("pet-debug.log")
+    };
     let timestamp = std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
         .map(|d| {
@@ -254,7 +258,7 @@ fn cmd_write_status(args: &[String]) {
     }
     let pet_dir = default_pet_dir();
     let _ = fs::create_dir_all(&pet_dir);
-    let log_path = pet_dir.clone();
+    let log_path = pet_dir.join("pet-debug.log");  // dummy file path for debug_log
     let t0 = std::time::Instant::now();
 
     debug_log(&log_path, &format!("write-status START args={:?}", &args[1..]));
@@ -272,7 +276,7 @@ fn cmd_write_status(args: &[String]) {
             // Adapter mode: read stdin JSON
             debug_log(&log_path, "reading stdin...");
             let stdin_data = read_stdin();
-            debug_log(&log_path, &format!("stdin read in {:?}, len={}", t0.elapsed(), stdin_data.len()));
+            debug_log(&log_path, &format!("stdin read in {:?}, len={}, data={}", t0.elapsed(), stdin_data.len(), &stdin_data));
             let stdin: adapter::StdinInput = serde_json::from_str(&stdin_data).unwrap_or_default();
 
             if let Some(adapter) = adapter::get_adapter(adapter_name) {

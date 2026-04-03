@@ -159,6 +159,7 @@ let petColor = localStorage.getItem('petColor') || '';
 let petBgColor = localStorage.getItem('petBgColor') || '';
 let petFillColor = localStorage.getItem('petFillColor') || '';
 let petFontSize = parseInt(localStorage.getItem('petFontSize') || '16');
+let petScale = parseFloat(localStorage.getItem('petScale') || '1');
 let currentState = 'idle';
 let currentImgSrc = '';
 let bubbleTimeout = null;
@@ -192,6 +193,8 @@ function applyConfig() {
     el.style[prop] = val || '';
   }
   asciiPre.style.fontSize = petFontSize + 'px';
+  container.style.transform = petScale !== 1 ? `scale(${petScale})` : '';
+  container.style.transformOrigin = 'center bottom';
 }
 
 function saveConfig(key, value) {
@@ -462,6 +465,7 @@ function buildAsciiPage() {
 function buildConfigPage() {
   addMenuItem(charMenu, '← Back', () => { menuPage = 'main'; buildMenu(); });
   addDivider(charMenu);
+  addSliderRow(charMenu, 'Scale', petScale, 0.5, 2, 0.1, (v) => { petScale = v; saveConfig('petScale', String(v)); }, '%');
   addColorRow(charMenu, 'Accent', petColor, '#e06c3c', (v) => { petColor = v; saveConfig('petColor', v); });
   addColorRow(charMenu, 'ASCII Fill', petFillColor, '#ffffff', (v) => { petFillColor = v; saveConfig('petFillColor', v); });
   addSliderRow(charMenu, 'ASCII Size', petFontSize, 10, 24, 1, (v) => { petFontSize = v; saveConfig('petFontSize', String(v)); }, 'px');

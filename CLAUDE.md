@@ -144,7 +144,9 @@ The app auto-discovers character packs via `list_character_packs` Tauri command.
 All hook processing is in Rust. No Node.js, Python, or shell scripts at runtime. Build-time still needs Node.js (`npx tauri build`).
 
 ### Hooks must not block
-All hooks use `"async": true` (Claude Code) or `"timeoutSec": 10` (Copilot). The `write-status` CLI writes a file and exits in ~1ms. The `auto_launch_gui()` function spawns detached and returns immediately.
+All hooks use `"async": true` (Claude Code) or `"timeoutSec": 1` (GitHub Copilot). The `write-status` CLI reads stdin (100ms timeout), writes a file, and calls `process::exit(0)` — total <100ms. GUI launch is handled separately by `sessionStart` hook via `Start-Process` (non-blocking).
+
+**Critical**: write-status must NEVER spawn child processes. PowerShell `&` waits for all children. GUI launch uses `Start-Process` in the hook script, not inside the binary.
 
 ### Image licensing
 - **Ferris SVGs** (CC0) are bundled in the repo
@@ -158,11 +160,12 @@ All hooks use `"async": true` (Claude Code) or `"timeoutSec": 10` (Copilot). The
 WebView2 blocks `file://` URLs. Assets loaded via `load_asset` Tauri command → base64 data URLs, cached in frontend memory.
 
 ### Copilot-specific quirks (in adapter/copilot.rs)
-- `sessionStart`: `launch_only=true` — don't write status (races with `userPromptSubmitted`)
+- `sessionStart`: writes `thinking` state — GUI launch handled by hook script's `Start-Process`
+- `userPromptSubmitted`: ignored (returns `None`) — sessionStart already sets thinking
 - `postToolUse`: mapped to `thinking` — avoids idle flash between tools
-- `sessionEnd`: writes `offline` — does NOT close the window (fires on every response, not just exit)
-- `stop`: maps to `idle` — fires after each agent response chunk, may cause brief idle flash during long responses (known issue, acceptable tradeoff)
-- `session_id`: hashed from `cwd` using simple hash (not MD5). Hash length differs from legacy JS scripts — old sessions (`3bff2f46`) won't match new ones (`5b500f061151c8f9`). This is expected; old status files are cleaned up by `open-pet.sh` after 24 hours.
+- `sessionEnd`: depends on `reason` field: `complete`→idle, `error`→error, `abort`/`user_exit`→idle, `timeout`→offline
+- `stop`: maps to `idle`
+- `session_id`: hashed from `cwd` using simple hash
 
 ## Common Pitfalls
 
@@ -170,11 +173,12 @@ WebView2 blocks `file://` URLs. Assets loaded via `load_asset` Tauri command →
 - **marketplace.json**: Must have top-level `name` (string) and `owner` (object with `name` field)
 - **Building**: Use `npx tauri build` from `pet-app/`, NOT `cargo build` from `src-tauri/` (the latter doesn't bundle frontend)
 - **Window border on Windows**: Check `shadow: false` in tauri.conf.json
-- **Hook blocking**: `write-status` must never block. No network calls, no user prompts. Write file and exit.
+- **Hook blocking**: `write-status` must never block. No network calls, no spawning child processes. Write file → `process::exit(0)`.
+- **PowerShell `&` waits for children**: NEVER spawn GUI from inside `& binary.exe`. Use `Start-Process` in the hook script instead.
 - **Adapter quirks**: All agent-specific behavior goes in the adapter module, not shared code.
-- **Auto-launch detection**: `write-status` counts running pet processes via `tasklist`/`pgrep`. Count >1 means GUI is already running (1 = the CLI itself). If detection fails, duplicate GUIs may appear.
+- **auto_start default**: `false` — pet only auto-launches if user explicitly sets `auto_start: true` in config.json
 - **Local debugging**: Always launch pet with `--debug` flag to enable logging to `~/.claude/pet-data/pet-debug.log`
-- **Legacy scripts**: `scripts/` directory still exists for backward compat. New hooks call the binary directly. Do NOT modify the old scripts — they will be removed in a future release.
+- **Legacy scripts**: `scripts/` directory exists for backward compat with Claude Code plugin. Copilot hooks call the binary directly.
 
 ## Building
 

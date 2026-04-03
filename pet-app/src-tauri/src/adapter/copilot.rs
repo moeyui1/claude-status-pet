@@ -48,11 +48,11 @@ impl Adapter for CopilotAdapter {
 
         let (event, tool, detail, launch_only) = match hook.as_str() {
             "sessionStart" => {
-                // Quirk: don't write status — races with userPromptSubmitted
-                ("done".into(), String::new(), "Session started".into(), true)
+                ("prompt".into(), String::new(), "Processing prompt...".into(), false)
             }
             "userPromptSubmitted" => {
-                ("prompt".into(), String::new(), "Processing prompt...".into(), false)
+                // Ignore — sessionStart already sets thinking state
+                return None;
             }
             "preToolUse" => {
                 let file = get_str(&tool_args, &["file", "filePath", "path"]);
@@ -104,7 +104,7 @@ impl Adapter for CopilotAdapter {
                 match reason {
                     "complete" => ("done".into(), String::new(), "Done".into(), false),
                     "error" => ("error".into(), String::new(), "Session error".into(), false),
-                    "abort" | "user_exit" => ("closed".into(), String::new(), "Session closed".into(), false),
+                    "abort" | "user_exit" => ("done".into(), String::new(), "Session closed".into(), false),
                     // "timeout" or unknown → offline (sleep animation)
                     _ => ("offline".into(), String::new(), "Session ended".into(), false),
                 }

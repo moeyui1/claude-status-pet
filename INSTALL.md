@@ -50,39 +50,28 @@ curl -sLo "$INSTALL_DIR/$ASSET" "https://github.com/moeyui1/claude-status-pet/re
 chmod +x "$INSTALL_DIR/$ASSET" 2>/dev/null || true
 ```
 
-#### 2. Download scripts
-
-```bash
-SCRIPTS_DIR="$HOME/.claude/pet-data/scripts"
-mkdir -p "$SCRIPTS_DIR"
-for f in status-writer.sh launch-pet.sh open-pet.sh download-assets.sh download-assets.js download-gifs.js; do
-  curl -sLo "$SCRIPTS_DIR/$f" "https://raw.githubusercontent.com/moeyui1/claude-status-pet/main/scripts/$f"
-  chmod +x "$SCRIPTS_DIR/$f"
-done
-```
-
-#### 3. Add hooks to `~/.claude/settings.json`
+#### 2. Add hooks to `~/.claude/settings.json`
 
 Merge these hooks (do not overwrite existing hooks):
 
 ```json
 {
   "hooks": {
-    "UserPromptSubmit": [{ "hooks": [{ "type": "command", "command": "bash ~/.claude/pet-data/scripts/status-writer.sh", "async": true }] }],
-    "PreToolUse": [{ "hooks": [{ "type": "command", "command": "bash ~/.claude/pet-data/scripts/status-writer.sh", "async": true }] }],
-    "Stop": [{ "hooks": [{ "type": "command", "command": "bash ~/.claude/pet-data/scripts/status-writer.sh", "async": true }] }],
-    "Notification": [{ "matcher": "permission_prompt", "hooks": [{ "type": "command", "command": "bash ~/.claude/pet-data/scripts/status-writer.sh", "async": true }] }],
-    "StopFailure": [{ "hooks": [{ "type": "command", "command": "bash ~/.claude/pet-data/scripts/status-writer.sh", "async": true }] }],
-    "SessionStart": [{ "matcher": "startup", "hooks": [{ "type": "command", "command": "bash ~/.claude/pet-data/scripts/launch-pet.sh", "async": true }] }],
-    "SessionEnd": [{ "hooks": [{ "type": "command", "command": "bash ~/.claude/pet-data/scripts/status-writer.sh", "async": true }] }]
+    "UserPromptSubmit": [{ "hooks": [{ "type": "command", "command": "~/.claude/pet-data/bin/claude-status-pet write-status --adapter claude", "async": true }] }],
+    "PreToolUse": [{ "hooks": [{ "type": "command", "command": "~/.claude/pet-data/bin/claude-status-pet write-status --adapter claude", "async": true }] }],
+    "Stop": [{ "hooks": [{ "type": "command", "command": "~/.claude/pet-data/bin/claude-status-pet write-status --adapter claude", "async": true }] }],
+    "Notification": [{ "matcher": "permission_prompt", "hooks": [{ "type": "command", "command": "~/.claude/pet-data/bin/claude-status-pet write-status --adapter claude", "async": true }] }],
+    "StopFailure": [{ "hooks": [{ "type": "command", "command": "~/.claude/pet-data/bin/claude-status-pet write-status --adapter claude", "async": true }] }],
+    "SessionStart": [{ "matcher": "startup", "hooks": [{ "type": "command", "command": "~/.claude/pet-data/bin/claude-status-pet write-status --adapter claude", "async": true }] }],
+    "SessionEnd": [{ "hooks": [{ "type": "command", "command": "~/.claude/pet-data/bin/claude-status-pet write-status --adapter claude", "async": true }] }]
   }
 }
 ```
 
-#### 4. Launch
+#### 3. Launch
 
 ```bash
-bash ~/.claude/pet-data/scripts/open-pet.sh
+~/.claude/pet-data/bin/claude-status-pet run --status-file ~/.claude/pet-data/status-test.json --session-id test --assets-dir ~/.claude/pet-data/assets
 ```
 
 ---
@@ -128,39 +117,7 @@ $asset = "claude-status-pet-windows-x64.exe"
 Invoke-WebRequest -Uri "https://github.com/moeyui1/claude-status-pet/releases/latest/download/$asset" -OutFile "$installDir\$asset"
 ```
 
-#### 2. Download Copilot hook scripts
-
-**macOS / Linux / Git Bash:**
-
-```bash
-SCRIPTS_DIR="$HOME/.claude/pet-data/scripts"
-mkdir -p "$SCRIPTS_DIR"
-BASE="https://raw.githubusercontent.com/moeyui1/claude-status-pet/main"
-curl -sLo "$SCRIPTS_DIR/copilot-status-writer.sh" "$BASE/copilot/status-writer.sh"
-curl -sLo "$SCRIPTS_DIR/copilot-status-writer.js" "$BASE/copilot/status-writer.js"
-chmod +x "$SCRIPTS_DIR/copilot-status-writer.sh"
-for f in download-assets.js download-gifs.js; do
-  curl -sLo "$SCRIPTS_DIR/$f" "$BASE/scripts/$f"
-done
-```
-
-**Windows PowerShell:**
-
-```powershell
-$scriptsDir = "$env:USERPROFILE\.claude\pet-data\scripts"
-New-Item -ItemType Directory -Path $scriptsDir -Force | Out-Null
-$base = "https://raw.githubusercontent.com/moeyui1/claude-status-pet/main"
-foreach ($f in @(
-    @("copilot-status-writer.sh", "copilot/status-writer.sh"),
-    @("copilot-status-writer.js", "copilot/status-writer.js"),
-    @("download-assets.js", "scripts/download-assets.js"),
-    @("download-gifs.js", "scripts/download-gifs.js")
-)) {
-    Invoke-WebRequest -Uri "$base/$($f[1])" -OutFile "$scriptsDir\$($f[0])"
-}
-```
-
-#### 3. Install global hooks file
+#### 2. Install global hooks file
 
 **macOS / Linux / Git Bash:**
 
@@ -179,7 +136,7 @@ New-Item -ItemType Directory -Path $hooksDir -Force | Out-Null
 Invoke-WebRequest -Uri "https://raw.githubusercontent.com/moeyui1/claude-status-pet/main/copilot/hooks.json" -OutFile "$hooksDir\status-pet.json"
 ```
 
-#### 4. Add hook location to VS Code user settings
+#### 3. Add hook location to VS Code user settings
 
 > AI agent: merge this into the user's VS Code `settings.json` (do not overwrite existing settings). The settings file is at:
 > - **Windows**: `%APPDATA%\Code\User\settings.json`
