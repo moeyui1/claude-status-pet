@@ -83,34 +83,31 @@ For characters bundled with the app (like Ferris):
 
 For characters downloaded at runtime (like Mona, Kuromi):
 
-### 1. Add GIF URLs to `scripts/download-gifs.js`
+### 1. Add GIF URLs to `download_dlc` in `pet-app/src-tauri/src/lib.rs`
 
-```javascript
-const GIFS = {
-  // ... existing entries ...
-  'mychar/happy.gif': 'https://media.giphy.com/media/.../giphy.gif',
-  'mychar/typing.gif': 'https://media.giphy.com/media/.../giphy.gif',
-  // ...
-};
+Add a new match arm in the `download_dlc` function with GIF URLs:
+
+```rust
+"mychar" => vec![
+    ("mychar/happy.gif", "https://media.giphy.com/media/.../giphy.gif"),
+    ("mychar/typing.gif", "https://media.giphy.com/media/.../giphy.gif"),
+    // ...
+],
 ```
 
-### 2. Add character config in the same file
+### 2. Add character config in the same function
 
-In the `characters` object inside `main()`:
+Add a new match arm for the `character.json` generation:
 
-```javascript
-const characters = {
-  // ... existing entries ...
-  mychar: {
-    name: 'My Character',
-    type: 'gif',
-    states: {
-      idle: ['mychar/happy.gif'],
-      thinking: ['mychar/curious.gif'],
-      // ...
+```rust
+"mychar" => serde_json::json!({
+    "name": "My Character", "type": "gif",
+    "states": {
+        "idle": ["mychar/happy.gif"],
+        "thinking": ["mychar/curious.gif"],
+        // ...
     }
-  }
-};
+}),
 ```
 
 ### 3. Register in the DLC menu
@@ -125,15 +122,7 @@ const knownDlcs = [
 ];
 ```
 
-### 4. Bump the GIF version
-
-Increment `CURRENT_VERSION` in `download-gifs.js` to force re-download:
-
-```javascript
-const CURRENT_VERSION = '3';  // was '2'
-```
-
-### 5. Test
+### 4. Test
 
 ```bash
 cd pet-app && npx tauri build

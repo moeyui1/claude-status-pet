@@ -31,9 +31,10 @@ jobs:
         run: cd assets && zip -r ../pet-assets.zip ferris/
 
       - name: Upload asset zip
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v2.6.1
         with:
           files: pet-assets.zip
+          prerelease: ${{ contains(github.ref, '-rc') || contains(github.ref, '-beta') || contains(github.ref, '-alpha') }}
 
   # Build binaries per platform
   build:
@@ -94,6 +95,7 @@ jobs:
           cp "pet-app/src-tauri/target/${{ matrix.target }}/release/${{ matrix.binary }}" "${{ matrix.asset_name }}"
 
       - name: Upload Release Asset
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v2.6.1
         with:
           files: ${{ matrix.asset_name }}
+          prerelease: ${{ contains(github.ref, '-rc') || contains(github.ref, '-beta') || contains(github.ref, '-alpha') }}

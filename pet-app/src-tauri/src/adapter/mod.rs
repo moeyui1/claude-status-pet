@@ -38,9 +38,9 @@ pub struct StdinInput {
     pub session_id: Option<String>,
     #[serde(default)]
     pub cwd: Option<String>,
-    // Copilot toolArgs (JSON string, needs secondary parse)
+    // Copilot toolArgs (may be JSON string or object depending on event)
     #[serde(alias = "toolArgs", default)]
-    pub tool_args: Option<String>,
+    pub tool_args: Option<serde_json::Value>,
     // Error info
     #[serde(default)]
     pub error: Option<serde_json::Value>,

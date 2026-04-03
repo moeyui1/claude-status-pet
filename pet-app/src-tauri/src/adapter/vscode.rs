@@ -72,6 +72,22 @@ impl Adapter for VscodeAdapter {
             "Stop" => {
                 ("done".into(), String::new(), "Done".into())
             }
+            "ErrorOccurred" | "errorOccurred" => {
+                let msg = stdin.error.as_ref()
+                    .and_then(|e| e.get("message"))
+                    .and_then(|m| m.as_str())
+                    .unwrap_or("Unknown error");
+                ("error".into(), String::new(), format!("Error: {}", truncate(msg, 40)))
+            }
+            "SessionEnd" | "sessionEnd" => {
+                let reason = stdin.reason.as_deref().unwrap_or("complete");
+                match reason {
+                    "complete" => ("done".into(), String::new(), "Done".into()),
+                    "error" => ("error".into(), String::new(), "Session error".into()),
+                    "abort" | "user_exit" => ("done".into(), String::new(), "Session closed".into()),
+                    _ => ("offline".into(), String::new(), "Session ended".into()),
+                }
+            }
             _ => {
                 ("prompt".into(), String::new(), format!("{}", hook))
             }

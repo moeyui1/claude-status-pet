@@ -103,10 +103,18 @@ fn is_dlc_installed(assets_dir: tauri::State<'_, Option<PathBuf>>, dlc_name: Str
 }
 
 #[tauri::command]
-fn download_dlc(assets_dir: tauri::State<'_, Option<PathBuf>>, dlc_name: String) -> Result<bool, String> {
-    let dir = assets_dir.inner().as_ref().ok_or("No assets dir")?;
+async fn download_dlc(assets_dir: tauri::State<'_, Option<PathBuf>>, dlc_name: String) -> Result<bool, String> {
+    let dir = assets_dir.inner().as_ref().ok_or("No assets dir")?.clone();
+    let dlc = dlc_name.clone();
 
-    let gifs: Vec<(&str, &str)> = match dlc_name.as_str() {
+    tauri::async_runtime::spawn_blocking(move || {
+        download_dlc_blocking(&dir, &dlc)
+    }).await.map_err(|e| e.to_string())?
+}
+
+fn download_dlc_blocking(dir: &PathBuf, dlc_name: &str) -> Result<bool, String> {
+
+    let gifs: Vec<(&str, &str)> = match dlc_name {
         "mona" => vec![
             ("mona/love.gif",      "https://media.giphy.com/media/jrdgDVFrcgJpNlonWO/giphy.gif"),
             ("mona/angry.gif",     "https://media.giphy.com/media/kmCCrDo2vlIu6Kswop/giphy.gif"),
@@ -139,28 +147,16 @@ fn download_dlc(assets_dir: tauri::State<'_, Option<PathBuf>>, dlc_name: String)
     let dlc_dir = dir.join(&dlc_name);
     let _ = fs::create_dir_all(&dlc_dir);
 
-    // Download each GIF using platform-native commands
+    // Download each GIF using ureq HTTP client
     let mut failed = Vec::new();
     for (name, url) in &gifs {
         let dest = dir.join(name);
-        let ok = if cfg!(windows) {
-            std::process::Command::new("powershell")
-                .args(["-Command", &format!(
-                    "Invoke-WebRequest -Uri '{}' -OutFile '{}' -MaximumRedirection 5",
-                    url, dest.to_string_lossy()
-                )])
-                .output()
-                .map(|o| o.status.success())
-                .unwrap_or(false)
-        } else {
-            std::process::Command::new("curl")
-                .args(["-sLo", &dest.to_string_lossy(), url])
-                .output()
-                .map(|o| o.status.success())
-                .unwrap_or(false)
-        };
-        if !ok {
-            failed.push(*name);
+        match download_file(url, &dest) {
+            Ok(_) => {}
+            Err(e) => {
+                eprintln!("Failed to download {}: {}", name, e);
+                failed.push(*name);
+            }
         }
     }
 
@@ -169,7 +165,7 @@ fn download_dlc(assets_dir: tauri::State<'_, Option<PathBuf>>, dlc_name: String)
     }
 
     // Write character.json
-    let config = match dlc_name.as_str() {
+    let config = match dlc_name {
         "mona" => serde_json::json!({
             "name": "Mona (GitHub)", "type": "gif",
             "states": {
@@ -409,6 +405,9 @@ fn cmd_write_status(args: &[String]) {
         let _ = fs::write(&status_file, status.to_string());
     }
 
+    // Output session info to stdout (hook script captures this to launch GUI)
+    println!("{}\t{}", status_file.to_string_lossy(), session_id);
+
     debug_log(&log_path, &format!("file written in {:?}", t0.elapsed()));
     debug_log(&log_path, &format!("write-status DONE in {:?}", t0.elapsed()));
 }
@@ -429,6 +428,25 @@ fn cleanup_stale_status(pet_dir: &PathBuf) {
             }
         }
     }
+}
+
+fn download_file(url: &str, dest: &PathBuf) -> Result<(), String> {
+    use std::io::Read;
+    let agent = ureq::Agent::config_builder()
+        .timeout_global(Some(std::time::Duration::from_secs(30)))
+        .build()
+        .new_agent();
+    let resp = agent.get(url).call().map_err(|e| e.to_string())?;
+    let status = resp.status();
+    if status != 200 {
+        return Err(format!("HTTP {}", status));
+    }
+    let mut bytes: Vec<u8> = Vec::new();
+    resp.into_body().into_reader().read_to_end(&mut bytes).map_err(|e| e.to_string())?;
+    if bytes.is_empty() {
+        return Err("Empty response".into());
+    }
+    fs::write(dest, &bytes).map_err(|e| e.to_string())
 }
 
 fn read_stdin() -> String {

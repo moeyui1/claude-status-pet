@@ -158,6 +158,8 @@ let eye = localStorage.getItem('petEye') || '·';
 let petColor = localStorage.getItem('petColor') || '';
 let petBgColor = localStorage.getItem('petBgColor') || '';
 let petFillColor = localStorage.getItem('petFillColor') || '';
+let petTextColor = localStorage.getItem('petTextColor') || '';
+let petSessionBg = localStorage.getItem('petSessionBg') || '';
 let petFontSize = parseInt(localStorage.getItem('petFontSize') || '16');
 let petScale = parseFloat(localStorage.getItem('petScale') || '1');
 let currentState = 'idle';
@@ -184,7 +186,8 @@ function applyConfig() {
     [asciiPre, 'color', petColor],
     [stateLabel, 'color', petColor],
     [bubble, 'borderColor', petColor],
-    [sessionNameEl, 'background', petColor],
+    [sessionNameEl, 'background', petSessionBg],
+    [sessionNameEl, 'color', petTextColor],
     [container, 'background', petBgColor],
     [container, 'borderRadius', petBgColor ? '12px' : ''],
     [asciiPre, 'background', petFillColor],
@@ -200,7 +203,7 @@ function applyConfig() {
   if (window.__TAURI__) {
     const w = Math.round(200 * petScale);
     const h = Math.round(240 * petScale);
-    window.__TAURI__.window.getCurrentWindow().setSize(new window.__TAURI__.window.LogicalSize(w, h));
+    window.__TAURI__.window.getCurrentWindow().setSize({ type: 'Logical', width: w, height: h });
   }
 }
 
@@ -317,7 +320,7 @@ function updateStatus(status) {
 
   stateLabel.textContent = state;
 
-  // Speech bubble — always visible
+  // Speech bubble — always visible for active states, 30s timeout for idle/offline
   if (detail && state !== 'offline') {
     if (statusText.textContent !== detail) {
       bubble.style.transition = 'none';
@@ -330,10 +333,14 @@ function updateStatus(status) {
     statusText.textContent = detail;
     bubble.classList.remove('hidden');
     clearTimeout(bubbleTimeout);
+    if (state === 'idle') {
+      bubbleTimeout = setTimeout(() => { bubble.classList.add('hidden'); }, 30000);
+    }
   } else if (state === 'offline') {
     statusText.textContent = 'Zzz...';
     bubble.classList.remove('hidden');
     clearTimeout(bubbleTimeout);
+    bubbleTimeout = setTimeout(() => { bubble.classList.add('hidden'); }, 30000);
   }
 }
 
@@ -471,10 +478,19 @@ function buildConfigPage() {
   addMenuItem(charMenu, '← Back', () => { menuPage = 'main'; buildMenu(); });
   addDivider(charMenu);
   addSliderRow(charMenu, 'Scale', petScale, 0.5, 2, 0.1, (v) => { petScale = v; saveConfig('petScale', String(v)); }, '%');
-  addColorRow(charMenu, 'Accent', petColor, '#e06c3c', (v) => { petColor = v; saveConfig('petColor', v); });
+  addColorRow(charMenu, 'Text', petTextColor, '#ffffff', (v) => { petTextColor = v; saveConfig('petTextColor', v); });
+  addColorRow(charMenu, 'Label', petSessionBg, '#e06c3c', (v) => { petSessionBg = v; saveConfig('petSessionBg', v); });
   addColorRow(charMenu, 'ASCII Fill', petFillColor, '#ffffff', (v) => { petFillColor = v; saveConfig('petFillColor', v); });
-  addSliderRow(charMenu, 'ASCII Size', petFontSize, 10, 24, 1, (v) => { petFontSize = v; saveConfig('petFontSize', String(v)); }, 'px');
   addColorRow(charMenu, 'Background', petBgColor, '#ffffff', (v) => { petBgColor = v; saveConfig('petBgColor', v); });
+  addDivider(charMenu);
+  addMenuItem(charMenu, 'Reset Default', () => {
+    petScale = 1; petTextColor = ''; petSessionBg = ''; petFillColor = ''; petBgColor = '';
+    localStorage.removeItem('petScale'); localStorage.removeItem('petTextColor');
+    localStorage.removeItem('petSessionBg'); localStorage.removeItem('petFillColor');
+    localStorage.removeItem('petBgColor');
+    applyConfig();
+    buildConfigPage();
+  }, 'menu-item-danger');
 }
 
 function isDlcInstalled(dlcName) {
@@ -496,6 +512,14 @@ async function downloadAndSelectDlc(dlcName) {
   try {
     await window.__TAURI__.core.invoke('download_dlc', { dlcName });
     dlcInstalledCache[dlcName] = true;
+    // Load character.json for the newly downloaded DLC
+    try {
+      const jsonStr = await window.__TAURI__.core.invoke('load_text_asset', { path: dlcName + '/character.json' });
+      if (jsonStr) {
+        const config = JSON.parse(jsonStr);
+        GIF_MODES[dlcName] = config.states;
+      }
+    } catch(e) {}
     await selectChar(dlcName);
   } catch (e) {
     statusText.textContent = 'Download failed: ' + (e || 'unknown error');
@@ -664,6 +688,27 @@ async function preloadAssets() {
         } catch(e) {}
       }
     } catch(e) {}
+  }
+
+  // If current mode is a DLC that's not installed, auto-download it
+  const knownDlcs = ['mona', 'kuromi'];
+  if (knownDlcs.includes(mode) && !dlcInstalledCache[mode] && window.__TAURI__) {
+    statusText.textContent = 'Downloading ' + mode + '...';
+    bubble.classList.remove('hidden');
+    try {
+      await window.__TAURI__.core.invoke('download_dlc', { dlcName: mode });
+      dlcInstalledCache[mode] = true;
+      const jsonStr = await window.__TAURI__.core.invoke('load_text_asset', { path: mode + '/character.json' });
+      if (jsonStr) {
+        GIF_MODES[mode] = JSON.parse(jsonStr).states;
+      } else {
+        throw new Error('character.json not found after download');
+      }
+    } catch(e) {
+      statusText.textContent = 'Download failed, using Ferris';
+      mode = 'ferris';
+      localStorage.setItem('petMode', mode);
+    }
   }
 
   // If current mode is a DLC that's installed, preload it

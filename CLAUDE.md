@@ -4,7 +4,7 @@ This document is for AI coding assistants (Claude Code, GitHub Copilot, Cursor, 
 
 ## What This Project Is
 
-A desktop pet (Tauri app) that floats on screen and shows what an AI coding assistant is doing in real time. A single Rust binary handles everything: parsing hook events, writing status, and rendering the UI.
+A desktop pet (Tauri app) that floats on screen and shows what an AI coding assistant is doing in real time. A single Rust binary handles everything: parsing hook events, writing status, downloading DLC, and rendering the UI.
 
 ```
 Hook event → claude-status-pet write-status → status-{id}.json → claude-status-pet GUI (file watcher) → UI update
@@ -24,13 +24,10 @@ claude-status-pet/
 ├── hooks/
 │   └── hooks.json           # Claude Code hooks → calls binary with --adapter claude
 ├── copilot/
-│   ├── hooks.json           # GitHub Copilot hooks → calls binary with --adapter copilot
+│   ├── hooks.json           # GitHub Copilot CLI hooks → calls binary with --adapter copilot
 │   └── README.md
-├── scripts/                 # Legacy scripts (kept for backward compat, being phased out)
-│   ├── download-assets.js   # Downloads pet-assets.zip (still used for first-time setup)
-│   └── download-gifs.js     # Downloads GIFs from GIPHY (still used for DLC)
 ├── skills/
-│   └── pet/SKILL.md         # /pet slash command definition
+│   └── pet/SKILL.md         # /pet slash command (works with Claude Code + Copilot via ~/.claude/skills/)
 ├── docs/
 │   ├── HOOKS.md             # Hook event → status mapping reference
 │   └── images/              # Compressed showcase GIFs
@@ -42,14 +39,15 @@ claude-status-pet/
 │   │   └── ferris/          # Ferris SVG art + character.json
 │   └── src-tauri/           # Rust backend
 │       ├── src/
-│       │   ├── lib.rs       # GUI mode: file watcher, WebView2, Tauri commands
+│       │   ├── lib.rs       # GUI mode + write-status CLI + DLC download
 │       │   ├── adapter/     # Hook adapters (one per AI agent)
-│       │   │   ├── mod.rs   # Adapter trait + registry
-│       │   │   ├── claude.rs   # Claude Code: PascalCase events, snake_case input
-│       │   │   └── copilot.rs  # GitHub Copilot: camelCase events + quirks
+│       │   │   ├── mod.rs   # Adapter trait + registry + StdinInput struct
+│       │   │   ├── claude.rs   # Claude Code adapter
+│       │   │   ├── copilot.rs  # GitHub Copilot CLI adapter
+│       │   │   └── vscode.rs   # VS Code Copilot adapter
 │       │   ├── status_map.rs   # Universal tool→state fuzzy matching
-│       │   └── tests.rs     # 24 unit tests
-│       ├── Cargo.toml
+│       │   └── tests.rs     # Unit tests
+│       ├── Cargo.toml       # Dependencies: tauri, serde, notify, base64, ureq
 │       └── tauri.conf.json
 ├── .github/workflows/
 │   └── release.yml          # CI: builds binaries + asset zip on version tags
@@ -61,32 +59,43 @@ claude-status-pet/
 
 ## Binary Modes
 
-The binary runs in different modes based on the first argument:
-
 ```
-claude-status-pet write-status --adapter claude    # CLI: parse stdin, write status, exit (~1ms)
+claude-status-pet write-status --adapter claude         # CLI: parse stdin, write status, exit
+claude-status-pet write-status --adapter copilot --copilot-event preToolUse  # CLI: Copilot with event arg
 claude-status-pet write-status --event tool --tool edit  # CLI: generic args, any agent
-claude-status-pet run --status-file <path>         # GUI: launch Tauri window
-claude-status-pet demo --assets-dir <path>         # GUI: cycle all states for recording
+claude-status-pet run --status-file <path> --debug       # GUI: launch Tauri window
+claude-status-pet demo --assets-dir <path>               # GUI: cycle all states for recording
 ```
 
-- `write-status` is the **hot path** — called on every hook event. Must be fast (<5ms), non-blocking.
-- `write-status` auto-launches the GUI if no pet process is running.
+- `write-status` is the **hot path** — called on every hook event. Must complete in <100ms.
+- `write-status` outputs `<status-file-path>\t<session-id>` to stdout (used by sessionStart hook to launch GUI).
+- `write-status` ends with `process::exit(0)` to kill any lingering stdin reader thread.
+- `write-status` does NOT spawn child processes (PowerShell `&` waits for all children).
 - `run` is the long-lived GUI process that watches the status file.
 
 ## Adapter System
 
-Each AI agent has an adapter in `src/adapter/`. Adapters do two things:
+Three adapters in `src/adapter/`:
 
-1. **Format conversion**: Parse agent-specific stdin JSON → normalized `(event, tool, detail, session_id)`
-2. **Quirk handling**: Agent-specific behavioral fixes (e.g., Copilot sessionStart race condition)
+| Adapter | Event source | Tool names | Session ID | Quirks |
+|---------|-------------|------------|------------|--------|
+| `claude` | stdin `hook_event_name` (PascalCase) | `Edit`, `Read`, `Bash` | stdin `session_id` | None |
+| `copilot` | `--copilot-event` CLI arg | stdin `toolName` (camelCase) | stdin `sessionId` | sessionStart=thinking, userPromptSubmitted=ignored, postToolUse=thinking |
+| `vscode` | stdin `hookEventName` (PascalCase) | stdin `tool_name` (snake_case) | stdin `sessionId` | PostToolUse=thinking |
 
-| Adapter | Event source | Tool names | Quirks |
-|---------|-------------|------------|--------|
-| `claude` | `stdin.hook_event_name` (PascalCase) | `Edit`, `Read`, `Bash` | None |
-| `copilot` | `env.COPILOT_HOOK_EVENT` (camelCase) | `replace_string_in_file`, `read_file` | sessionStart=launch_only, postToolUse=thinking |
+### StdinInput parsing
 
-**Adding a new adapter**: See CONTRIBUTING.md. New agents should prefer CLI args (`--event/--tool`) over custom adapters.
+`StdinInput` uses `serde(alias)` to handle both snake_case and camelCase:
+- `tool_name` / `toolName` → same field
+- `hook_event_name` / `hookEventName` → same field
+- `session_id` / `sessionId` → same field
+- `tool_args` / `toolArgs` → `Option<serde_json::Value>` (can be JSON string OR object)
+
+**Critical**: `toolArgs` must be `Option<Value>` not `Option<String>`. Copilot CLI sends it as a JSON string for preToolUse, but as an object for postToolUse. If typed as `String`, serde silently fails on the object form, losing ALL fields including `sessionId`.
+
+### Non-blocking stdin reader
+
+`read_stdin()` reads byte-by-byte tracking `{}` depth. Returns immediately when outermost `}` closes — does NOT wait for EOF. 100ms timeout as safety net. Uses `Vec<u8>` + `from_utf8_lossy` (not `char` cast) for UTF-8 safety.
 
 ### Tool→State Mapping (`status_map.rs`)
 
@@ -99,29 +108,17 @@ Shared by all adapters. Uses fuzzy keyword matching:
 - `agent`, `skill`, `delegate` → `delegating`
 - anything else → `running` (fallback)
 
-MCP tools (`mcp__server__tool`) are auto-formatted as "server: tool".
+All `truncate()` functions use `is_char_boundary()` to avoid UTF-8 panics.
 
 ## Character System
 
-Characters are defined by `character.json` files (not hardcoded):
+Characters defined by `character.json` files:
 
-- **Bundled**: `pet-app/src/ferris/character.json` (built into frontend)
-- **DLC**: `~/.claude/pet-data/assets/{mona,kuromi}/character.json` (generated by download-gifs.js)
+- **Bundled**: `pet-app/src/ferris/character.json`
+- **DLC**: `~/.claude/pet-data/assets/{mona,kuromi}/character.json` (downloaded by `download_dlc` Rust command using `ureq` HTTP client)
 - **Custom**: `~/.claude/pet-data/characters/*/character.json` (user-installed packs)
 
-```json
-{
-  "name": "My Character",
-  "type": "gif",
-  "states": {
-    "idle": ["mychar/idle.gif"],
-    "thinking": ["mychar/think.gif"],
-    ...
-  }
-}
-```
-
-The app auto-discovers character packs via `list_character_packs` Tauri command.
+DLC download is async (`spawn_blocking`) with 30s HTTP timeout per file. Auto-downloads missing DLC on startup if selected character requires it.
 
 ## States
 
@@ -138,47 +135,56 @@ The app auto-discovers character packs via `list_character_packs` Tauri command.
 | error | shake 3x | red | error event |
 | offline | slow breathing | grey | offline event |
 
+Speech bubble: always visible for active states, 30s timeout for idle/offline.
+
 ## Key Design Decisions
 
 ### Single binary, zero runtime deps
-All hook processing is in Rust. No Node.js, Python, or shell scripts at runtime. Build-time still needs Node.js (`npx tauri build`).
+All hook processing and DLC download in Rust (using `ureq` for HTTP). No Node.js, Python, or shell scripts at runtime. Build-time still needs Node.js (`npx tauri build`).
 
 ### Hooks must not block
-All hooks use `"async": true` (Claude Code) or `"timeoutSec": 1` (GitHub Copilot). The `write-status` CLI reads stdin (100ms timeout), writes a file, and calls `process::exit(0)` — total <100ms. GUI launch is handled separately by `sessionStart` hook via `Start-Process` (non-blocking).
+- Claude Code hooks: `"async": true`
+- GitHub Copilot hooks: `"timeoutSec": 1`
+- `write-status` reads stdin (100ms timeout), writes file, calls `process::exit(0)` — total <100ms
+- GUI launch: handled by `sessionStart` hook via `Start-Process` (non-blocking), NOT inside the binary
 
-**Critical**: write-status must NEVER spawn child processes. PowerShell `&` waits for all children. GUI launch uses `Start-Process` in the hook script, not inside the binary.
+**Critical**: write-status must NEVER spawn child processes. PowerShell `&` waits for all children to exit.
+
+### Session ID tracking
+- `write-status` outputs `<status-file-path>\t<session-id>` to stdout
+- `sessionStart` hook captures this output and passes the exact file path to `run` via `Start-Process`
+- No guessing, no `.last-session` files, no `ls -t`
+
+### Copilot-specific quirks (in adapter/copilot.rs)
+- `sessionStart`: writes `thinking` — GUI launch handled by hook script
+- `userPromptSubmitted`: returns `None` (ignored) — avoids overwriting sessionStart's thinking
+- `postToolUse`: mapped to `thinking` — avoids idle flash between tools
+- `sessionEnd`: depends on `reason`: `complete`→idle, `error`→error, `abort`/`user_exit`→idle, `timeout`→offline
+- `stop`: maps to `idle`
+- Event name from `--copilot-event` CLI arg (stdin may not have `hookEventName`)
 
 ### Image licensing
 - **Ferris SVGs** (CC0) are bundled in the repo
-- **Mona/Kuromi GIFs** (GIPHY) are NOT in the repo — downloaded at runtime via `download-gifs.js`
-- Never commit GIPHY-sourced GIFs to git
+- **Mona/Kuromi GIFs** (GIPHY) are NOT in the repo — downloaded at runtime via `download_dlc`
 
-### Window transparency on Windows
-`transparent: true`, `decorations: false`, `shadow: false` in tauri.conf.json. WebView2 background set to RGBA(0,0,0,0) in Rust. Do NOT use Win32 DWM hacks.
+### Window transparency
+`transparent: true`, `decorations: false`, `shadow: false`, `skipTaskbar: true` in tauri.conf.json.
 
 ### External assets via base64 data URLs
 WebView2 blocks `file://` URLs. Assets loaded via `load_asset` Tauri command → base64 data URLs, cached in frontend memory.
 
-### Copilot-specific quirks (in adapter/copilot.rs)
-- `sessionStart`: writes `thinking` state — GUI launch handled by hook script's `Start-Process`
-- `userPromptSubmitted`: ignored (returns `None`) — sessionStart already sets thinking
-- `postToolUse`: mapped to `thinking` — avoids idle flash between tools
-- `sessionEnd`: depends on `reason` field: `complete`→idle, `error`→error, `abort`/`user_exit`→idle, `timeout`→offline
-- `stop`: maps to `idle`
-- `session_id`: hashed from `cwd` using simple hash
-
 ## Common Pitfalls
 
 - **plugin.json**: Do NOT add `"hooks"` field — `hooks/hooks.json` is auto-discovered
-- **marketplace.json**: Must have top-level `name` (string) and `owner` (object with `name` field)
-- **Building**: Use `npx tauri build` from `pet-app/`, NOT `cargo build` from `src-tauri/` (the latter doesn't bundle frontend)
-- **Window border on Windows**: Check `shadow: false` in tauri.conf.json
-- **Hook blocking**: `write-status` must never block. No network calls, no spawning child processes. Write file → `process::exit(0)`.
-- **PowerShell `&` waits for children**: NEVER spawn GUI from inside `& binary.exe`. Use `Start-Process` in the hook script instead.
-- **Adapter quirks**: All agent-specific behavior goes in the adapter module, not shared code.
-- **auto_start default**: `false` — pet only auto-launches if user explicitly sets `auto_start: true` in config.json
-- **Local debugging**: Always launch pet with `--debug` flag to enable logging to `~/.claude/pet-data/pet-debug.log`
-- **Legacy scripts**: `scripts/` directory exists for backward compat with Claude Code plugin. Copilot hooks call the binary directly.
+- **Building**: Use `npx tauri build` from `pet-app/`, NOT `cargo build` from `src-tauri/`
+- **Hook blocking**: write-status must never block. No network calls, no spawning children. Write file → `process::exit(0)`
+- **PowerShell `&`**: Waits for ALL child processes. NEVER spawn GUI from inside `& binary.exe`
+- **toolArgs type**: Must be `Option<Value>` not `Option<String>` (Copilot sends both formats)
+- **UTF-8 safety**: All `truncate()` must use `is_char_boundary()`. stdin reader uses `Vec<u8>` not `char` cast
+- **auto_start default**: `false` — pet only auto-launches if user sets `auto_start: true`
+- **Local debugging**: Always launch pet with `--debug` flag
+- **SKILL uses native commands**: PowerShell on Windows, bash on Unix. No Node.js in SKILL
+- **Stale status files**: Cleaned up on GUI startup (>24h old). Each session writes its own file
 
 ## Building
 
@@ -188,24 +194,11 @@ npm install
 npx tauri build  # requires Rust toolchain + MSVC on Windows
 ```
 
-Binary output: `pet-app/src-tauri/target/release/claude-status-pet(.exe)`
-
 ## Testing
 
 ```bash
 cd pet-app/src-tauri
-cargo test  # runs 24 unit tests (adapters, status mapping)
-```
-
-```bash
-# Test write-status CLI
-echo '{"hook_event_name":"PreToolUse","tool_name":"Edit","tool_input":{"file_path":"/foo/bar.rs"},"session_id":"test","cwd":"/proj"}' | ./target/release/claude-status-pet write-status --adapter claude
-
-# Test generic CLI args
-./target/release/claude-status-pet write-status --event tool --tool edit --detail "Editing bar.rs" --session-id test
-
-# Launch demo mode
-./target/release/claude-status-pet demo --assets-dir ~/.claude/pet-data/assets
+cargo test
 ```
 
 ## Releasing
@@ -214,7 +207,7 @@ Use the `/release` skill or manually:
 
 1. Update version in: `plugin.json`, `tauri.conf.json`, `Cargo.toml`, `package.json`
 2. Commit, tag: `git tag v0.X.0 && git push origin --tags`
-3. CI builds binaries + asset zip and uploads to GitHub Releases
+3. CI builds binaries + asset zip. Pre-release tags (`-rc`, `-beta`) marked as pre-release.
 
 ## Status File Format
 

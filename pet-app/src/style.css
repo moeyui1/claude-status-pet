@@ -93,7 +93,7 @@ html, body {
   font-weight: 400;
   line-height: 1;
   color: rgba(255, 255, 255, 0.95);
-  background: rgba(224, 108, 60, 0.8);
+  background: var(--accent, rgba(224, 108, 60, 0.8));
   padding: 5px 10px;
   border-radius: 6px;
   margin-top: 2px;
@@ -406,3 +406,4 @@ html, body {
 .anim-waiting #state-label { color: #e67e22; }
 .anim-error #state-label { color: #e74c3c; }
 .anim-offline #state-label { color: #95a5a6; }
+
