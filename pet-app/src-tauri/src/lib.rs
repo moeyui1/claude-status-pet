@@ -333,8 +333,9 @@ fn cmd_write_status(args: &[String]) {
 
     debug_log(&log_path, &format!("file written in {:?}", t0.elapsed()));
 
-    // Auto-launch GUI if not running
-    auto_launch_gui(&pet_dir, &status_file, &session_id);
+    // NOTE: auto_launch_gui is NOT called from write-status.
+    // GUI launch is handled by sessionStart hook using Start-Process (non-blocking).
+    // Spawning GUI from & call chain causes PowerShell to wait for child process.
 
     debug_log(&log_path, &format!("write-status DONE in {:?}", t0.elapsed()));
 }

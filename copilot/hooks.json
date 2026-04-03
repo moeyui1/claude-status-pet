@@ -5,8 +5,8 @@
       {
         "type": "command",
         "bash": "~/.claude/pet-data/bin/claude-status-pet write-status --adapter copilot --copilot-event sessionStart",
-        "powershell": "& \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" write-status --adapter copilot --copilot-event sessionStart",
-        "timeoutSec": 5
+        "powershell": "& \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" write-status --adapter copilot --copilot-event sessionStart; if (-not (Get-Process -Name 'claude-status-pet*' -ErrorAction SilentlyContinue)) { $sf=Get-ChildItem \"$env:USERPROFILE\\.claude\\pet-data\\status-copilot-*.json\" -ErrorAction SilentlyContinue|Sort-Object LastWriteTime -Descending|Select-Object -First 1; if($sf){Start-Process -WindowStyle Hidden \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" -ArgumentList 'run','--status-file',$sf.FullName,'--session-id',$sf.BaseName.Replace('status-',''),'--assets-dir',\"$env:USERPROFILE\\.claude\\pet-data\\assets\",'--debug'} }",
+        "timeoutSec": 10
       }
     ],
     "sessionEnd": [
