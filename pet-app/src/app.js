@@ -317,7 +317,7 @@ function updateStatus(status) {
 
   stateLabel.textContent = state;
 
-  // Speech bubble — always visible
+  // Speech bubble — always visible for active states, 30s timeout for idle/offline
   if (detail && state !== 'offline') {
     if (statusText.textContent !== detail) {
       bubble.style.transition = 'none';
@@ -330,10 +330,14 @@ function updateStatus(status) {
     statusText.textContent = detail;
     bubble.classList.remove('hidden');
     clearTimeout(bubbleTimeout);
+    if (state === 'idle') {
+      bubbleTimeout = setTimeout(() => { bubble.classList.add('hidden'); }, 30000);
+    }
   } else if (state === 'offline') {
     statusText.textContent = 'Zzz...';
     bubble.classList.remove('hidden');
     clearTimeout(bubbleTimeout);
+    bubbleTimeout = setTimeout(() => { bubble.classList.add('hidden'); }, 30000);
   }
 }
 

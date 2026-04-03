@@ -412,6 +412,9 @@ fn cmd_write_status(args: &[String]) {
         let _ = fs::write(&status_file, status.to_string());
     }
 
+    // Output session info to stdout (hook script captures this to launch GUI)
+    println!("{}\t{}", status_file.to_string_lossy(), session_id);
+
     debug_log(&log_path, &format!("file written in {:?}", t0.elapsed()));
     debug_log(&log_path, &format!("write-status DONE in {:?}", t0.elapsed()));
 }
