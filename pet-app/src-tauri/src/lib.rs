@@ -250,6 +250,10 @@ fn scan_packs_in_dir(dir: &PathBuf, group: &str, packs: &mut Vec<CharacterPack>)
 fn cmd_write_status(args: &[String]) {
     let pet_dir = default_pet_dir();
     let _ = fs::create_dir_all(&pet_dir);
+    let log_path = pet_dir.clone();
+    let t0 = std::time::Instant::now();
+
+    debug_log(&log_path, &format!("write-status START args={:?}", &args[1..]));
 
     // Parse CLI args
     let adapter_name = get_arg(args, "--adapter");
@@ -262,7 +266,9 @@ fn cmd_write_status(args: &[String]) {
     let (event, tool, detail, session_id, session_name, launch_only) =
         if let Some(adapter_name) = &adapter_name {
             // Adapter mode: read stdin JSON
+            debug_log(&log_path, "reading stdin...");
             let stdin_data = read_stdin();
+            debug_log(&log_path, &format!("stdin read in {:?}, len={}", t0.elapsed(), stdin_data.len()));
             let stdin: adapter::StdinInput = serde_json::from_str(&stdin_data).unwrap_or_default();
 
             if let Some(adapter) = adapter::get_adapter(adapter_name) {
@@ -300,6 +306,8 @@ fn cmd_write_status(args: &[String]) {
 
     let status_file = pet_dir.join(format!("status-{}.json", session_id));
 
+    debug_log(&log_path, &format!("writing state={} tool={} to {:?}", state, tool, status_file));
+
     // If launch_only (e.g. Copilot sessionStart), only create file if missing
     if launch_only {
         if !status_file.exists() {
@@ -319,35 +327,32 @@ fn cmd_write_status(args: &[String]) {
         let _ = fs::write(&status_file, status.to_string());
     }
 
+    debug_log(&log_path, &format!("file written in {:?}", t0.elapsed()));
+
     // Auto-launch GUI if not running
     auto_launch_gui(&pet_dir, &status_file, &session_id);
+
+    debug_log(&log_path, &format!("write-status DONE in {:?}", t0.elapsed()));
 }
 
 /// Check if pet GUI is running for this session, launch if not.
-/// Uses per-session lock files to support multiple simultaneous pets.
+/// Respects auto_start config. Uses per-session lock files.
 fn auto_launch_gui(pet_dir: &PathBuf, status_file: &PathBuf, session_id: &str) {
-    let lock_file = pet_dir.join(format!(".pet-gui-{}.lock", session_id));
-
-    // Check lock file — if it exists and the PID in it is still alive, GUI is running
-    if let Ok(content) = fs::read_to_string(&lock_file) {
-        if let Ok(pid) = content.trim().parse::<u32>() {
-            let is_alive = if cfg!(windows) {
-                std::process::Command::new("tasklist")
-                    .args(["/FI", &format!("PID eq {}", pid), "/NH"])
-                    .output()
-                    .map(|o| !String::from_utf8_lossy(&o.stdout).contains("No tasks"))
-                    .unwrap_or(false)
-            } else {
-                std::process::Command::new("kill")
-                    .args(["-0", &pid.to_string()])
-                    .output()
-                    .map(|o| o.status.success())
-                    .unwrap_or(false)
-            };
-            if is_alive {
+    // Check config: if auto_start is explicitly false, don't launch
+    let config_file = pet_dir.join("config.json");
+    if let Ok(content) = fs::read_to_string(&config_file) {
+        if let Ok(v) = serde_json::from_str::<serde_json::Value>(&content) {
+            if v["auto_start"] == serde_json::Value::Bool(false) {
                 return;
             }
         }
+    }
+
+    let lock_file = pet_dir.join(format!(".pet-gui-{}.lock", session_id));
+
+    // Fast check: if lock file exists, assume GUI is running (no tasklist/pgrep!)
+    if lock_file.exists() {
+        return;
     }
 
     // Find the binary (self)
