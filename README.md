@@ -45,6 +45,15 @@ A desktop pet that shows what your AI coding assistant is doing — in real time
 /plugin install claude-status-pet
 ```
 
+**Option 1b — Plugin install** (GitHub Copilot CLI):
+
+```
+copilot plugin marketplace add moeyui1/claude-status-pet
+copilot plugin install claude-status-pet-copilot
+```
+
+Then run `/pet update` to download the binary and assets.
+
 **Option 2 — Ask your AI agent** (works with Claude Code, Copilot, etc.):
 
 > Read https://raw.githubusercontent.com/moeyui1/claude-status-pet/main/INSTALL.md and install it for me
@@ -67,19 +76,28 @@ That's it! A pet will appear on your next session. 🎉
 - Customize colors, background, font size
 - Exit the pet
 
-**`/pet` commands** (in Claude Code):
+**`/pet` commands** (in Claude Code or Copilot CLI):
 
 | Command | Action |
 |---------|--------|
-| `/pet` or `/pet open` | Open pets for all active sessions |
-| `/pet close` | Close all running pets |
-| `/pet set <character>` | Set default character |
-| `/pet auto on/off` | Toggle auto-start on session begin |
+| `/pet` or `/pet on` | Launch the pet |
+| `/pet update` | Update binary, hooks, skill, and assets |
+| `/pet auto on/off` | Toggle auto-start (Claude Code only) |
 | `/pet status` | Show config and active sessions |
+| `/pet pack install <url>` | Install a custom character pack |
+
+> **Tip:** Switch characters and customize colors via the right-click menu.
 
 ## GitHub Copilot Support
 
-Also works with **GitHub Copilot CLI** and **Copilot Coding Agent**! See [`copilot/README.md`](copilot/README.md) for setup.
+Also works with **GitHub Copilot CLI**! Install via plugin:
+
+```
+copilot plugin marketplace add moeyui1/claude-status-pet
+copilot plugin install claude-status-pet-copilot
+```
+
+Or see [`copilot/README.md`](copilot/README.md) for manual setup.
 
 Both tools can run simultaneously — each gets its own pet window.
 
@@ -148,8 +166,9 @@ Add to your `~/.claude/settings.json`:
 
 ## Uninstall
 
+Right-click the pet → Exit to close it, then:
+
 ```
-/pet close
 /plugin uninstall claude-status-pet
 /plugin marketplace remove claude-status-pet
 rm -rf ~/.claude/pet-data    # optional: remove downloaded assets

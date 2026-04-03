@@ -45,6 +45,15 @@
 /plugin install claude-status-pet
 ```
 
+**方式一b — 插件安装**（GitHub Copilot CLI）：
+
+```
+copilot plugin marketplace add moeyui1/claude-status-pet
+copilot plugin install claude-status-pet-copilot
+```
+
+安装后运行 `/pet update` 下载二进制和资源。
+
 **方式二 — 让 AI 助手安装**（适用于 Claude Code、Copilot 等）：
 
 > Read https://raw.githubusercontent.com/moeyui1/claude-status-pet/main/INSTALL.md and install it for me
@@ -67,19 +76,28 @@
 - 自定义颜色、背景、字体大小
 - 退出宠物
 
-**`/pet` 命令**（Claude Code 中使用）：
+**`/pet` 命令**（Claude Code 或 Copilot CLI 中使用）：
 
 | 命令 | 功能 |
 |------|------|
-| `/pet` 或 `/pet open` | 为所有活跃会话打开宠物 |
-| `/pet close` | 关闭所有运行中的宠物 |
-| `/pet set <角色>` | 设置默认角色 |
-| `/pet auto on/off` | 开关会话自动启动 |
+| `/pet` 或 `/pet on` | 启动宠物 |
+| `/pet update` | 更新二进制、钩子、技能和资源 |
+| `/pet auto on/off` | 开关会话自动启动（仅 Claude Code） |
 | `/pet status` | 查看配置和活跃会话 |
+| `/pet pack install <url>` | 安装自定义角色包 |
+
+> **提示：** 通过右键菜单切换角色和自定义颜色。
 
 ## GitHub Copilot 支持
 
-同时支持 **GitHub Copilot CLI** 和 **Copilot Coding Agent**！详见 [`copilot/README.md`](copilot/README.md)。
+同时支持 **GitHub Copilot CLI**！通过插件安装：
+
+```
+copilot plugin marketplace add moeyui1/claude-status-pet
+copilot plugin install claude-status-pet-copilot
+```
+
+或参阅 [`copilot/README.md`](copilot/README.md) 进行手动配置。
 
 两个工具可以同时运行 — 各自拥有独立的宠物窗口。
 
@@ -148,8 +166,9 @@ npx tauri build
 
 ## 卸载
 
+右键宠物 → 退出来关闭，然后：
+
 ```
-/pet close
 /plugin uninstall claude-status-pet
 /plugin marketplace remove claude-status-pet
 rm -rf ~/.claude/pet-data    # 可选：删除下载的资源
