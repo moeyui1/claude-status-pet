@@ -384,15 +384,37 @@ fn auto_launch_gui(pet_dir: &PathBuf, status_file: &PathBuf, session_id: &str) {
 
 fn read_stdin() -> String {
     use std::io::Read;
-    // Read stdin with short timeout — hooks must not block the agent
+    // Read stdin until complete JSON object (depth-balanced {}) or timeout.
+    // Does NOT wait for EOF — returns as soon as JSON is complete.
     let (tx, rx) = std::sync::mpsc::channel();
     std::thread::spawn(move || {
         let mut buf = String::new();
-        let _ = std::io::stdin().read_to_string(&mut buf);
+        let mut depth = 0i32;
+        let mut in_string = false;
+        let mut escape = false;
+        let mut started = false;
+
+        for byte in std::io::stdin().bytes() {
+            let Ok(b) = byte else { break };
+            let c = b as char;
+            buf.push(c);
+
+            if escape { escape = false; continue; }
+            if c == '\\' && in_string { escape = true; continue; }
+            if c == '"' { in_string = !in_string; continue; }
+            if in_string { continue; }
+            if c == '{' { depth += 1; started = true; }
+            if c == '}' {
+                depth -= 1;
+                if started && depth == 0 {
+                    let _ = tx.send(buf);
+                    return;
+                }
+            }
+        }
         let _ = tx.send(buf);
     });
-    // 200ms is enough for piped stdin; if no data, proceed with empty input
-    rx.recv_timeout(std::time::Duration::from_millis(200)).unwrap_or_default()
+    rx.recv_timeout(std::time::Duration::from_millis(100)).unwrap_or_default()
 }
 
 fn get_arg(args: &[String], flag: &str) -> Option<String> {

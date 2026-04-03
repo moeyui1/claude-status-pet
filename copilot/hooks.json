@@ -4,56 +4,56 @@
     "sessionStart": [
       {
         "type": "command",
-        "bash": "~/.claude/pet-data/bin/claude-status-pet write-status --event done --session-id copilot --session-name Copilot --detail 'Session started' &",
-        "powershell": "Start-Process -WindowStyle Hidden -FilePath \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" -ArgumentList 'write-status','--event','done','--session-id','copilot','--session-name','Copilot','--detail','Session started'",
+        "bash": "~/.claude/pet-data/bin/claude-status-pet write-status --adapter copilot --copilot-event sessionStart",
+        "powershell": "& \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" write-status --adapter copilot --copilot-event sessionStart",
         "timeoutSec": 5
       }
     ],
     "sessionEnd": [
       {
         "type": "command",
-        "bash": "~/.claude/pet-data/bin/claude-status-pet write-status --event offline --session-id copilot --session-name Copilot --detail 'Session ended' &",
-        "powershell": "Start-Process -WindowStyle Hidden -FilePath \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" -ArgumentList 'write-status','--event','offline','--session-id','copilot','--session-name','Copilot','--detail','Session ended'",
+        "bash": "~/.claude/pet-data/bin/claude-status-pet write-status --adapter copilot --copilot-event sessionEnd",
+        "powershell": "& \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" write-status --adapter copilot --copilot-event sessionEnd",
         "timeoutSec": 5
       }
     ],
     "userPromptSubmitted": [
       {
         "type": "command",
-        "bash": "~/.claude/pet-data/bin/claude-status-pet write-status --event prompt --session-id copilot --session-name Copilot --detail 'Processing prompt...' &",
-        "powershell": "Start-Process -WindowStyle Hidden -FilePath \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" -ArgumentList 'write-status','--event','prompt','--session-id','copilot','--session-name','Copilot','--detail','Processing prompt...'",
+        "bash": "~/.claude/pet-data/bin/claude-status-pet write-status --adapter copilot --copilot-event userPromptSubmitted",
+        "powershell": "& \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" write-status --adapter copilot --copilot-event userPromptSubmitted",
         "timeoutSec": 5
       }
     ],
     "preToolUse": [
       {
         "type": "command",
-        "bash": "INPUT=$(cat); TOOL=$(echo \"$INPUT\" | grep -o '\"toolName\":\"[^\"]*\"' | head -1 | cut -d'\"' -f4); ~/.claude/pet-data/bin/claude-status-pet write-status --event tool --tool \"${TOOL:-unknown}\" --session-id copilot --session-name Copilot &",
-        "powershell": "$d=[Console]::In.ReadToEnd()|ConvertFrom-Json;$t=if($d.toolName){$d.toolName}else{'unknown'};Start-Process -WindowStyle Hidden -FilePath \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" -ArgumentList 'write-status','--event','tool','--tool',$t,'--session-id','copilot','--session-name','Copilot'",
+        "bash": "~/.claude/pet-data/bin/claude-status-pet write-status --adapter copilot --copilot-event preToolUse",
+        "powershell": "& \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" write-status --adapter copilot --copilot-event preToolUse",
         "timeoutSec": 5
       }
     ],
     "postToolUse": [
       {
         "type": "command",
-        "bash": "~/.claude/pet-data/bin/claude-status-pet write-status --event prompt --session-id copilot --session-name Copilot --detail 'Processing...' &",
-        "powershell": "Start-Process -WindowStyle Hidden -FilePath \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" -ArgumentList 'write-status','--event','prompt','--session-id','copilot','--session-name','Copilot','--detail','Processing...'",
+        "bash": "~/.claude/pet-data/bin/claude-status-pet write-status --adapter copilot --copilot-event postToolUse",
+        "powershell": "& \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" write-status --adapter copilot --copilot-event postToolUse",
         "timeoutSec": 5
       }
     ],
     "errorOccurred": [
       {
         "type": "command",
-        "bash": "~/.claude/pet-data/bin/claude-status-pet write-status --event error --session-id copilot --session-name Copilot --detail 'Error occurred' &",
-        "powershell": "Start-Process -WindowStyle Hidden -FilePath \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" -ArgumentList 'write-status','--event','error','--session-id','copilot','--session-name','Copilot','--detail','Error occurred'",
+        "bash": "~/.claude/pet-data/bin/claude-status-pet write-status --adapter copilot --copilot-event errorOccurred",
+        "powershell": "& \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" write-status --adapter copilot --copilot-event errorOccurred",
         "timeoutSec": 5
       }
     ],
     "stop": [
       {
         "type": "command",
-        "bash": "~/.claude/pet-data/bin/claude-status-pet write-status --event done --session-id copilot --session-name Copilot --detail 'Done' &",
-        "powershell": "Start-Process -WindowStyle Hidden -FilePath \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" -ArgumentList 'write-status','--event','done','--session-id','copilot','--session-name','Copilot','--detail','Done'",
+        "bash": "~/.claude/pet-data/bin/claude-status-pet write-status --adapter copilot --copilot-event stop",
+        "powershell": "& \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" write-status --adapter copilot --copilot-event stop",
         "timeoutSec": 5
       }
     ]
