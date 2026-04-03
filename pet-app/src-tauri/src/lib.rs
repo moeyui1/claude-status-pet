@@ -312,16 +312,9 @@ fn cmd_write_status(args: &[String]) {
 
     debug_log(&log_path, &format!("writing state={} tool={} to {:?}", state, tool, status_file));
 
-    // If launch_only (e.g. Copilot sessionStart), only create file if missing
+    // launch_only: don't write status (e.g. Copilot sessionStart — GUI launch handled by hook script)
     if launch_only {
-        if !status_file.exists() {
-            let status = serde_json::json!({
-                "state": "idle", "detail": "Session started", "tool": "",
-                "event": event, "session_id": session_id,
-                "session_name": session_name, "timestamp": timestamp()
-            });
-            let _ = fs::write(&status_file, status.to_string());
-        }
+        debug_log(&log_path, "launch_only — skipping status write");
     } else {
         let status = serde_json::json!({
             "state": state, "detail": detail, "tool": tool,
