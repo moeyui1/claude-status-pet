@@ -170,6 +170,8 @@ let asciiInterval = null;
 let menuPage = 'main';
 let appVersion = '0.0.0';
 let customPacks = [];
+let boundSessionId = '';
+let sessionPoll = null;
 const dlcInstalledCache = {};
 
 function pickRandom(arr) {
@@ -464,6 +466,16 @@ function buildMenu() {
   verLabel.className = 'menu-version';
   verLabel.textContent = 'v' + appVersion;
   charMenu.appendChild(verLabel);
+
+  if (boundSessionId) {
+    const sidLabel = document.createElement('div');
+    sidLabel.className = 'menu-version';
+    sidLabel.textContent = boundSessionId.length > 12
+      ? boundSessionId.slice(0, 12) + '…'
+      : boundSessionId;
+    sidLabel.title = boundSessionId;
+    charMenu.appendChild(sidLabel);
+  }
 }
 
 function buildAsciiPage() {
@@ -577,9 +589,62 @@ for (const el of [imgWrapper, asciiPre, bubble, stateLabel]) {
   el.addEventListener('mousedown', startDrag);
 }
 
+// ── Session picker ──
+async function showSessionPicker() {
+  if (sessionPoll) { clearInterval(sessionPoll); sessionPoll = null; }
+  const sessions = await window.__TAURI__.core.invoke('list_unlocked_sessions');
+  if (sessions.length === 0) {
+    statusText.textContent = 'No active sessions';
+    bubble.classList.remove('hidden');
+    stateLabel.textContent = 'waiting';
+    sessionPoll = setInterval(async () => {
+      const s = await window.__TAURI__.core.invoke('list_unlocked_sessions');
+      if (s.length > 0) { clearInterval(sessionPoll); sessionPoll = null; showSessionPicker(); }
+    }, 2000);
+    return;
+  }
+  if (sessions.length === 1) {
+    await bindToSession(sessions[0].session_id);
+    return;
+  }
+  // Multiple sessions — show picker in the menu area
+  charMenu.innerHTML = '';
+  const title = document.createElement('div');
+  title.className = 'menu-section-label';
+  title.textContent = 'Select Session';
+  charMenu.appendChild(title);
+  for (const s of sessions) {
+    const label = s.session_name || s.session_id.slice(0, 12) + '…';
+    const sub = s.state !== 'idle' ? ` (${s.state})` : '';
+    addMenuItem(charMenu, label + sub, () => bindToSession(s.session_id));
+  }
+  charMenu.classList.remove('hidden');
+  menuBackdrop.classList.remove('hidden');
+}
+
+async function bindToSession(sessionId) {
+  try {
+    await window.__TAURI__.core.invoke('bind_session', { sessionId });
+    boundSessionId = sessionId;
+    charMenu.classList.add('hidden');
+    menuBackdrop.classList.add('hidden');
+  } catch (e) {
+    statusText.textContent = 'Bind failed: ' + e;
+    bubble.classList.remove('hidden');
+  }
+}
+
 // ── Listen for status updates ──
 if (window.__TAURI__) {
   window.__TAURI__.event.listen('status-update', (e) => updateStatus(e.payload));
+  window.__TAURI__.core.invoke('get_session_id').then((sid) => {
+    if (sid) {
+      boundSessionId = sid;
+    } else {
+      // No explicit session — show session picker
+      showSessionPicker();
+    }
+  });
   window.__TAURI__.core.invoke('get_status').then((s) => { if (s) updateStatus(s); });
 } else {
   const demos = [

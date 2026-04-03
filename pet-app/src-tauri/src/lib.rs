@@ -1,5 +1,5 @@
 use notify::{EventKind, RecursiveMode, Watcher};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use std::fs;
 use std::io::Write;
 use std::path::PathBuf;
@@ -80,13 +80,149 @@ fn get_status(status_path: tauri::State<'_, Arc<Mutex<PathBuf>>>) -> Option<Stat
 }
 
 #[tauri::command]
-fn get_session_id(session_id: tauri::State<'_, String>) -> String {
-    session_id.inner().clone()
+fn get_session_id(session_id: tauri::State<'_, Arc<Mutex<String>>>) -> String {
+    session_id.lock().unwrap().clone()
 }
 
 #[tauri::command]
 fn get_assets_dir(assets_dir: tauri::State<'_, Option<PathBuf>>) -> Option<String> {
     assets_dir.inner().as_ref().map(|p| p.to_string_lossy().to_string())
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+struct SessionInfo {
+    session_id: String,
+    session_name: String,
+    state: String,
+    detail: String,
+    status_file: String,
+}
+
+#[tauri::command]
+fn list_unlocked_sessions() -> Vec<SessionInfo> {
+    let pet_dir = default_pet_dir();
+    let Ok(entries) = fs::read_dir(&pet_dir) else { return vec![] };
+    let mut sessions = Vec::new();
+    for entry in entries.filter_map(|e| e.ok()) {
+        let name = entry.file_name();
+        let name_str = name.to_string_lossy().to_string();
+        if name_str.starts_with("status-") && name_str.ends_with(".json") {
+            let sid = name_str.strip_prefix("status-").unwrap().strip_suffix(".json").unwrap().to_string();
+            let lock_file = pet_dir.join(format!("pet-{}.lock", sid));
+            if is_lock_alive(&lock_file) {
+                continue; // already has a running pet
+            }
+            // Clean up dead lock file
+            if lock_file.exists() {
+                let _ = fs::remove_file(&lock_file);
+            }
+            let status_path = entry.path();
+            let (sname, state, detail) = if let Some(s) = read_status(&status_path) {
+                (s.session_name, s.state, s.detail)
+            } else {
+                (String::new(), "idle".to_string(), String::new())
+            };
+            sessions.push(SessionInfo {
+                session_id: sid,
+                session_name: sname,
+                state,
+                detail,
+                status_file: status_path.to_string_lossy().to_string(),
+            });
+        }
+    }
+    sessions
+}
+
+#[tauri::command]
+fn bind_session(
+    session_id: String,
+    status_path_state: tauri::State<'_, Arc<Mutex<PathBuf>>>,
+    session_id_state: tauri::State<'_, Arc<Mutex<String>>>,
+    lock_path_state: tauri::State<'_, Arc<Mutex<Option<PathBuf>>>>,
+    app: tauri::AppHandle,
+) -> Result<(), String> {
+    if !is_safe_session_id(&session_id) {
+        return Err("Invalid session ID".to_string());
+    }
+    let pet_dir = default_pet_dir();
+    let status_file = pet_dir.join(format!("status-{}.json", session_id));
+    let lock_file = pet_dir.join(format!("pet-{}.lock", session_id));
+
+    if is_lock_alive(&lock_file) {
+        return Err("Session already has a running pet".to_string());
+    }
+    write_lock_file(&lock_file);
+
+    // Update shared state
+    *status_path_state.lock().unwrap() = status_file.clone();
+    *session_id_state.lock().unwrap() = session_id.clone();
+    *lock_path_state.lock().unwrap() = Some(lock_file);
+
+    // Emit initial status
+    if let Some(status) = read_status(&status_file) {
+        let _ = app.emit("status-update", status);
+    }
+
+    // Start file watcher in a background thread
+    let watch_path = status_file.clone();
+    let log_path = status_file.clone();
+    let handle = app.clone();
+    std::thread::spawn(move || {
+        let (tx, rx) = std::sync::mpsc::channel();
+        let mut watcher = match notify::recommended_watcher(tx) {
+            Ok(w) => w,
+            Err(e) => {
+                debug_log(&log_path, &format!("FATAL: watcher init failed: {}", e));
+                return;
+            }
+        };
+        let watch_dir = match watch_path.parent() {
+            Some(p) => p.to_path_buf(),
+            None => return,
+        };
+        let _ = fs::create_dir_all(&watch_dir);
+        if let Err(e) = watcher.watch(&watch_dir, RecursiveMode::NonRecursive) {
+            debug_log(&log_path, &format!("FATAL: watch() failed: {}", e));
+            return;
+        }
+        debug_log(&log_path, &format!("Watcher started on {:?} (bind_session)", watch_dir));
+
+        for event in rx {
+            if let Ok(event) = event {
+                let is_our_file = event.paths.iter().any(|p| *p == watch_path);
+                if !is_our_file { continue; }
+                match event.kind {
+                    EventKind::Modify(_) | EventKind::Create(_) => {
+                        std::thread::sleep(std::time::Duration::from_millis(50));
+                        if let Some(status) = read_status(&watch_path) {
+                            let _ = handle.emit("status-update", status);
+                        }
+                    }
+                    EventKind::Remove(_) => {
+                        std::thread::sleep(std::time::Duration::from_millis(300));
+                        if watch_path.exists() {
+                            if let Some(status) = read_status(&watch_path) {
+                                let _ = handle.emit("status-update", status);
+                            }
+                        } else {
+                            let _ = handle.emit("status-update", StatusPayload {
+                                state: "closed".to_string(),
+                                detail: "Session ended".to_string(),
+                                tool: String::new(),
+                                event: "SessionEnd".to_string(),
+                                session_id: String::new(),
+                                session_name: String::new(),
+                            });
+                        }
+                    }
+                    _ => {}
+                }
+            }
+        }
+    });
+
+    Ok(())
 }
 
 #[tauri::command]
@@ -427,7 +563,62 @@ fn cleanup_stale_status(pet_dir: &PathBuf) {
                 }
             }
         }
+        // Also clean up orphaned lock files whose process is no longer alive
+        if name_str.starts_with("pet-") && name_str.ends_with(".lock") {
+            if !is_lock_alive(&entry.path().to_path_buf()) {
+                let _ = fs::remove_file(entry.path());
+            }
+        }
     }
+}
+
+fn is_safe_session_id(id: &str) -> bool {
+    !id.is_empty() && !id.contains('/') && !id.contains('\\') && !id.contains("..")
+}
+
+fn write_lock_file(lock_path: &PathBuf) {
+    let _ = fs::write(lock_path, std::process::id().to_string());
+}
+
+fn is_lock_alive(lock_path: &PathBuf) -> bool {
+    let Ok(content) = fs::read_to_string(lock_path) else { return false };
+    let Ok(pid) = content.trim().parse::<u32>() else { return false };
+    is_process_running(pid)
+}
+
+#[cfg(windows)]
+fn is_process_running(pid: u32) -> bool {
+    const PROCESS_QUERY_LIMITED_INFORMATION: u32 = 0x1000;
+    const STILL_ACTIVE: u32 = 259;
+    unsafe {
+        let handle = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, 0, pid);
+        if handle.is_null() {
+            return false;
+        }
+        let mut exit_code: u32 = 0;
+        let result = GetExitCodeProcess(handle, &mut exit_code);
+        CloseHandle(handle);
+        result != 0 && exit_code == STILL_ACTIVE
+    }
+}
+
+#[cfg(windows)]
+unsafe extern "system" {
+    fn OpenProcess(access: u32, inherit: i32, pid: u32) -> *mut std::ffi::c_void;
+    fn GetExitCodeProcess(handle: *mut std::ffi::c_void, exit_code: *mut u32) -> i32;
+    fn CloseHandle(handle: *mut std::ffi::c_void) -> i32;
+}
+
+#[cfg(not(windows))]
+fn is_process_running(pid: u32) -> bool {
+    // signal 0 checks if process exists without sending a signal
+    unsafe { libc_kill(pid as i32, 0) == 0 }
+}
+
+#[cfg(not(windows))]
+unsafe extern "C" {
+    #[link_name = "kill"]
+    fn libc_kill(pid: i32, sig: i32) -> i32;
 }
 
 fn download_file(url: &str, dest: &PathBuf) -> Result<(), String> {
@@ -533,42 +724,52 @@ pub fn run() {
 
     let demo_mode = args.iter().any(|a| a == "--demo");
 
-    let status_path = args
-        .windows(2)
-        .find(|w| w[0] == "--status-file")
-        .map(|w| PathBuf::from(&w[1]))
-        .unwrap_or_else(default_status_path);
+    let explicit_status = args.windows(2).find(|w| w[0] == "--status-file").map(|w| PathBuf::from(&w[1]));
+    let explicit_session = args.windows(2).find(|w| w[0] == "--session-id").map(|w| w[1].clone());
 
-    let session_id = args
-        .windows(2)
-        .find(|w| w[0] == "--session-id")
-        .map(|w| w[1].clone())
-        .unwrap_or_else(|| "unknown".to_string());
+    // Determine if we have an explicit session or need session selection
+    let (initial_status_path, initial_session_id, initial_lock) = if let Some(sf) = &explicit_status {
+        let sid = explicit_session.clone().unwrap_or_else(|| "unknown".to_string());
+        let pet_dir = default_pet_dir();
+        let _ = fs::create_dir_all(&pet_dir);
+        let lock_file = pet_dir.join(format!("pet-{}.lock", sid));
+        if is_lock_alive(&lock_file) {
+            eprintln!("Pet already running for session {}", sid);
+            std::process::exit(0);
+        }
+        write_lock_file(&lock_file);
+        (sf.clone(), sid, Some(lock_file))
+    } else {
+        // No explicit session — will show session picker in frontend
+        (default_status_path(), String::new(), None)
+    };
 
-    // Write per-session PID lock file
-    let pet_dir = default_pet_dir();
-    let _ = fs::create_dir_all(&pet_dir);
+    let needs_session_select = explicit_status.is_none() && !demo_mode;
 
     let assets_dir: Option<PathBuf> = args
         .windows(2)
         .find(|w| w[0] == "--assets-dir")
         .map(|w| PathBuf::from(&w[1]));
 
-    if let Some(parent) = status_path.parent() {
+    if let Some(parent) = initial_status_path.parent() {
         let _ = fs::create_dir_all(parent);
     }
 
     // Clean up stale status files on GUI startup
     cleanup_stale_status(&default_pet_dir());
 
-    let status_path_shared = Arc::new(Mutex::new(status_path.clone()));
-    let status_path_for_cleanup = status_path.clone();
+    let status_path_shared = Arc::new(Mutex::new(initial_status_path.clone()));
+    let session_id_shared = Arc::new(Mutex::new(initial_session_id.clone()));
+    let lock_path_shared: Arc<Mutex<Option<PathBuf>>> = Arc::new(Mutex::new(initial_lock.clone()));
+
+    let lock_for_cleanup = lock_path_shared.clone();
 
     tauri::Builder::default()
         .manage(status_path_shared)
-        .manage(session_id)
+        .manage(session_id_shared)
+        .manage(lock_path_shared)
         .manage(assets_dir)
-        .invoke_handler(tauri::generate_handler![get_status, get_session_id, get_assets_dir, load_asset, load_text_asset, load_custom_asset, is_dlc_installed, download_dlc, list_character_packs])
+        .invoke_handler(tauri::generate_handler![get_status, get_session_id, get_assets_dir, load_asset, load_text_asset, load_custom_asset, is_dlc_installed, download_dlc, list_character_packs, list_unlocked_sessions, bind_session])
         .setup(move |app| {
             let window = app.get_webview_window("main").unwrap();
 
@@ -592,10 +793,11 @@ pub fn run() {
             });
 
             let handle = app.handle().clone();
-            let watch_path = status_path.clone();
-            let log_path = status_path.clone();
 
-            if demo_mode {
+            if needs_session_select {
+                // Frontend will query for session selection on init
+                // (emit is unreliable here — JS may not have loaded listeners yet)
+            } else if demo_mode {
                 // Demo mode: cycle through all states for recording
                 std::thread::spawn(move || {
                     let demos = vec![
@@ -626,7 +828,9 @@ pub fn run() {
                     }
                 });
             } else {
-                // Normal mode: watch status file
+                // Explicit session mode: watch status file directly
+                let watch_path = initial_status_path.clone();
+                let log_path = initial_status_path.clone();
                 std::thread::spawn(move || {
                 let (tx, rx) = std::sync::mpsc::channel();
                 let mut watcher = match notify::recommended_watcher(tx) {
@@ -675,8 +879,6 @@ pub fn run() {
                                 }
                             }
                             EventKind::Remove(_) => {
-                                // On Windows, writeFileSync can trigger Remove+Create.
-                                // Wait briefly and check if file reappears before closing.
                                 debug_log(&log_path, "Remove detected, waiting 300ms to confirm deletion...");
                                 std::thread::sleep(std::time::Duration::from_millis(300));
                                 if watch_path.exists() {
@@ -710,13 +912,16 @@ pub fn run() {
                 }
                 debug_log(&log_path, "Watcher loop ended (channel closed)");
                 });
-            } // end if demo_mode / else
+            }
 
             Ok(())
         })
         .on_window_event(move |_window, event| {
             if let tauri::WindowEvent::Destroyed = event {
-                let _ = fs::remove_file(&status_path_for_cleanup);
+                if let Some(lock) = lock_for_cleanup.lock().unwrap().as_ref() {
+                    let _ = fs::remove_file(lock);
+                }
+                // Don't delete status file — it belongs to the session, not the pet
             }
         })
         .run(tauri::generate_context!())

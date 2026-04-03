@@ -1,0 +1,13 @@
+{
+  "name": "claude-status-pet",
+  "description": "A desktop pet that shows your AI assistant's working status in real time",
+  "version": "0.9.1",
+  "author": {
+    "name": "moeyui1"
+  },
+  "repository": "https://github.com/moeyui1/claude-status-pet",
+  "license": "AGPL-3.0-only",
+  "keywords": ["status", "desktop-pet", "ferris", "mona", "hooks"],
+  "hooks": "hooks.json",
+  "skills": "skills/"
+}

@@ -24,7 +24,9 @@ claude-status-pet/
 ├── hooks/
 │   └── hooks.json           # Claude Code hooks → calls binary with --adapter claude
 ├── copilot/
+│   ├── plugin.json         # Copilot CLI plugin manifest
 │   ├── hooks.json           # GitHub Copilot CLI hooks → calls binary with --adapter copilot
+│   ├── skills/pet/SKILL.md  # /pet skill (copy of skills/pet/SKILL.md for plugin packaging)
 │   └── README.md
 ├── skills/
 │   └── pet/SKILL.md         # /pet slash command (works with Claude Code + Copilot via ~/.claude/skills/)
@@ -43,8 +45,7 @@ claude-status-pet/
 │       │   ├── adapter/     # Hook adapters (one per AI agent)
 │       │   │   ├── mod.rs   # Adapter trait + registry + StdinInput struct
 │       │   │   ├── claude.rs   # Claude Code adapter
-│       │   │   ├── copilot.rs  # GitHub Copilot CLI adapter
-│       │   │   └── vscode.rs   # VS Code Copilot adapter
+│       │   │   └── copilot.rs  # GitHub Copilot CLI adapter
 │       │   ├── status_map.rs   # Universal tool→state fuzzy matching
 │       │   └── tests.rs     # Unit tests
 │       ├── Cargo.toml       # Dependencies: tauri, serde, notify, base64, ureq
@@ -75,13 +76,13 @@ claude-status-pet demo --assets-dir <path>               # GUI: cycle all states
 
 ## Adapter System
 
-Three adapters in `src/adapter/`:
+Two adapters in `src/adapter/` (VS Code Copilot adapter planned — 待支持):
 
 | Adapter | Event source | Tool names | Session ID | Quirks |
 |---------|-------------|------------|------------|--------|
 | `claude` | stdin `hook_event_name` (PascalCase) | `Edit`, `Read`, `Bash` | stdin `session_id` | None |
 | `copilot` | `--copilot-event` CLI arg | stdin `toolName` (camelCase) | stdin `sessionId` | sessionStart=thinking, userPromptSubmitted=ignored, postToolUse=thinking |
-| `vscode` | stdin `hookEventName` (PascalCase) | stdin `tool_name` (snake_case) | stdin `sessionId` | PostToolUse=thinking |
+| `vscode` | _(待支持)_ | — | — | — |
 
 ### StdinInput parsing
 

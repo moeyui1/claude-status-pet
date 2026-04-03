@@ -8,7 +8,7 @@ This document explains how hook events from different AI assistants are mapped t
 |---|---|---|
 | **Hook config** | `hooks/hooks.json` | `copilot/hooks.json` |
 | **Status writer** | Binary: `write-status --adapter claude` | Binary: `write-status --adapter copilot` |
-| **Platforms** | Claude Code CLI | VS Code Copilot Chat, Copilot CLI, Copilot Coding Agent |
+| **Platforms** | Claude Code CLI | Copilot CLI (VS Code Copilot Chat — 待支持) |
 | **Event naming** | PascalCase (`PreToolUse`) | camelCase (`preToolUse`) |
 | **Tool names** | `Edit`, `Read`, `Bash`, `Grep` | `replace_string_in_file`, `read_file`, `run_in_terminal`, `grep_search` |
 | **Tool input keys** | snake_case (`file_path`) | camelCase (`filePath`) |

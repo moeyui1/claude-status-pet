@@ -1,37 +1,52 @@
-# Claude Status Pet — GitHub Copilot Integration
+# Claude Status Pet — GitHub Copilot CLI Plugin
 
-## Quick Setup
+## Quick Install (Plugin)
 
-Run in your repo directory:
-
-```bash
-bash <(curl -sL https://raw.githubusercontent.com/moeyui1/claude-status-pet/main/copilot/setup.sh)
+```
+copilot plugin marketplace add moeyui1/claude-status-pet
+copilot plugin install claude-status-pet-copilot
 ```
 
-This installs the hook script and adds `.github/hooks/status-pet.json` to your repo. Then commit it:
+This installs the hooks and `/pet` skill automatically.
+
+> **Note:** You still need to download the binary separately. Use `/pet update` after installing the plugin, or download it manually from [Releases](https://github.com/moeyui1/claude-status-pet/releases).
+
+## Manual Install (Per-Repo)
+
+If you prefer per-repo hooks instead of the plugin:
 
 ```bash
+mkdir -p .github/hooks
+curl -sLo .github/hooks/status-pet.json \
+  https://raw.githubusercontent.com/moeyui1/claude-status-pet/main/copilot/hooks.json
 git add .github/hooks/status-pet.json
 git commit -m "Add status pet hooks for Copilot"
 ```
 
-If you already have the pet via the Claude Code plugin, you're done — the same binary works for both. If not, grab it from [Releases](https://github.com/moeyui1/claude-status-pet/releases).
-
 ## How It Works
 
-Copilot hooks fire on the same lifecycle events:
+Copilot hooks fire on lifecycle events:
 
 | Copilot Hook | Pet State | Animation |
 |-------------|-----------|-----------|
-| `sessionStart` | idle | Floating |
-| `userPromptSubmitted` | thinking | Tilting |
+| `sessionStart` | thinking | Tilting |
+| `userPromptSubmitted` | _(ignored)_ | — |
 | `preToolUse` | reading/editing/searching/running | Varies by tool |
-| `postToolUse` | (same) | Varies |
+| `postToolUse` | thinking | Tilting |
+| `stop` | idle | Floating |
 | `errorOccurred` | error | Shake |
-| `sessionEnd` | (closes) | Auto-close |
+| `sessionEnd` | offline/idle | Varies by reason |
 
-Sessions show "(Copilot)" next to the name. Works alongside Claude Code — each gets its own pet.
+Sessions show "(Copilot)" next to the project name.
 
-## Note
+## Commands
 
-Copilot hooks are per-repo (`.github/hooks/`), not global. You need to add the hooks file to each repo where you want the pet.
+After installing the plugin, use `/pet` in Copilot CLI:
+
+- `/pet` or `/pet on` — Launch the pet
+- `/pet update` — Update binary, hooks, skill, and assets
+- `/pet set <character>` — Switch character
+- `/pet status` — Show config and active sessions
+- `/pet help` — Show all commands
+
+> **Note:** Auto-start (`/pet auto on`) has no effect in Copilot CLI. Use `/pet on` to manually launch the pet each session.

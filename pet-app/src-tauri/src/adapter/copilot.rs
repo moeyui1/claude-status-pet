@@ -19,7 +19,7 @@ pub struct CopilotAdapter;
 impl Adapter for CopilotAdapter {
     fn parse(&self, stdin: &StdinInput) -> Option<NormalizedEvent> {
         // Event name comes from --copilot-event CLI arg (Copilot CLI doesn't put it in stdin)
-        // Fallback: stdin hookEventName (VS Code), then env var (legacy)
+        // Fallback: stdin hookEventName, then env var (legacy)
         let hook_from_arg = std::env::args().collect::<Vec<_>>()
             .windows(2)
             .find(|w| w[0] == "--copilot-event")
