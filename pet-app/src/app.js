@@ -284,16 +284,12 @@ function updateStatus(status) {
 
   if (mode === 'ferris') {
     showImage();
-    if (state !== currentState) {
-      const sprites = FERRIS_SVG_MAP[state] || FERRIS_SVG_MAP.idle;
-      setImage(pickRandom(sprites));
-    }
+    const sprites = FERRIS_SVG_MAP[state] || FERRIS_SVG_MAP.idle;
+    setImage(pickRandom(sprites));
   } else if (GIF_MODES[mode]) {
     showImage();
-    if (state !== currentState) {
-      const map = GIF_MODES[mode];
-      setImage(pickRandom(map[state] || map.idle));
-    }
+    const map = GIF_MODES[mode];
+    setImage(pickRandom(map[state] || map.idle));
   } else {
     showAscii();
     const species = ASCII_SPECIES[mode];
