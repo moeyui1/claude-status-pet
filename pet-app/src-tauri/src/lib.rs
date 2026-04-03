@@ -325,10 +325,6 @@ fn cmd_write_status(args: &[String]) {
     }
 
     debug_log(&log_path, &format!("file written in {:?}", t0.elapsed()));
-
-    // Clean up stale status files (older than 24 hours)
-    cleanup_stale_status(&pet_dir);
-
     debug_log(&log_path, &format!("write-status DONE in {:?}", t0.elapsed()));
 }
 
@@ -457,6 +453,9 @@ pub fn run() {
     if let Some(parent) = status_path.parent() {
         let _ = fs::create_dir_all(parent);
     }
+
+    // Clean up stale status files on GUI startup
+    cleanup_stale_status(&default_pet_dir());
 
     let status_path_shared = Arc::new(Mutex::new(status_path.clone()));
     let status_path_for_cleanup = status_path.clone();
