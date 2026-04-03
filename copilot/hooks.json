@@ -4,57 +4,57 @@
     "sessionStart": [
       {
         "type": "command",
-        "bash": "COPILOT_HOOK_EVENT=sessionStart ~/.claude/pet-data/bin/claude-status-pet write-status --adapter copilot",
-        "powershell": "$env:COPILOT_HOOK_EVENT='sessionStart'; & \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" write-status --adapter copilot",
-        "timeoutSec": 10
+        "bash": "COPILOT_HOOK_EVENT=sessionStart ~/.claude/pet-data/bin/claude-status-pet write-status --adapter copilot &",
+        "powershell": "Start-Process -FilePath \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" -ArgumentList 'write-status','--adapter','copilot' -WindowStyle Hidden",
+        "timeoutSec": 3
       }
     ],
     "sessionEnd": [
       {
         "type": "command",
-        "bash": "COPILOT_HOOK_EVENT=sessionEnd ~/.claude/pet-data/bin/claude-status-pet write-status --adapter copilot",
-        "powershell": "$env:COPILOT_HOOK_EVENT='sessionEnd'; & \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" write-status --adapter copilot",
-        "timeoutSec": 10
+        "bash": "COPILOT_HOOK_EVENT=sessionEnd ~/.claude/pet-data/bin/claude-status-pet write-status --adapter copilot &",
+        "powershell": "Start-Process -FilePath \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" -ArgumentList 'write-status','--adapter','copilot' -WindowStyle Hidden -Environment @{COPILOT_HOOK_EVENT='sessionEnd'}",
+        "timeoutSec": 3
       }
     ],
     "userPromptSubmitted": [
       {
         "type": "command",
-        "bash": "COPILOT_HOOK_EVENT=userPromptSubmitted ~/.claude/pet-data/bin/claude-status-pet write-status --adapter copilot",
-        "powershell": "$env:COPILOT_HOOK_EVENT='userPromptSubmitted'; & \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" write-status --adapter copilot",
-        "timeoutSec": 10
+        "bash": "COPILOT_HOOK_EVENT=userPromptSubmitted ~/.claude/pet-data/bin/claude-status-pet write-status --adapter copilot &",
+        "powershell": "Start-Process -FilePath \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" -ArgumentList 'write-status','--adapter','copilot' -WindowStyle Hidden -Environment @{COPILOT_HOOK_EVENT='userPromptSubmitted'}",
+        "timeoutSec": 3
       }
     ],
     "preToolUse": [
       {
         "type": "command",
-        "bash": "COPILOT_HOOK_EVENT=preToolUse ~/.claude/pet-data/bin/claude-status-pet write-status --adapter copilot",
-        "powershell": "$env:COPILOT_HOOK_EVENT='preToolUse'; & \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" write-status --adapter copilot",
-        "timeoutSec": 10
+        "bash": "COPILOT_HOOK_EVENT=preToolUse ~/.claude/pet-data/bin/claude-status-pet write-status --adapter copilot &",
+        "powershell": "Start-Process -FilePath \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" -ArgumentList 'write-status','--adapter','copilot' -WindowStyle Hidden -Environment @{COPILOT_HOOK_EVENT='preToolUse'}",
+        "timeoutSec": 3
       }
     ],
     "postToolUse": [
       {
         "type": "command",
-        "bash": "COPILOT_HOOK_EVENT=postToolUse ~/.claude/pet-data/bin/claude-status-pet write-status --adapter copilot",
-        "powershell": "$env:COPILOT_HOOK_EVENT='postToolUse'; & \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" write-status --adapter copilot",
-        "timeoutSec": 10
+        "bash": "COPILOT_HOOK_EVENT=postToolUse ~/.claude/pet-data/bin/claude-status-pet write-status --adapter copilot &",
+        "powershell": "Start-Process -FilePath \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" -ArgumentList 'write-status','--adapter','copilot' -WindowStyle Hidden -Environment @{COPILOT_HOOK_EVENT='postToolUse'}",
+        "timeoutSec": 3
       }
     ],
     "errorOccurred": [
       {
         "type": "command",
-        "bash": "COPILOT_HOOK_EVENT=errorOccurred ~/.claude/pet-data/bin/claude-status-pet write-status --adapter copilot",
-        "powershell": "$env:COPILOT_HOOK_EVENT='errorOccurred'; & \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" write-status --adapter copilot",
-        "timeoutSec": 10
+        "bash": "COPILOT_HOOK_EVENT=errorOccurred ~/.claude/pet-data/bin/claude-status-pet write-status --adapter copilot &",
+        "powershell": "Start-Process -FilePath \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" -ArgumentList 'write-status','--adapter','copilot' -WindowStyle Hidden -Environment @{COPILOT_HOOK_EVENT='errorOccurred'}",
+        "timeoutSec": 3
       }
     ],
     "stop": [
       {
         "type": "command",
-        "bash": "COPILOT_HOOK_EVENT=stop ~/.claude/pet-data/bin/claude-status-pet write-status --adapter copilot",
-        "powershell": "$env:COPILOT_HOOK_EVENT='stop'; & \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" write-status --adapter copilot",
-        "timeoutSec": 10
+        "bash": "COPILOT_HOOK_EVENT=stop ~/.claude/pet-data/bin/claude-status-pet write-status --adapter copilot &",
+        "powershell": "Start-Process -FilePath \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" -ArgumentList 'write-status','--adapter','copilot' -WindowStyle Hidden -Environment @{COPILOT_HOOK_EVENT='stop'}",
+        "timeoutSec": 3
       }
     ]
   }

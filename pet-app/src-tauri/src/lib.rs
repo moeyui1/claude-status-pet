@@ -323,33 +323,31 @@ fn cmd_write_status(args: &[String]) {
     auto_launch_gui(&pet_dir, &status_file, &session_id);
 }
 
-/// Check if pet GUI is running, launch if not
+/// Check if pet GUI is running for this session, launch if not.
+/// Uses per-session lock files to support multiple simultaneous pets.
 fn auto_launch_gui(pet_dir: &PathBuf, status_file: &PathBuf, session_id: &str) {
-    // Check if a GUI instance is already running (not just this CLI process)
-    let is_running = if cfg!(windows) {
-        std::process::Command::new("tasklist")
-            .args(["/NH"])
-            .output()
-            .map(|o| {
-                let output = String::from_utf8_lossy(&o.stdout);
-                // Count instances — if >1, a GUI is already running (1 = just us)
-                output.matches("claude-status-pet").count() > 1
-            })
-            .unwrap_or(false)
-    } else {
-        // pgrep -c counts processes; >1 means GUI is running
-        std::process::Command::new("pgrep")
-            .args(["-fc", "claude-status-pet"])
-            .output()
-            .map(|o| {
-                let count: usize = String::from_utf8_lossy(&o.stdout).trim().parse().unwrap_or(0);
-                count > 1
-            })
-            .unwrap_or(false)
-    };
+    let lock_file = pet_dir.join(format!(".pet-gui-{}.lock", session_id));
 
-    if is_running {
-        return;
+    // Check lock file — if it exists and the PID in it is still alive, GUI is running
+    if let Ok(content) = fs::read_to_string(&lock_file) {
+        if let Ok(pid) = content.trim().parse::<u32>() {
+            let is_alive = if cfg!(windows) {
+                std::process::Command::new("tasklist")
+                    .args(["/FI", &format!("PID eq {}", pid), "/NH"])
+                    .output()
+                    .map(|o| !String::from_utf8_lossy(&o.stdout).contains("No tasks"))
+                    .unwrap_or(false)
+            } else {
+                std::process::Command::new("kill")
+                    .args(["-0", &pid.to_string()])
+                    .output()
+                    .map(|o| o.status.success())
+                    .unwrap_or(false)
+            };
+            if is_alive {
+                return;
+            }
+        }
     }
 
     // Find the binary (self)
@@ -374,17 +372,27 @@ fn auto_launch_gui(pet_dir: &PathBuf, status_file: &PathBuf, session_id: &str) {
         cmd.creation_flags(CREATE_NO_WINDOW | DETACHED_PROCESS);
     }
 
-    let _ = cmd.stdin(std::process::Stdio::null())
+    if let Ok(child) = cmd.stdin(std::process::Stdio::null())
         .stdout(std::process::Stdio::null())
         .stderr(std::process::Stdio::null())
-        .spawn();
+        .spawn()
+    {
+        // Write PID to per-session lock file
+        let _ = fs::write(&lock_file, child.id().to_string());
+    }
 }
 
 fn read_stdin() -> String {
     use std::io::Read;
-    let mut buf = String::new();
-    let _ = std::io::stdin().read_to_string(&mut buf);
-    buf
+    // Read stdin with short timeout — hooks must not block the agent
+    let (tx, rx) = std::sync::mpsc::channel();
+    std::thread::spawn(move || {
+        let mut buf = String::new();
+        let _ = std::io::stdin().read_to_string(&mut buf);
+        let _ = tx.send(buf);
+    });
+    // 200ms is enough for piped stdin; if no data, proceed with empty input
+    rx.recv_timeout(std::time::Duration::from_millis(200)).unwrap_or_default()
 }
 
 fn get_arg(args: &[String], flag: &str) -> Option<String> {
@@ -446,6 +454,11 @@ pub fn run() {
         .find(|w| w[0] == "--session-id")
         .map(|w| w[1].clone())
         .unwrap_or_else(|| "unknown".to_string());
+
+    // Write per-session PID lock file so write-status knows this GUI is running
+    let pet_dir = default_pet_dir();
+    let _ = fs::create_dir_all(&pet_dir);
+    let _ = fs::write(pet_dir.join(format!(".pet-gui-{}.lock", session_id)), std::process::id().to_string());
 
     let assets_dir: Option<PathBuf> = args
         .windows(2)
@@ -610,9 +623,16 @@ pub fn run() {
             Ok(())
         })
         .on_window_event(move |_window, event| {
-            // Clean up status file when window is closed
+            // Clean up status file and lock file when window is closed
             if let tauri::WindowEvent::Destroyed = event {
                 let _ = fs::remove_file(&status_path_for_cleanup);
+                if let Some(parent) = status_path_for_cleanup.parent() {
+                    // Extract session ID from status filename: status-{id}.json → {id}
+                    if let Some(fname) = status_path_for_cleanup.file_stem().and_then(|s| s.to_str()) {
+                        let sid = fname.strip_prefix("status-").unwrap_or(fname);
+                        let _ = fs::remove_file(parent.join(format!(".pet-gui-{}.lock", sid)));
+                    }
+                }
             }
         })
         .run(tauri::generate_context!())
