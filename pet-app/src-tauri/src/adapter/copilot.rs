@@ -18,17 +18,27 @@ pub struct CopilotAdapter;
 
 impl Adapter for CopilotAdapter {
     fn parse(&self, stdin: &StdinInput) -> Option<NormalizedEvent> {
-        let hook = std::env::var("COPILOT_HOOK_EVENT").unwrap_or_else(|_| "unknown".into());
+        // Event name comes from --copilot-event CLI arg (Copilot CLI doesn't put it in stdin)
+        // Fallback: stdin hookEventName (VS Code), then env var (legacy)
+        let hook_from_arg = std::env::args().collect::<Vec<_>>()
+            .windows(2)
+            .find(|w| w[0] == "--copilot-event")
+            .map(|w| w[1].clone());
+        let hook_from_stdin = stdin.hook_event_name.as_deref().filter(|s| !s.is_empty()).map(|s| s.to_string());
+        let hook_from_env = std::env::var("COPILOT_HOOK_EVENT").ok();
+        let hook = hook_from_arg.or(hook_from_stdin).or(hook_from_env).unwrap_or_else(|| "unknown".into());
         let cwd = stdin.cwd.as_deref().unwrap_or("");
-        let session_id = format!("copilot-{}", md5_short(if cwd.is_empty() { "default" } else { cwd }));
+        // Use sessionId from stdin if available, otherwise hash from cwd
+        let session_id = stdin.session_id.as_deref()
+            .filter(|s| !s.is_empty())
+            .map(|s| format!("copilot-{}", s))
+            .unwrap_or_else(|| format!("copilot-{}", md5_short(if cwd.is_empty() { "default" } else { cwd })));
         let session_name = format!(
             "{} (Copilot)",
             Path::new(cwd).file_name().and_then(|n| n.to_str()).unwrap_or("copilot")
         );
 
-        let tool_name = stdin.tool_name_copilot.as_deref()
-            .or(stdin.tool_name.as_deref())
-            .unwrap_or("");
+        let tool_name = stdin.tool_name.as_deref().unwrap_or("");
 
         // Parse toolArgs (may be a JSON string)
         let tool_args: serde_json::Value = stdin.tool_args.as_ref()
@@ -90,8 +100,14 @@ impl Adapter for CopilotAdapter {
                 ("error".into(), String::new(), format!("Error: {}", truncate(msg, 40)), false)
             }
             "sessionEnd" => {
-                // Quirk: write offline, don't close window
-                ("offline".into(), String::new(), "Session ended".into(), false)
+                let reason = stdin.reason.as_deref().unwrap_or("complete");
+                match reason {
+                    "complete" => ("done".into(), String::new(), "Done".into(), false),
+                    "error" => ("error".into(), String::new(), "Session error".into(), false),
+                    "abort" | "user_exit" => ("closed".into(), String::new(), "Session closed".into(), false),
+                    // "timeout" or unknown → offline (sleep animation)
+                    _ => ("offline".into(), String::new(), "Session ended".into(), false),
+                }
             }
             _ => {
                 ("done".into(), String::new(), "Waiting for input".into(), false)

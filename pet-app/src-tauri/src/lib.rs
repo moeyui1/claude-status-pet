@@ -248,8 +248,16 @@ fn scan_packs_in_dir(dir: &PathBuf, group: &str, packs: &mut Vec<CharacterPack>)
 /// CLI: write-status subcommand
 /// Reads event info from CLI args or stdin (via adapter), writes status JSON, exits.
 fn cmd_write_status(args: &[String]) {
+    // Enable debug if --debug is passed
+    if args.iter().any(|a| a == "--debug") {
+        DEBUG_ENABLED.store(true, Ordering::Relaxed);
+    }
     let pet_dir = default_pet_dir();
     let _ = fs::create_dir_all(&pet_dir);
+    let log_path = pet_dir.clone();
+    let t0 = std::time::Instant::now();
+
+    debug_log(&log_path, &format!("write-status START args={:?}", &args[1..]));
 
     // Parse CLI args
     let adapter_name = get_arg(args, "--adapter");
@@ -262,7 +270,9 @@ fn cmd_write_status(args: &[String]) {
     let (event, tool, detail, session_id, session_name, launch_only) =
         if let Some(adapter_name) = &adapter_name {
             // Adapter mode: read stdin JSON
+            debug_log(&log_path, "reading stdin...");
             let stdin_data = read_stdin();
+            debug_log(&log_path, &format!("stdin read in {:?}, len={}", t0.elapsed(), stdin_data.len()));
             let stdin: adapter::StdinInput = serde_json::from_str(&stdin_data).unwrap_or_default();
 
             if let Some(adapter) = adapter::get_adapter(adapter_name) {
@@ -300,16 +310,11 @@ fn cmd_write_status(args: &[String]) {
 
     let status_file = pet_dir.join(format!("status-{}.json", session_id));
 
-    // If launch_only (e.g. Copilot sessionStart), only create file if missing
+    debug_log(&log_path, &format!("writing state={} tool={} to {:?}", state, tool, status_file));
+
+    // launch_only: don't write status (e.g. Copilot sessionStart — GUI launch handled by hook script)
     if launch_only {
-        if !status_file.exists() {
-            let status = serde_json::json!({
-                "state": "idle", "detail": "Session started", "tool": "",
-                "event": event, "session_id": session_id,
-                "session_name": session_name, "timestamp": timestamp()
-            });
-            let _ = fs::write(&status_file, status.to_string());
-        }
+        debug_log(&log_path, "launch_only — skipping status write");
     } else {
         let status = serde_json::json!({
             "state": state, "detail": detail, "tool": tool,
@@ -319,72 +324,61 @@ fn cmd_write_status(args: &[String]) {
         let _ = fs::write(&status_file, status.to_string());
     }
 
-    // Auto-launch GUI if not running
-    auto_launch_gui(&pet_dir, &status_file, &session_id);
+    debug_log(&log_path, &format!("file written in {:?}", t0.elapsed()));
+    debug_log(&log_path, &format!("write-status DONE in {:?}", t0.elapsed()));
 }
 
-/// Check if pet GUI is running, launch if not
-fn auto_launch_gui(pet_dir: &PathBuf, status_file: &PathBuf, session_id: &str) {
-    // Check if a GUI instance is already running (not just this CLI process)
-    let is_running = if cfg!(windows) {
-        std::process::Command::new("tasklist")
-            .args(["/NH"])
-            .output()
-            .map(|o| {
-                let output = String::from_utf8_lossy(&o.stdout);
-                // Count instances — if >1, a GUI is already running (1 = just us)
-                output.matches("claude-status-pet").count() > 1
-            })
-            .unwrap_or(false)
-    } else {
-        // pgrep -c counts processes; >1 means GUI is running
-        std::process::Command::new("pgrep")
-            .args(["-fc", "claude-status-pet"])
-            .output()
-            .map(|o| {
-                let count: usize = String::from_utf8_lossy(&o.stdout).trim().parse().unwrap_or(0);
-                count > 1
-            })
-            .unwrap_or(false)
-    };
-
-    if is_running {
-        return;
+fn cleanup_stale_status(pet_dir: &PathBuf) {
+    let Ok(entries) = fs::read_dir(pet_dir) else { return };
+    let cutoff = std::time::SystemTime::now() - std::time::Duration::from_secs(24 * 3600);
+    for entry in entries.filter_map(|e| e.ok()) {
+        let name = entry.file_name();
+        let name_str = name.to_string_lossy();
+        if name_str.starts_with("status-") && name_str.ends_with(".json") {
+            if let Ok(meta) = entry.metadata() {
+                if let Ok(modified) = meta.modified() {
+                    if modified < cutoff {
+                        let _ = fs::remove_file(entry.path());
+                    }
+                }
+            }
+        }
     }
-
-    // Find the binary (self)
-    let self_bin = std::env::current_exe().unwrap_or_default();
-    let assets_dir = pet_dir.join("assets");
-
-    let mut cmd = std::process::Command::new(&self_bin);
-    cmd.args(["run", "--status-file"])
-        .arg(status_file.to_string_lossy().as_ref())
-        .args(["--session-id", session_id]);
-
-    if assets_dir.is_dir() {
-        cmd.args(["--assets-dir"]).arg(assets_dir.to_string_lossy().as_ref());
-    }
-
-    // Detach the process
-    #[cfg(windows)]
-    {
-        use std::os::windows::process::CommandExt;
-        const CREATE_NO_WINDOW: u32 = 0x08000000;
-        const DETACHED_PROCESS: u32 = 0x00000008;
-        cmd.creation_flags(CREATE_NO_WINDOW | DETACHED_PROCESS);
-    }
-
-    let _ = cmd.stdin(std::process::Stdio::null())
-        .stdout(std::process::Stdio::null())
-        .stderr(std::process::Stdio::null())
-        .spawn();
 }
 
 fn read_stdin() -> String {
     use std::io::Read;
-    let mut buf = String::new();
-    let _ = std::io::stdin().read_to_string(&mut buf);
-    buf
+    // Read stdin until complete JSON object (depth-balanced {}) or timeout.
+    // Does NOT wait for EOF — returns as soon as JSON is complete.
+    let (tx, rx) = std::sync::mpsc::channel();
+    std::thread::spawn(move || {
+        let mut buf = String::new();
+        let mut depth = 0i32;
+        let mut in_string = false;
+        let mut escape = false;
+        let mut started = false;
+
+        for byte in std::io::stdin().bytes() {
+            let Ok(b) = byte else { break };
+            let c = b as char;
+            buf.push(c);
+
+            if escape { escape = false; continue; }
+            if c == '\\' && in_string { escape = true; continue; }
+            if c == '"' { in_string = !in_string; continue; }
+            if in_string { continue; }
+            if c == '{' { depth += 1; started = true; }
+            if c == '}' {
+                depth -= 1;
+                if started && depth == 0 {
+                    let _ = tx.send(buf);
+                    return;
+                }
+            }
+        }
+        let _ = tx.send(buf);
+    });
+    rx.recv_timeout(std::time::Duration::from_millis(100)).unwrap_or_default()
 }
 
 fn get_arg(args: &[String], flag: &str) -> Option<String> {
@@ -426,7 +420,7 @@ pub fn run() {
     // Subcommand dispatch: write-status runs without GUI
     if args.iter().any(|a| a == "write-status") {
         cmd_write_status(&args);
-        return;
+        std::process::exit(0); // Force exit — don't wait for stdin reader thread
     }
 
     if args.iter().any(|a| a == "--debug") {
@@ -447,6 +441,10 @@ pub fn run() {
         .map(|w| w[1].clone())
         .unwrap_or_else(|| "unknown".to_string());
 
+    // Write per-session PID lock file
+    let pet_dir = default_pet_dir();
+    let _ = fs::create_dir_all(&pet_dir);
+
     let assets_dir: Option<PathBuf> = args
         .windows(2)
         .find(|w| w[0] == "--assets-dir")
@@ -455,6 +453,9 @@ pub fn run() {
     if let Some(parent) = status_path.parent() {
         let _ = fs::create_dir_all(parent);
     }
+
+    // Clean up stale status files on GUI startup
+    cleanup_stale_status(&default_pet_dir());
 
     let status_path_shared = Arc::new(Mutex::new(status_path.clone()));
     let status_path_for_cleanup = status_path.clone();
@@ -610,7 +611,6 @@ pub fn run() {
             Ok(())
         })
         .on_window_event(move |_window, event| {
-            // Clean up status file when window is closed
             if let tauri::WindowEvent::Destroyed = event {
                 let _ = fs::remove_file(&status_path_for_cleanup);
             }

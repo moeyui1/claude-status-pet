@@ -172,7 +172,7 @@ console.log('Installed: '+c.name+' ('+Object.keys(c.states).length+' states)');
 "
 ```
 
-Tell the user: "Character pack installed! Right-click the pet → look under **Custom** to select it."
+Tell the user: "Character pack installed! You need to restart the pet for it to appear. Right-click → Exit, then use `/pet open`. The new character will be under **Custom** in the menu."
 
 #### `/pet pack remove <name>`
 

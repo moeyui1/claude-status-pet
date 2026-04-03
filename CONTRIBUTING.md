@@ -162,6 +162,8 @@ Users can install character packs **without rebuilding** — just drop a folder 
 
 The pet will auto-discover it on next launch and show it under **Custom** in the right-click menu.
 
+> **Note:** You must restart the pet for new packs to appear. Close via right-click → Exit, then relaunch. Or use `/pet close` then `/pet open` if using Claude Code.
+
 ### Sharing Packs
 
 To share a character pack:
@@ -195,6 +197,98 @@ unzip my-pack.zip -d ~/.claude/pet-data/characters/
 
 ---
 
+## Adding a New AI Agent Adapter
+
+The pet supports any AI agent via the binary's CLI interface. There are three integration methods, from easiest to most optimized:
+
+### Method 1: CLI Args (zero code, any agent)
+
+Configure your agent's hooks to call the binary with generic arguments:
+
+```
+claude-status-pet write-status --event <event> --tool <tool> --detail "<text>" --session-id <id>
+```
+
+| `--event` | Maps to state |
+|-----------|---------------|
+| `prompt` | thinking |
+| `tool` | depends on `--tool` (auto-mapped) |
+| `done` | idle |
+| `error` | error |
+| `offline` | offline |
+
+Tool names are fuzzy-matched: `edit`, `replace_string_in_file`, `my_editor` all → `editing`.
+
+### Method 2: Built-in Adapter (Rust, PR required)
+
+For deeper integration, create an adapter in `pet-app/src-tauri/src/adapter/`:
+
+```
+adapter/
+├── mod.rs        ← register new adapter here
+├── claude.rs     ← Claude Code adapter
+├── copilot.rs    ← GitHub Copilot adapter
+└── myagent.rs    ← your adapter
+```
+
+**1. Create `adapter/myagent.rs`:**
+
+```rust
+use super::{Adapter, NormalizedEvent, StdinInput};
+
+pub struct MyAgentAdapter;
+
+impl Adapter for MyAgentAdapter {
+    fn parse(&self, stdin: &StdinInput) -> Option<NormalizedEvent> {
+        // Parse your agent's JSON format from stdin
+        // Map events to normalized: prompt, tool, done, error, offline
+        // Handle any agent-specific quirks here
+        Some(NormalizedEvent {
+            event: "tool".into(),
+            tool: "edit".into(),
+            detail: "Editing file.rs".into(),
+            session_id: "my-session".into(),
+            session_name: "My Project".into(),
+            launch_only: false,
+        })
+    }
+}
+```
+
+**2. Register in `adapter/mod.rs`:**
+
+```rust
+pub mod myagent;
+
+pub fn get_adapter(name: &str) -> Option<Box<dyn Adapter>> {
+    match name {
+        "claude" => Some(Box::new(claude::ClaudeAdapter)),
+        "copilot" => Some(Box::new(copilot::CopilotAdapter)),
+        "myagent" => Some(Box::new(myagent::MyAgentAdapter)),
+        _ => None,
+    }
+}
+```
+
+**3. Usage:**
+
+```
+claude-status-pet write-status --adapter myagent < stdin.json
+```
+
+**Key design rules for adapters:**
+- All agent-specific quirks belong INSIDE the adapter (not in shared code)
+- The adapter normalizes to generic events: `prompt`, `tool`, `done`, `error`, `offline`
+- Tool→state mapping is shared (`status_map.rs`) — don't duplicate it
+- Set `launch_only: true` if the event should only launch the GUI (not write status)
+- Add tests in `tests.rs`
+
+### Method 3: External Adapter Config (planned)
+
+Future: JSON config files for custom adapters without Rust code.
+
+---
+
 ## Adding an ASCII Art Character
 
 ASCII characters are hardcoded in `app.js` (they're just text, no external files needed).
@@ -224,14 +318,15 @@ Add your character to the `ASCII_SPECIES` object. It will automatically appear i
 
 ---
 
-## Submitting Your Character
+## Submitting
 
 1. Fork the repo
-2. Add your character files and `character.json`
-3. Open a PR with:
-   - Screenshot/GIF of your character in action
-   - Credit/attribution for the art (if not original)
-   - License compatibility (must be compatible with the project license)
+2. Add your files (character pack, adapter, or ASCII art)
+3. Add tests for adapters (`tests.rs`)
+4. Open a PR with:
+   - Screenshot/GIF showing it working
+   - Credit/attribution for art (if not original)
+   - License compatibility
 
 ## Art Credits
 

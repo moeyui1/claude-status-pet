@@ -229,14 +229,24 @@ function setImage(src) {
   currentImgSrc = resolved;
 }
 
-// Show error in bubble if image fails to load
+// Show ASCII 404 art when image fails to load
 imgEl.addEventListener('error', () => {
   if (imgEl.src && imgEl.src !== window.location.href) {
-    const name = imgEl.src.split('/').pop();
+    const name = decodeURIComponent(imgEl.src.split('/').pop().split('?')[0]);
+    // Switch to ASCII 404 display
+    showAscii();
+    asciiPre.textContent = [
+      '            ',
+      '   4  0  4  ',
+      '   ╭──────╮ ',
+      '   │ ×  × │ ',
+      '   │  __  │ ',
+      '   ╰──────╯ ',
+    ].join('\n');
     statusText.textContent = 'Image not found: ' + name;
     bubble.classList.remove('hidden');
     clearTimeout(bubbleTimeout);
-    bubbleTimeout = setTimeout(() => bubble.classList.add('hidden'), 5000);
+    bubbleTimeout = setTimeout(() => bubble.classList.add('hidden'), 8000);
   }
 });
 
