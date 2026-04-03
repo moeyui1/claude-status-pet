@@ -440,9 +440,12 @@ function buildMenu() {
   addMenuItem(charMenu, 'Settings...', () => { menuPage = 'config'; buildMenu(); });
   addDivider(charMenu);
   addMenuItem(charMenu, 'Close', () => closeMenu());
-  addMenuItem(charMenu, 'Exit', () => {
+  addMenuItem(charMenu, 'Exit', async () => {
     closeMenu();
-    if (window.__TAURI__) window.__TAURI__.window.getCurrentWindow().close();
+    if (window.__TAURI__) {
+      await window.__TAURI__.core.invoke('user_exit_pet');
+      window.__TAURI__.window.getCurrentWindow().close();
+    }
   }, 'menu-item-danger');
 
   const verLabel = document.createElement('div');

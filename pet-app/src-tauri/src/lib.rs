@@ -126,6 +126,13 @@ fn download_dlc(assets_dir: tauri::State<'_, Option<PathBuf>>, _dlc_name: String
 }
 
 #[tauri::command]
+fn user_exit_pet() {
+    // User explicitly chose "Exit" from menu — write disabled marker
+    let pet_dir = default_pet_dir();
+    let _ = fs::write(pet_dir.join(".pet-disabled"), "");
+}
+
+#[tauri::command]
 fn load_asset(assets_dir: tauri::State<'_, Option<PathBuf>>, path: String) -> Option<String> {
     use base64::Engine;
     let dir = assets_dir.inner().as_ref()?;
@@ -488,9 +495,11 @@ pub fn run() {
         .unwrap_or_else(|| "unknown".to_string());
 
     // Write per-session PID lock file so write-status knows this GUI is running
+    // Clear .pet-disabled — user explicitly launched, so re-enable auto-start
     let pet_dir = default_pet_dir();
     let _ = fs::create_dir_all(&pet_dir);
     let _ = fs::write(pet_dir.join(format!(".pet-gui-{}.lock", session_id)), std::process::id().to_string());
+    let _ = fs::remove_file(pet_dir.join(".pet-disabled"));
 
     let assets_dir: Option<PathBuf> = args
         .windows(2)
@@ -508,7 +517,7 @@ pub fn run() {
         .manage(status_path_shared)
         .manage(session_id)
         .manage(assets_dir)
-        .invoke_handler(tauri::generate_handler![get_status, get_session_id, get_assets_dir, load_asset, load_text_asset, load_custom_asset, is_dlc_installed, download_dlc, list_character_packs])
+        .invoke_handler(tauri::generate_handler![get_status, get_session_id, get_assets_dir, load_asset, load_text_asset, load_custom_asset, is_dlc_installed, download_dlc, list_character_packs, user_exit_pet])
         .setup(move |app| {
             let window = app.get_webview_window("main").unwrap();
 
