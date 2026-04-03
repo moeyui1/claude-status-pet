@@ -204,6 +204,10 @@ function applyConfig() {
   // Scale inner elements
   imgWrapper.style.width = Math.round(140 * petScale) + 'px';
   imgWrapper.style.height = Math.round(140 * petScale) + 'px';
+  statusText.style.fontSize = Math.round(13 * petScale) + 'px';
+  sessionNameEl.style.fontSize = Math.round(12 * petScale) + 'px';
+  stateLabel.style.fontSize = Math.round(12 * petScale) + 'px';
+  bubble.style.maxWidth = Math.round(180 * petScale) + 'px';
 
   // Resize window to match
   if (window.__TAURI__) {
