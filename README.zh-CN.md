@@ -126,30 +126,22 @@ npx tauri build
 {
   "hooks": {
     "UserPromptSubmit": [
-      { "hooks": [{ "type": "command", "command": "bash /path/to/claude-status-pet/scripts/status-writer.sh", "async": true }] }
+      { "hooks": [{ "type": "command", "command": "~/.claude/pet-data/bin/claude-status-pet write-status --adapter claude", "async": true }] }
     ],
     "PreToolUse": [
-      { "hooks": [{ "type": "command", "command": "bash /path/to/claude-status-pet/scripts/status-writer.sh", "async": true }] }
+      { "hooks": [{ "type": "command", "command": "~/.claude/pet-data/bin/claude-status-pet write-status --adapter claude", "async": true }] }
     ],
     "Stop": [
-      { "hooks": [{ "type": "command", "command": "bash /path/to/claude-status-pet/scripts/status-writer.sh", "async": true }] }
+      { "hooks": [{ "type": "command", "command": "~/.claude/pet-data/bin/claude-status-pet write-status --adapter claude", "async": true }] }
     ],
     "SessionStart": [
-      { "matcher": "startup", "hooks": [{ "type": "command", "command": "bash /path/to/claude-status-pet/scripts/launch-pet.sh", "async": true }] }
+      { "matcher": "startup", "hooks": [{ "type": "command", "command": "~/.claude/pet-data/bin/claude-status-pet write-status --adapter claude", "async": true }] }
     ],
     "SessionEnd": [
-      { "hooks": [{ "type": "command", "command": "bash /path/to/claude-status-pet/scripts/status-writer.sh", "async": true }] }
+      { "hooks": [{ "type": "command", "command": "~/.claude/pet-data/bin/claude-status-pet write-status --adapter claude", "async": true }] }
     ]
   }
 }
-```
-
-将 `/path/to/claude-status-pet` 替换为实际的项目路径。
-
-**安装 `/pet` 技能：**
-
-```bash
-cp -r skills/pet ~/.claude/skills/pet
 ```
 
 </details>
@@ -166,7 +158,7 @@ rm -rf ~/.claude/pet-data    # 可选：删除下载的资源
 <details>
 <summary>手动卸载</summary>
 
-1. 从 `~/.claude/settings.json` 中删除引用了 `status-writer.sh` 和 `launch-pet.sh` 的钩子配置
+1. 从 `~/.claude/settings.json` 中删除引用了 `claude-status-pet` 的钩子配置
 2. `rm -rf ~/.claude/skills/pet`
 3. `rm -rf ~/.claude/pet-data`
 
@@ -192,4 +184,4 @@ graph LR
 
 ## 许可证
 
-MIT
+[AGPL-3.0-only](LICENSE)

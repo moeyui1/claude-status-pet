@@ -1,0 +1,112 @@
+THIRD-PARTY SOFTWARE NOTICES AND INFORMATION
+
+claude-status-pet incorporates third-party components under the licenses
+listed below. This file provides license identifiers, copyright
+attributions, and upstream project links for informational purposes.
+
+================================================================================
+
+1. Tauri (tauri, tauri-build, tauri-codegen, tauri-macros, tauri-runtime,
+   tauri-runtime-wry, tauri-utils)
+   https://github.com/tauri-apps/tauri
+   License: MIT OR Apache-2.0
+   Copyright (c) 2017 - Present Tauri Programme within The Commons Conservancy
+
+2. Wry
+   https://github.com/tauri-apps/wry
+   License: MIT OR Apache-2.0
+   Copyright (c) 2020 - Present Tauri Programme within The Commons Conservancy
+
+3. Tao
+   https://github.com/tauri-apps/tao
+   License: MIT OR Apache-2.0
+   Copyright (c) 2021 - Present Tauri Programme within The Commons Conservancy
+
+4. Serde (serde, serde_json, serde_derive)
+   https://github.com/serde-rs/serde
+   License: MIT OR Apache-2.0
+   Copyright (c) David Tolnay
+
+5. Notify
+   https://github.com/notify-rs/notify
+   License: CC0-1.0
+   Creative Commons Zero v1.0 Universal — Public Domain Dedication
+
+6. Base64
+   https://github.com/marshallpierce/rust-base64
+   License: MIT OR Apache-2.0
+   Copyright (c) Marshall Pierce
+
+7. WebView2-COM (webview2-com, webview2-com-macros, webview2-com-sys)
+   https://github.com/AiziChen/webview2-rs
+   License: MIT
+   Copyright (c) WebView2-RS Contributors
+
+8. Windows (windows, windows-core, windows-sys, windows-targets, etc.)
+   https://github.com/microsoft/windows-rs
+   License: MIT OR Apache-2.0
+   Copyright (c) Microsoft Corporation
+
+9. Tokio
+   https://github.com/tokio-rs/tokio
+   License: MIT
+   Copyright (c) Tokio Contributors
+
+10. Reqwest
+    https://github.com/seanmonstar/reqwest
+    License: MIT OR Apache-2.0
+    Copyright (c) Sean McArthur
+
+11. Hyper
+    https://github.com/hyperium/hyper
+    License: MIT
+    Copyright (c) Sean McArthur
+
+12. servo_arc
+    https://github.com/nickel-org/rust-servo-arc
+    License: MPL-2.0
+    Copyright (c) The Servo Project Developers
+
+13. @tauri-apps/api (npm)
+    https://github.com/tauri-apps/tauri
+    License: MIT OR Apache-2.0
+    Copyright (c) 2017 - Present Tauri Programme within The Commons Conservancy
+
+14. @tauri-apps/cli (npm, dev dependency)
+    https://github.com/tauri-apps/tauri
+    License: MIT OR Apache-2.0
+    Copyright (c) 2017 - Present Tauri Programme within The Commons Conservancy
+
+================================================================================
+
+SYSTEM LIBRARIES (dynamically linked at runtime, not bundled)
+
+- WebKit2GTK: LGPL-2.0-or-later
+- libsoup3: LGPL-2.1-or-later
+- GTK3: LGPL-2.1-or-later
+- libappindicator: LGPL-2.1-or-later
+
+================================================================================
+
+BUNDLED ASSETS
+
+- Ferris SVG art: CC0-1.0 (Public Domain)
+  The Rust mascot Ferris, used under Creative Commons Zero.
+
+- Mona / Kuromi GIFs: NOT bundled in this repository.
+  Downloaded at runtime from GIPHY. Subject to GIPHY Terms of Service.
+  https://developers.giphy.com/docs/sdk#terms
+
+================================================================================
+
+LICENSE TEXTS
+
+The full text of the licenses referenced above can be found at:
+
+- MIT License: https://opensource.org/licenses/MIT
+- Apache License 2.0: https://www.apache.org/licenses/LICENSE-2.0
+- CC0 1.0 Universal: https://creativecommons.org/publicdomain/zero/1.0/
+- MPL 2.0: https://www.mozilla.org/en-US/MPL/2.0/
+- LGPL 2.0: https://www.gnu.org/licenses/old-licenses/lgpl-2.0.html
+- LGPL 2.1: https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
+- LGPL 3.0: https://www.gnu.org/licenses/lgpl-3.0.html

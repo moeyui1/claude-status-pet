@@ -126,30 +126,22 @@ Add to your `~/.claude/settings.json`:
 {
   "hooks": {
     "UserPromptSubmit": [
-      { "hooks": [{ "type": "command", "command": "bash /path/to/claude-status-pet/scripts/status-writer.sh", "async": true }] }
+      { "hooks": [{ "type": "command", "command": "~/.claude/pet-data/bin/claude-status-pet write-status --adapter claude", "async": true }] }
     ],
     "PreToolUse": [
-      { "hooks": [{ "type": "command", "command": "bash /path/to/claude-status-pet/scripts/status-writer.sh", "async": true }] }
+      { "hooks": [{ "type": "command", "command": "~/.claude/pet-data/bin/claude-status-pet write-status --adapter claude", "async": true }] }
     ],
     "Stop": [
-      { "hooks": [{ "type": "command", "command": "bash /path/to/claude-status-pet/scripts/status-writer.sh", "async": true }] }
+      { "hooks": [{ "type": "command", "command": "~/.claude/pet-data/bin/claude-status-pet write-status --adapter claude", "async": true }] }
     ],
     "SessionStart": [
-      { "matcher": "startup", "hooks": [{ "type": "command", "command": "bash /path/to/claude-status-pet/scripts/launch-pet.sh", "async": true }] }
+      { "matcher": "startup", "hooks": [{ "type": "command", "command": "~/.claude/pet-data/bin/claude-status-pet write-status --adapter claude", "async": true }] }
     ],
     "SessionEnd": [
-      { "hooks": [{ "type": "command", "command": "bash /path/to/claude-status-pet/scripts/status-writer.sh", "async": true }] }
+      { "hooks": [{ "type": "command", "command": "~/.claude/pet-data/bin/claude-status-pet write-status --adapter claude", "async": true }] }
     ]
   }
 }
-```
-
-Replace `/path/to/claude-status-pet` with your actual clone path.
-
-**Install the `/pet` skill:**
-
-```bash
-cp -r skills/pet ~/.claude/skills/pet
 ```
 
 </details>
@@ -166,7 +158,7 @@ rm -rf ~/.claude/pet-data    # optional: remove downloaded assets
 <details>
 <summary>Manual uninstall</summary>
 
-1. Remove hooks from `~/.claude/settings.json` (delete entries referencing `status-writer.sh` and `launch-pet.sh`)
+1. Remove hooks from `~/.claude/settings.json` (delete entries referencing `claude-status-pet`)
 2. `rm -rf ~/.claude/skills/pet`
 3. `rm -rf ~/.claude/pet-data`
 
@@ -192,4 +184,4 @@ The pet is **decoupled from any specific tool** — it just watches a JSON statu
 
 ## License
 
-MIT
+[AGPL-3.0-only](LICENSE)

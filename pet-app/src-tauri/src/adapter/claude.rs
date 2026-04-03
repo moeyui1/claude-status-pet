@@ -112,5 +112,8 @@ fn basename(path: &str) -> &str {
 }
 
 fn truncate(s: &str, max: usize) -> &str {
-    if s.len() <= max { s } else { &s[..max] }
+    if s.len() <= max { return s; }
+    let mut idx = max;
+    while idx > 0 && !s.is_char_boundary(idx) { idx -= 1; }
+    &s[..idx]
 }
