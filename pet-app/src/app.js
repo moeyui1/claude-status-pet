@@ -205,9 +205,10 @@ function applyConfig() {
   if (window.__TAURI__) {
     const w = Math.round(200 * petScale);
     const h = Math.round(240 * petScale);
-    window.__TAURI__.window.getCurrentWindow().setSize(
-      new window.__TAURI__.dpi.LogicalSize(w, h)
-    );
+    const LS = window.__TAURI__.dpi?.LogicalSize || window.__TAURI__.window?.LogicalSize;
+    if (LS) {
+      window.__TAURI__.window.getCurrentWindow().setSize(new LS(w, h));
+    }
   }
 }
 
