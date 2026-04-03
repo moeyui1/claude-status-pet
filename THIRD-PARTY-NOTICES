@@ -1,8 +1,8 @@
 THIRD-PARTY SOFTWARE NOTICES AND INFORMATION
 
 claude-status-pet incorporates third-party components under the licenses
-listed below. The original copyright notices and license terms are provided
-for informational purposes.
+listed below. This file provides license identifiers, copyright
+attributions, and upstream project links for informational purposes.
 
 ================================================================================
 
@@ -84,7 +84,7 @@ SYSTEM LIBRARIES (dynamically linked at runtime, not bundled)
 - WebKit2GTK: LGPL-2.0-or-later
 - libsoup3: LGPL-2.1-or-later
 - GTK3: LGPL-2.1-or-later
-- libappindicator: LGPL-2.1 or LGPL-3.0
+- libappindicator: LGPL-2.1-or-later
 
 ================================================================================
 

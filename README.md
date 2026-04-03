@@ -184,4 +184,4 @@ The pet is **decoupled from any specific tool** — it just watches a JSON statu
 
 ## License
 
-[AGPL-3.0](LICENSE)
+[AGPL-3.0-only](LICENSE)
