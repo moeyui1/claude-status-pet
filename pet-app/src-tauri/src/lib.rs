@@ -527,6 +527,11 @@ fn cmd_write_status(args: &[String]) {
         status_map::event_to_state(&event)
     };
 
+    if !is_safe_session_id(&session_id) {
+        eprintln!("Invalid session ID");
+        std::process::exit(1);
+    }
+
     let status_file = pet_dir.join(format!("status-{}.json", session_id));
 
     debug_log(&log_path, &format!("writing state={} tool={} to {:?}", state, tool, status_file));
