@@ -4,57 +4,57 @@
     "sessionStart": [
       {
         "type": "command",
-        "bash": "COPILOT_HOOK_EVENT=sessionStart ~/.claude/pet-data/bin/claude-status-pet write-status --adapter copilot &",
-        "powershell": "Start-Process -FilePath \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" -ArgumentList 'write-status','--adapter','copilot' -WindowStyle Hidden",
-        "timeoutSec": 3
+        "bash": "INPUT=$(cat); COPILOT_HOOK_EVENT=sessionStart ~/.claude/pet-data/bin/claude-status-pet write-status --adapter copilot <<< \"$INPUT\" &",
+        "powershell": "$j=try{$i=[Console]::In.ReadToEnd();ConvertFrom-Json $i}catch{@{}};$cwd=if($j.cwd){$j.cwd}else{Get-Location};Start-Process \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" -ArgumentList 'write-status','--event','prompt','--session-id',\"copilot-$($cwd.GetHashCode().ToString('x8'))\",'--session-name',\"$(Split-Path $cwd -Leaf) (Copilot)\",'--detail','Session started' -WindowStyle Hidden",
+        "timeoutSec": 5
       }
     ],
     "sessionEnd": [
       {
         "type": "command",
-        "bash": "COPILOT_HOOK_EVENT=sessionEnd ~/.claude/pet-data/bin/claude-status-pet write-status --adapter copilot &",
-        "powershell": "Start-Process -FilePath \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" -ArgumentList 'write-status','--adapter','copilot' -WindowStyle Hidden -Environment @{COPILOT_HOOK_EVENT='sessionEnd'}",
-        "timeoutSec": 3
+        "bash": "INPUT=$(cat); COPILOT_HOOK_EVENT=sessionEnd ~/.claude/pet-data/bin/claude-status-pet write-status --adapter copilot <<< \"$INPUT\" &",
+        "powershell": "$j=try{$i=[Console]::In.ReadToEnd();ConvertFrom-Json $i}catch{@{}};$cwd=if($j.cwd){$j.cwd}else{Get-Location};Start-Process \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" -ArgumentList 'write-status','--event','offline','--session-id',\"copilot-$($cwd.GetHashCode().ToString('x8'))\",'--session-name',\"$(Split-Path $cwd -Leaf) (Copilot)\",'--detail','Session ended' -WindowStyle Hidden",
+        "timeoutSec": 5
       }
     ],
     "userPromptSubmitted": [
       {
         "type": "command",
-        "bash": "COPILOT_HOOK_EVENT=userPromptSubmitted ~/.claude/pet-data/bin/claude-status-pet write-status --adapter copilot &",
-        "powershell": "Start-Process -FilePath \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" -ArgumentList 'write-status','--adapter','copilot' -WindowStyle Hidden -Environment @{COPILOT_HOOK_EVENT='userPromptSubmitted'}",
-        "timeoutSec": 3
+        "bash": "INPUT=$(cat); COPILOT_HOOK_EVENT=userPromptSubmitted ~/.claude/pet-data/bin/claude-status-pet write-status --adapter copilot <<< \"$INPUT\" &",
+        "powershell": "$j=try{$i=[Console]::In.ReadToEnd();ConvertFrom-Json $i}catch{@{}};$cwd=if($j.cwd){$j.cwd}else{Get-Location};Start-Process \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" -ArgumentList 'write-status','--event','prompt','--session-id',\"copilot-$($cwd.GetHashCode().ToString('x8'))\",'--session-name',\"$(Split-Path $cwd -Leaf) (Copilot)\",'--detail','Processing prompt...' -WindowStyle Hidden",
+        "timeoutSec": 5
       }
     ],
     "preToolUse": [
       {
         "type": "command",
-        "bash": "COPILOT_HOOK_EVENT=preToolUse ~/.claude/pet-data/bin/claude-status-pet write-status --adapter copilot &",
-        "powershell": "Start-Process -FilePath \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" -ArgumentList 'write-status','--adapter','copilot' -WindowStyle Hidden -Environment @{COPILOT_HOOK_EVENT='preToolUse'}",
-        "timeoutSec": 3
+        "bash": "INPUT=$(cat); COPILOT_HOOK_EVENT=preToolUse ~/.claude/pet-data/bin/claude-status-pet write-status --adapter copilot <<< \"$INPUT\" &",
+        "powershell": "$j=try{$i=[Console]::In.ReadToEnd();ConvertFrom-Json $i}catch{@{}};$cwd=if($j.cwd){$j.cwd}else{Get-Location};$t=if($j.toolName){$j.toolName}else{'unknown'};Start-Process \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" -ArgumentList 'write-status','--event','tool','--tool',$t,'--session-id',\"copilot-$($cwd.GetHashCode().ToString('x8'))\",'--session-name',\"$(Split-Path $cwd -Leaf) (Copilot)\" -WindowStyle Hidden",
+        "timeoutSec": 5
       }
     ],
     "postToolUse": [
       {
         "type": "command",
-        "bash": "COPILOT_HOOK_EVENT=postToolUse ~/.claude/pet-data/bin/claude-status-pet write-status --adapter copilot &",
-        "powershell": "Start-Process -FilePath \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" -ArgumentList 'write-status','--adapter','copilot' -WindowStyle Hidden -Environment @{COPILOT_HOOK_EVENT='postToolUse'}",
-        "timeoutSec": 3
+        "bash": "INPUT=$(cat); COPILOT_HOOK_EVENT=postToolUse ~/.claude/pet-data/bin/claude-status-pet write-status --adapter copilot <<< \"$INPUT\" &",
+        "powershell": "$j=try{$i=[Console]::In.ReadToEnd();ConvertFrom-Json $i}catch{@{}};$cwd=if($j.cwd){$j.cwd}else{Get-Location};Start-Process \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" -ArgumentList 'write-status','--event','prompt','--session-id',\"copilot-$($cwd.GetHashCode().ToString('x8'))\",'--session-name',\"$(Split-Path $cwd -Leaf) (Copilot)\",'--detail','Processing...' -WindowStyle Hidden",
+        "timeoutSec": 5
       }
     ],
     "errorOccurred": [
       {
         "type": "command",
-        "bash": "COPILOT_HOOK_EVENT=errorOccurred ~/.claude/pet-data/bin/claude-status-pet write-status --adapter copilot &",
-        "powershell": "Start-Process -FilePath \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" -ArgumentList 'write-status','--adapter','copilot' -WindowStyle Hidden -Environment @{COPILOT_HOOK_EVENT='errorOccurred'}",
-        "timeoutSec": 3
+        "bash": "INPUT=$(cat); COPILOT_HOOK_EVENT=errorOccurred ~/.claude/pet-data/bin/claude-status-pet write-status --adapter copilot <<< \"$INPUT\" &",
+        "powershell": "$j=try{$i=[Console]::In.ReadToEnd();ConvertFrom-Json $i}catch{@{}};$cwd=if($j.cwd){$j.cwd}else{Get-Location};Start-Process \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" -ArgumentList 'write-status','--event','error','--session-id',\"copilot-$($cwd.GetHashCode().ToString('x8'))\",'--session-name',\"$(Split-Path $cwd -Leaf) (Copilot)\",'--detail','Error occurred' -WindowStyle Hidden",
+        "timeoutSec": 5
       }
     ],
     "stop": [
       {
         "type": "command",
-        "bash": "COPILOT_HOOK_EVENT=stop ~/.claude/pet-data/bin/claude-status-pet write-status --adapter copilot &",
-        "powershell": "Start-Process -FilePath \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" -ArgumentList 'write-status','--adapter','copilot' -WindowStyle Hidden -Environment @{COPILOT_HOOK_EVENT='stop'}",
-        "timeoutSec": 3
+        "bash": "INPUT=$(cat); COPILOT_HOOK_EVENT=stop ~/.claude/pet-data/bin/claude-status-pet write-status --adapter copilot <<< \"$INPUT\" &",
+        "powershell": "$j=try{$i=[Console]::In.ReadToEnd();ConvertFrom-Json $i}catch{@{}};$cwd=if($j.cwd){$j.cwd}else{Get-Location};Start-Process \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" -ArgumentList 'write-status','--event','done','--session-id',\"copilot-$($cwd.GetHashCode().ToString('x8'))\",'--session-name',\"$(Split-Path $cwd -Leaf) (Copilot)\",'--detail','Done' -WindowStyle Hidden",
+        "timeoutSec": 5
       }
     ]
   }
