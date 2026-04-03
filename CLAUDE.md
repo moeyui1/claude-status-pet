@@ -161,7 +161,8 @@ WebView2 blocks `file://` URLs. Assets loaded via `load_asset` Tauri command →
 - `sessionStart`: `launch_only=true` — don't write status (races with `userPromptSubmitted`)
 - `postToolUse`: mapped to `thinking` — avoids idle flash between tools
 - `sessionEnd`: writes `offline` — does NOT close the window (fires on every response, not just exit)
-- `session_id`: hashed from `cwd` (Copilot doesn't provide one)
+- `stop`: maps to `idle` — fires after each agent response chunk, may cause brief idle flash during long responses (known issue, acceptable tradeoff)
+- `session_id`: hashed from `cwd` using simple hash (not MD5). Hash length differs from legacy JS scripts — old sessions (`3bff2f46`) won't match new ones (`5b500f061151c8f9`). This is expected; old status files are cleaned up by `open-pet.sh` after 24 hours.
 
 ## Common Pitfalls
 
@@ -171,6 +172,9 @@ WebView2 blocks `file://` URLs. Assets loaded via `load_asset` Tauri command →
 - **Window border on Windows**: Check `shadow: false` in tauri.conf.json
 - **Hook blocking**: `write-status` must never block. No network calls, no user prompts. Write file and exit.
 - **Adapter quirks**: All agent-specific behavior goes in the adapter module, not shared code.
+- **Auto-launch detection**: `write-status` counts running pet processes via `tasklist`/`pgrep`. Count >1 means GUI is already running (1 = the CLI itself). If detection fails, duplicate GUIs may appear.
+- **Local debugging**: Always launch pet with `--debug` flag to enable logging to `~/.claude/pet-data/pet-debug.log`
+- **Legacy scripts**: `scripts/` directory still exists for backward compat. New hooks call the binary directly. Do NOT modify the old scripts — they will be removed in a future release.
 
 ## Building
 
