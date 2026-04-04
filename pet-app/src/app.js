@@ -187,7 +187,6 @@ function applyConfig() {
   const colorProps = [
     [asciiPre, 'color', petColor],
     [stateLabel, 'color', petColor],
-    [bubble, 'borderColor', petColor],
     [sessionNameEl, 'background', petSessionBg],
     [sessionNameEl, 'color', petTextColor],
     [container, 'background', petBgColor],
@@ -197,6 +196,9 @@ function applyConfig() {
   for (const [el, prop, val] of colorProps) {
     el.style[prop] = val || '';
   }
+  // Sync bubble border + tail with label background color
+  const bubbleColor = petSessionBg && petSessionBg !== 'transparent' ? petSessionBg : '';
+  bubble.style.setProperty('--bubble-color', bubbleColor);
   asciiPre.style.fontSize = petFontSize + 'px';
   container.style.width = Math.round(200 * petScale) + 'px';
   container.style.height = Math.round(240 * petScale) + 'px';
