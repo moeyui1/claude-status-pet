@@ -7,7 +7,6 @@
 /// - Session ID: not provided — generated from MD5 of cwd
 ///
 /// Quirks handled:
-/// - sessionStart: launch_only=true (don't write status, avoids racing with userPromptSubmitted)
 /// - postToolUse: mapped to "prompt"/thinking (avoids idle flash between tools)
 /// - sessionEnd: writes offline (does NOT close the window)
 
@@ -52,8 +51,7 @@ impl Adapter for CopilotAdapter {
                 ("prompt".into(), String::new(), "Processing prompt...".into(), false)
             }
             "userPromptSubmitted" => {
-                // Ignore — sessionStart already sets thinking state
-                return None;
+                ("prompt".into(), String::new(), "Processing your prompt...".into(), false)
             }
             "preToolUse" => {
                 let file = get_str(&tool_args, &["file", "filePath", "path"]);

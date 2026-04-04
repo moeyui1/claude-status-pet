@@ -25,7 +25,10 @@ claude-status-pet/
 │   └── hooks.json           # Claude Code hooks → calls binary with --adapter claude
 ├── copilot/
 │   ├── plugin.json         # Copilot CLI plugin manifest
-│   ├── hooks.json           # GitHub Copilot CLI hooks → calls binary with --adapter copilot
+│   ├── hooks.json           # GitHub Copilot CLI hooks → calls scripts with event arg
+│   ├── scripts/
+│   │   ├── hook.sh          # Bash hook handler (deployed to ~/.claude/pet-data/scripts/)
+│   │   └── hook.ps1         # PowerShell hook handler (deployed to ~/.claude/pet-data/scripts/)
 │   ├── skills/pet/SKILL.md  # /pet skill (copy of skills/pet/SKILL.md for plugin packaging)
 │   └── README.md
 ├── skills/
@@ -64,7 +67,7 @@ claude-status-pet/
 claude-status-pet write-status --adapter claude         # CLI: parse stdin, write status, exit
 claude-status-pet write-status --adapter copilot --copilot-event preToolUse  # CLI: Copilot with event arg
 claude-status-pet write-status --event tool --tool edit  # CLI: generic args, any agent
-claude-status-pet run --status-file <path> --debug       # GUI: launch Tauri window
+claude-status-pet run --status-file <path>                # GUI: launch Tauri window
 claude-status-pet demo --assets-dir <path>               # GUI: cycle all states for recording
 ```
 
@@ -182,8 +185,7 @@ WebView2 blocks `file://` URLs. Assets loaded via `load_asset` Tauri command →
 - **PowerShell `&`**: Waits for ALL child processes. NEVER spawn GUI from inside `& binary.exe`
 - **toolArgs type**: Must be `Option<Value>` not `Option<String>` (Copilot sends both formats)
 - **UTF-8 safety**: All `truncate()` must use `is_char_boundary()`. stdin reader uses `Vec<u8>` not `char` cast
-- **auto_start default**: `false` — pet only auto-launches if user sets `auto_start: true`
-- **Local debugging**: Always launch pet with `--debug` flag
+- **Debug logging**: Disabled by default. Set env var `PET_DEBUG=1` to enable. Logs to `pet-debug.log`
 - **SKILL uses native commands**: PowerShell on Windows, bash on Unix. No Node.js in SKILL
 - **Stale status files**: Cleaned up on GUI startup (>24h old). Each session writes its own file
 

@@ -613,23 +613,11 @@ async function showSessionPicker() {
     }, 2000);
     return;
   }
-  if (sessions.length === 1) {
-    await bindToSession(sessions[0].session_id);
-    return;
-  }
-  // Multiple sessions — show picker in the menu area
-  charMenu.innerHTML = '';
-  const title = document.createElement('div');
-  title.className = 'menu-section-label';
-  title.textContent = 'Select Session';
-  charMenu.appendChild(title);
-  for (const s of sessions) {
-    const label = s.session_name || s.session_id.slice(0, 12) + '…';
-    const sub = s.state !== 'idle' ? ` (${s.state})` : '';
-    addMenuItem(charMenu, label + sub, () => bindToSession(s.session_id));
-  }
-  charMenu.classList.remove('hidden');
-  menuBackdrop.classList.remove('hidden');
+  // Auto-bind to the most recently updated session; random if tied
+  const maxMod = Math.max(...sessions.map(s => s.last_modified));
+  const newest = sessions.filter(s => s.last_modified === maxMod);
+  const pick = newest[Math.floor(Math.random() * newest.length)];
+  await bindToSession(pick.session_id);
 }
 
 async function bindToSession(sessionId) {

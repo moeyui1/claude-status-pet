@@ -48,5 +48,3 @@ After installing the plugin, use `/pet` in Copilot CLI:
 - `/pet set <character>` — Switch character
 - `/pet status` — Show config and active sessions
 - `/pet help` — Show all commands
-
-> **Note:** Auto-start (`/pet auto on`) has no effect in Copilot CLI. Use `/pet on` to manually launch the pet each session.

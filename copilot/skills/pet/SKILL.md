@@ -1,6 +1,6 @@
 ---
 name: pet
-description: Manage your desktop pet — on, update, toggle auto-start, status
+description: Manage your desktop pet — on, update, status
 user-invocable: true
 ---
 
@@ -16,13 +16,9 @@ The user will run `/pet` with an optional subcommand. Parse the arguments and ex
 
 - `/pet` or `/pet on` — Launch the pet (session selection handled by the app UI)
 - `/pet update` — Update binary, hooks, skill, and assets to the latest release
-- `/pet auto on` — Enable auto-start on new sessions (Claude Code only; not supported under Copilot — use `/pet on` manually)
-- `/pet auto off` — Disable auto-start
 - `/pet status` — Show current config, active sessions, and installed character packs
 - `/pet help` — Show available commands
 
-> **Note on auto-start:** Auto-start relies on `sessionStart` hooks, which only work in Claude Code. Under GitHub Copilot CLI, auto-start has no effect — use `/pet on` to manually launch the pet each session.
->
 > **Closing the pet:** Right-click the pet → Exit. There is no `/pet off` command.
 >
 > **Switching characters:** Right-click the pet to open the character menu.
@@ -41,32 +37,62 @@ Sub-paths:
 - `bin/` — Pet binary (`claude-status-pet*`)
 - `status-*.json` — Active session status files
 - `pet-*.lock` — PID lock files (one per running pet window)
-- `config.json` — User config (`auto_start`, `character`)
+- `config.json` — User config (`character`)
 - `assets/` — DLC characters (mona, kuromi)
 - `characters/` — User-installed custom packs
 
 ### /pet on
 
-Simply launch the pet binary. If there are multiple unlocked sessions, the app will show a session picker UI. The binary has built-in PID lock detection, so duplicate windows are automatically prevented.
+Simply launch the pet binary. The binary has built-in PID lock detection, so duplicate windows are automatically prevented.
 
-**PowerShell:**
+> **Claude Code** provides `${CLAUDE_SESSION_ID}` — use it to bind directly to the current session.
+> **Copilot CLI** does not provide a session ID variable — the pet will auto-bind to the most recently updated session.
+
+**PowerShell (Claude Code):**
 ```powershell
 $dir = "$env:USERPROFILE\.claude\pet-data"
 $bin = Get-ChildItem "$dir\bin\claude-status-pet*" | Select-Object -First 1
 if (-not $bin) { Write-Host "Pet binary not found"; return }
-$a = @("run","--debug")
+$sid = "${CLAUDE_SESSION_ID}"
+$sf = "$dir\status-$sid.json"
+$a = @("run","--status-file",$sf,"--session-id",$sid)
 $assets = "$dir\assets"
 if (Test-Path $assets) { $a += "--assets-dir"; $a += $assets }
 Start-Process $bin.FullName -ArgumentList $a -WindowStyle Hidden
 Write-Host "Pet launched"
 ```
 
-**bash:**
+**bash (Claude Code):**
 ```bash
 DIR="$HOME/.claude/pet-data"
 BIN=$(ls "$DIR/bin/claude-status-pet"* 2>/dev/null | head -1)
 [ -z "$BIN" ] && echo "Pet binary not found" && exit 1
-ARGS="run --debug"
+SID="${CLAUDE_SESSION_ID}"
+SF="$DIR/status-$SID.json"
+ARGS="run --status-file $SF --session-id $SID"
+[ -d "$DIR/assets" ] && ARGS="$ARGS --assets-dir $DIR/assets"
+nohup "$BIN" $ARGS >/dev/null 2>&1 &
+echo "Pet launched"
+```
+
+**PowerShell (Copilot CLI):**
+```powershell
+$dir = "$env:USERPROFILE\.claude\pet-data"
+$bin = Get-ChildItem "$dir\bin\claude-status-pet*" | Select-Object -First 1
+if (-not $bin) { Write-Host "Pet binary not found"; return }
+$a = @("run")
+$assets = "$dir\assets"
+if (Test-Path $assets) { $a += "--assets-dir"; $a += $assets }
+Start-Process $bin.FullName -ArgumentList $a -WindowStyle Hidden
+Write-Host "Pet launched"
+```
+
+**bash (Copilot CLI):**
+```bash
+DIR="$HOME/.claude/pet-data"
+BIN=$(ls "$DIR/bin/claude-status-pet"* 2>/dev/null | head -1)
+[ -z "$BIN" ] && echo "Pet binary not found" && exit 1
+ARGS="run"
 [ -d "$DIR/assets" ] && ARGS="$ARGS --assets-dir $DIR/assets"
 nohup "$BIN" $ARGS >/dev/null 2>&1 &
 echo "Pet launched"
@@ -94,14 +120,14 @@ $dir  = "$env:USERPROFILE\.claude\pet-data"
 # 1. Close running pets
 Get-Process | Where-Object { $_.ProcessName -like "claude-status-pet*" } | ForEach-Object { Stop-Process -Id $_.Id -Force -ErrorAction SilentlyContinue }
 Start-Sleep -Milliseconds 500
-Write-Host "[1/5] Stopped running pets"
+Write-Host "[1/6] Stopped running pets"
 
 # 2. Download binary
 $binDir = "$dir\bin"
 New-Item -ItemType Directory -Path $binDir -Force | Out-Null
 $asset = "claude-status-pet-windows-x64.exe"
 Invoke-WebRequest -Uri "$BASE/releases/latest/download/$asset" -OutFile "$binDir\$asset"
-Write-Host "[2/5] Binary updated"
+Write-Host "[2/6] Binary updated"
 
 # 3. Update hooks (only for installed hook locations)
 $hookUpdated = $false
@@ -109,15 +135,22 @@ $hookUpdated = $false
 $copilotHooksDir = "$env:USERPROFILE\.copilot\hooks"
 if (Test-Path $copilotHooksDir) {
     Invoke-WebRequest -Uri "$RAW/copilot/hooks.json" -OutFile "$copilotHooksDir\status-pet.json"
-    $hookUpdated = $true; Write-Host "[3/5] Copilot hooks updated"
+    $hookUpdated = $true; Write-Host "[3/6] Copilot hooks updated"
 }
-if (-not $hookUpdated) { Write-Host "[3/5] No hook locations to update (skipped)" }
+if (-not $hookUpdated) { Write-Host "[3/6] No hook locations to update (skipped)" }
+
+# 3b. Update hook scripts
+$scriptsDir = "$dir\scripts"
+New-Item -ItemType Directory -Path $scriptsDir -Force | Out-Null
+Invoke-WebRequest -Uri "$RAW/copilot/scripts/hook.sh" -OutFile "$scriptsDir\copilot-hook.sh"
+Invoke-WebRequest -Uri "$RAW/copilot/scripts/hook.ps1" -OutFile "$scriptsDir\copilot-hook.ps1"
+Write-Host "[4/6] Hook scripts updated"
 
 # 4. Update skill
 $skillDir = "$env:USERPROFILE\.claude\skills\pet"
 New-Item -ItemType Directory -Path $skillDir -Force | Out-Null
 Invoke-WebRequest -Uri "$RAW/skills/pet/SKILL.md" -OutFile "$skillDir\SKILL.md"
-Write-Host "[4/5] Skill updated"
+Write-Host "[5/6] Skill updated"
 
 # 5. Update assets
 $assetsDir = "$dir\assets"
@@ -125,7 +158,7 @@ New-Item -ItemType Directory -Path $assetsDir -Force | Out-Null
 Invoke-WebRequest -Uri "$BASE/releases/latest/download/pet-assets.zip" -OutFile "$env:TEMP\pet-assets.zip"
 Expand-Archive -Path "$env:TEMP\pet-assets.zip" -DestinationPath $assetsDir -Force
 Remove-Item "$env:TEMP\pet-assets.zip" -ErrorAction SilentlyContinue
-Write-Host "[5/5] Assets updated"
+Write-Host "[6/6] Assets updated"
 
 Write-Host "Update complete! Run /pet on to start."
 ```
@@ -139,7 +172,7 @@ DIR="$HOME/.claude/pet-data"
 
 # 1. Close running pets
 pkill -f claude-status-pet 2>/dev/null; sleep 0.5
-echo "[1/5] Stopped running pets"
+echo "[1/6] Stopped running pets"
 
 # 2. Download binary
 mkdir -p "$DIR/bin"
@@ -151,43 +184,39 @@ case "$OS" in
 esac
 curl -sLo "$DIR/bin/$ASSET" "$BASE/releases/latest/download/$ASSET"
 chmod +x "$DIR/bin/$ASSET" 2>/dev/null || true
-echo "[2/5] Binary updated"
+echo "[2/6] Binary updated"
 
 # 3. Update hooks (only for installed hook locations)
 HOOK_UPDATED=0
 if [ -d "$HOME/.copilot/hooks" ]; then
   curl -sLo "$HOME/.copilot/hooks/status-pet.json" "$RAW/copilot/hooks.json"
-  HOOK_UPDATED=1; echo "[3/5] Copilot hooks updated"
+  HOOK_UPDATED=1; echo "[3/6] Copilot hooks updated"
 fi
-[ "$HOOK_UPDATED" -eq 0 ] && echo "[3/5] No hook locations to update (skipped)"
+[ "$HOOK_UPDATED" -eq 0 ] && echo "[3/6] No hook locations to update (skipped)"
+
+# 3b. Update hook scripts
+mkdir -p "$DIR/scripts"
+curl -sLo "$DIR/scripts/copilot-hook.sh" "$RAW/copilot/scripts/hook.sh"
+curl -sLo "$DIR/scripts/copilot-hook.ps1" "$RAW/copilot/scripts/hook.ps1"
+chmod +x "$DIR/scripts/copilot-hook.sh" 2>/dev/null || true
+echo "[4/6] Hook scripts updated"
 
 # 4. Update skill
 mkdir -p "$HOME/.claude/skills/pet"
 curl -sLo "$HOME/.claude/skills/pet/SKILL.md" "$RAW/skills/pet/SKILL.md"
-echo "[4/5] Skill updated"
+echo "[5/6] Skill updated"
 
 # 5. Update assets
 mkdir -p "$DIR/assets"
 curl -sLo /tmp/pet-assets.zip "$BASE/releases/latest/download/pet-assets.zip"
 unzip -o /tmp/pet-assets.zip -d "$DIR/assets"
 rm -f /tmp/pet-assets.zip
-echo "[5/5] Assets updated"
+echo "[6/6] Assets updated"
 
 echo "Update complete! Run /pet on to start."
 ```
 
 Tell the user: "Update complete! Use `/pet on` to start the pet."
-
-### /pet auto on/off
-
-**PowerShell:**
-```powershell
-$cfg = "$env:USERPROFILE\.claude\pet-data\config.json"
-$c = @{}; if (Test-Path $cfg) { $c = Get-Content $cfg | ConvertFrom-Json -AsHashtable }
-$c.auto_start = $<true|false>
-$c | ConvertTo-Json | Set-Content $cfg
-Write-Host "Auto-start: <on|off>"
-```
 
 ### /pet status
 

@@ -52,7 +52,7 @@ Done! The plugin auto-downloads the binary on first session start.
 }
 ```
 
-3. Launch: `~/.claude/pet-data/bin/claude-status-pet run --debug`
+3. Launch: `~/.claude/pet-data/bin/claude-status-pet run`
 
 ---
 
@@ -135,18 +135,32 @@ Invoke-WebRequest -Uri "https://github.com/moeyui1/claude-status-pet/releases/la
 **macOS / Linux / Git Bash:**
 
 ```bash
+RAW="https://raw.githubusercontent.com/moeyui1/claude-status-pet/main"
+
 HOOKS_DIR="$HOME/.copilot/hooks"
 mkdir -p "$HOOKS_DIR"
-curl -sLo "$HOOKS_DIR/status-pet.json" \
-  "https://raw.githubusercontent.com/moeyui1/claude-status-pet/main/copilot/hooks.json"
+curl -sLo "$HOOKS_DIR/status-pet.json" "$RAW/copilot/hooks.json"
+
+SCRIPTS_DIR="$HOME/.claude/pet-data/scripts"
+mkdir -p "$SCRIPTS_DIR"
+curl -sLo "$SCRIPTS_DIR/copilot-hook.sh" "$RAW/copilot/scripts/hook.sh"
+curl -sLo "$SCRIPTS_DIR/copilot-hook.ps1" "$RAW/copilot/scripts/hook.ps1"
+chmod +x "$SCRIPTS_DIR/copilot-hook.sh" 2>/dev/null || true
 ```
 
 **Windows PowerShell:**
 
 ```powershell
+$RAW = "https://raw.githubusercontent.com/moeyui1/claude-status-pet/main"
+
 $hooksDir = "$env:USERPROFILE\.copilot\hooks"
 New-Item -ItemType Directory -Path $hooksDir -Force | Out-Null
-Invoke-WebRequest -Uri "https://raw.githubusercontent.com/moeyui1/claude-status-pet/main/copilot/hooks.json" -OutFile "$hooksDir\status-pet.json"
+Invoke-WebRequest -Uri "$RAW/copilot/hooks.json" -OutFile "$hooksDir\status-pet.json"
+
+$scriptsDir = "$env:USERPROFILE\.claude\pet-data\scripts"
+New-Item -ItemType Directory -Path $scriptsDir -Force | Out-Null
+Invoke-WebRequest -Uri "$RAW/copilot/scripts/hook.sh" -OutFile "$scriptsDir\copilot-hook.sh"
+Invoke-WebRequest -Uri "$RAW/copilot/scripts/hook.ps1" -OutFile "$scriptsDir\copilot-hook.ps1"
 ```
 
 ### Manual: Download Assets
@@ -181,12 +195,12 @@ After install, confirm:
 
 **bash:**
 ```bash
-~/.claude/pet-data/bin/claude-status-pet* run --debug &
+~/.claude/pet-data/bin/claude-status-pet* run &
 ```
 
 **PowerShell:**
 ```powershell
-Start-Process "$env:USERPROFILE\.claude\pet-data\bin\claude-status-pet-windows-x64.exe" -ArgumentList "run", "--debug"
+Start-Process "$env:USERPROFILE\.claude\pet-data\bin\claude-status-pet-windows-x64.exe" -ArgumentList "run"
 ```
 
 Tell the user: "Your desktop pet is installed! It will appear on your screen and react to what your AI assistant is doing. Right-click to change characters or settings."

@@ -14,6 +14,13 @@ mod tests;
 
 static DEBUG_ENABLED: AtomicBool = AtomicBool::new(false);
 
+fn init_debug(args: &[String]) {
+    let _ = args; // reserved for future use
+    if std::env::var("PET_DEBUG").map_or(false, |v| v == "1" || v == "true") {
+        DEBUG_ENABLED.store(true, Ordering::Relaxed);
+    }
+}
+
 fn debug_log(path: &PathBuf, msg: &str) {
     if !DEBUG_ENABLED.load(Ordering::Relaxed) {
         return;
@@ -96,6 +103,7 @@ struct SessionInfo {
     state: String,
     detail: String,
     status_file: String,
+    last_modified: u64,
 }
 
 #[tauri::command]
@@ -117,6 +125,10 @@ fn list_unlocked_sessions() -> Vec<SessionInfo> {
                 let _ = fs::remove_file(&lock_file);
             }
             let status_path = entry.path();
+            let last_modified = status_path.metadata()
+                .and_then(|m| m.modified())
+                .map(|t| t.duration_since(std::time::UNIX_EPOCH).unwrap_or_default().as_millis() as u64)
+                .unwrap_or(0);
             let (sname, state, detail) = if let Some(s) = read_status(&status_path) {
                 (s.session_name, s.state, s.detail)
             } else {
@@ -128,6 +140,7 @@ fn list_unlocked_sessions() -> Vec<SessionInfo> {
                 state,
                 detail,
                 status_file: status_path.to_string_lossy().to_string(),
+                last_modified,
             });
         }
     }
@@ -467,10 +480,7 @@ fn scan_packs_in_dir(dir: &PathBuf, group: &str, packs: &mut Vec<CharacterPack>)
 /// CLI: write-status subcommand
 /// Reads event info from CLI args or stdin (via adapter), writes status JSON, exits.
 fn cmd_write_status(args: &[String]) {
-    // Enable debug if --debug is passed
-    if args.iter().any(|a| a == "--debug") {
-        DEBUG_ENABLED.store(true, Ordering::Relaxed);
-    }
+    init_debug(args);
     let pet_dir = default_pet_dir();
     let _ = fs::create_dir_all(&pet_dir);
     let log_path = pet_dir.join("pet-debug.log");  // dummy file path for debug_log
@@ -725,7 +735,7 @@ pub fn run() {
         std::process::exit(0); // Force exit — don't wait for stdin reader thread
     }
 
-    if args.iter().any(|a| a == "--debug") {
+    if std::env::var("PET_DEBUG").map_or(false, |v| v == "1" || v == "true") {
         DEBUG_ENABLED.store(true, Ordering::Relaxed);
     }
 

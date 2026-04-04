@@ -82,7 +82,6 @@ That's it! A pet will appear on your next session. 🎉
 |---------|--------|
 | `/pet` or `/pet on` | Launch the pet |
 | `/pet update` | Update binary, hooks, skill, and assets |
-| `/pet auto on/off` | Toggle auto-start (Claude Code only) |
 | `/pet status` | Show config and active sessions |
 
 > **Tip:** Switch characters and customize colors via the right-click menu.
