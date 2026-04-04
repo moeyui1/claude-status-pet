@@ -264,6 +264,10 @@ async fn download_dlc(assets_dir: tauri::State<'_, Option<PathBuf>>, dlc_name: S
 }
 
 fn download_dlc_blocking(dir: &PathBuf, dlc_name: &str) -> Result<bool, String> {
+    if !is_safe_session_id(dlc_name) {
+        return Err("Invalid DLC name".to_string());
+    }
+
     // Read DLC config from dlc/<name>.json
     let config_path = dir.join("dlc").join(format!("{}.json", dlc_name));
     let config_str = fs::read_to_string(&config_path)
@@ -275,17 +279,27 @@ fn download_dlc_blocking(dir: &PathBuf, dlc_name: &str) -> Result<bool, String> 
         .ok_or_else(|| "DLC config missing 'downloads' array".to_string())?;
 
     let dlc_dir = dir.join(dlc_name);
-    let _ = fs::create_dir_all(&dlc_dir);
+    fs::create_dir_all(&dlc_dir)
+        .map_err(|e| format!("Failed to create DLC directory: {}", e))?;
 
-    // Download each file
+    // Download each file (validate paths stay within assets dir)
+    let dir_canonical = dir.canonicalize().map_err(|e| format!("Invalid assets dir: {}", e))?;
     let mut failed = Vec::new();
     for item in downloads {
         let path = item["path"].as_str().unwrap_or("");
         let url = item["url"].as_str().unwrap_or("");
         if path.is_empty() || url.is_empty() { continue; }
+        // Path traversal prevention: ensure dest stays within assets dir
         let dest = dir.join(path);
         if let Some(parent) = dest.parent() {
-            let _ = fs::create_dir_all(parent);
+            fs::create_dir_all(parent)
+                .map_err(|e| format!("Failed to create directory for {}: {}", path, e))?;
+        }
+        let dest_parent = dest.parent()
+            .and_then(|p| p.canonicalize().ok())
+            .ok_or_else(|| format!("Invalid path: {}", path))?;
+        if !dest_parent.starts_with(&dir_canonical) {
+            return Err(format!("Path traversal blocked: {}", path));
         }
         match download_file(url, &dest) {
             Ok(_) => {}
@@ -306,7 +320,8 @@ fn download_dlc_blocking(dir: &PathBuf, dlc_name: &str) -> Result<bool, String> 
         "type": config["type"],
         "states": config["states"]
     });
-    let _ = fs::write(dlc_dir.join("character.json"), serde_json::to_string_pretty(&character).unwrap());
+    fs::write(dlc_dir.join("character.json"), serde_json::to_string_pretty(&character).unwrap())
+        .map_err(|e| format!("Failed to write character.json: {}", e))?;
 
     Ok(true)
 }
@@ -369,19 +384,28 @@ struct DlcInfo {
 #[tauri::command]
 fn list_available_dlcs(assets_dir: tauri::State<'_, Option<PathBuf>>) -> Vec<DlcInfo> {
     let mut dlcs = Vec::new();
-    let Some(dir) = assets_dir.inner().as_ref() else { return dlcs };
-    let dlc_dir = dir.join("dlc");
-    let Ok(entries) = fs::read_dir(&dlc_dir) else { return dlcs };
-    for entry in entries.filter_map(|e| e.ok()) {
-        let path = entry.path();
-        if path.extension().and_then(|e| e.to_str()) != Some("json") { continue; }
-        let id = path.file_stem().unwrap_or_default().to_string_lossy().to_string();
-        let Ok(content) = fs::read_to_string(&path) else { continue };
-        let Ok(v) = serde_json::from_str::<serde_json::Value>(&content) else { continue };
-        let name = v["name"].as_str().unwrap_or(&id).to_string();
-        // Check if already downloaded (has character.json in assets/<id>/)
-        let installed = dir.join(&id).join("character.json").exists();
-        dlcs.push(DlcInfo { id, name, installed });
+
+    // Scan dlc/*.json in assets dir, with fallback to default pet-data/assets/dlc/
+    let dirs_to_check: Vec<PathBuf> = if let Some(dir) = assets_dir.inner().as_ref() {
+        vec![dir.clone()]
+    } else {
+        vec![default_pet_dir().join("assets")]
+    };
+
+    for dir in &dirs_to_check {
+        let dlc_dir = dir.join("dlc");
+        let Ok(entries) = fs::read_dir(&dlc_dir) else { continue };
+        for entry in entries.filter_map(|e| e.ok()) {
+            let path = entry.path();
+            if path.extension().and_then(|e| e.to_str()) != Some("json") { continue; }
+            let id = path.file_stem().unwrap_or_default().to_string_lossy().to_string();
+            if dlcs.iter().any(|d: &DlcInfo| d.id == id) { continue; }
+            let Ok(content) = fs::read_to_string(&path) else { continue };
+            let Ok(v) = serde_json::from_str::<serde_json::Value>(&content) else { continue };
+            let name = v["name"].as_str().unwrap_or(&id).to_string();
+            let installed = dir.join(&id).join("character.json").exists();
+            dlcs.push(DlcInfo { id, name, installed });
+        }
     }
     dlcs
 }
