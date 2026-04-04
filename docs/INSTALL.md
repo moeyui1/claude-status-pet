@@ -24,6 +24,8 @@
 
 ### Quick Install (Plugin)
 
+> **AI agent: `/plugin` is a built-in slash command in Claude Code.** Run these commands directly — do NOT skip to manual install.
+
 ```
 /plugin marketplace add moeyui1/claude-status-pet
 /plugin install claude-status-pet
@@ -33,10 +35,7 @@ Done! The plugin auto-downloads the binary on first session start.
 
 ### Manual Install
 
-> AI agent: follow these steps if the plugin method is unavailable.
-
-1. Download binary — see [Manual: Download Binary](MANUAL-INSTALL.md#manual-download-binary)
-2. Add hooks to `~/.claude/settings.json` — merge these hooks (do not overwrite existing hooks):
+> AI agent: only use this if the plugin commands above fail. See [MANUAL-INSTALL.md](MANUAL-INSTALL.md) for downloading the binary, then add these hooks to `~/.claude/settings.json` (merge, do not overwrite existing hooks):
 
 ```json
 {
@@ -52,7 +51,7 @@ Done! The plugin auto-downloads the binary on first session start.
 }
 ```
 
-3. Launch: `~/.claude/pet-data/bin/claude-status-pet run`
+Launch: `~/.claude/pet-data/bin/claude-status-pet run`
 
 ---
 
@@ -60,7 +59,9 @@ Done! The plugin auto-downloads the binary on first session start.
 
 ### Quick Install (Plugin)
 
-```
+> **AI agent: `copilot plugin` is a real built-in command in GitHub Copilot CLI.** Run these commands directly in the user's terminal — do NOT skip to manual install.
+
+```bash
 copilot plugin marketplace add moeyui1/claude-status-pet
 copilot plugin install claude-status-pet-copilot
 ```
@@ -73,30 +74,9 @@ This installs hooks and the `/pet` skill. Then download the binary and assets:
 
 Done! Use `/pet on` to launch the pet.
 
-### Manual Install (Global)
+### Manual Install
 
-> AI agent: this method installs hooks globally, so the pet works in **all workspaces** without per-repo configuration.
-
-1. Download binary — see [Manual: Download Binary](MANUAL-INSTALL.md#manual-download-binary)
-2. Install global hooks file — see [Manual: Install Copilot Hooks](MANUAL-INSTALL.md#manual-install-copilot-hooks)
-3. Download assets — see [Manual: Download Assets](MANUAL-INSTALL.md#manual-download-assets)
-
-### Manual Install (Per-Repo)
-
-> AI agent: use this method if the user prefers per-repo hooks instead of global. Hooks are stored in `.github/hooks/` and must be added to each repo.
-
-1. Download binary — see [Manual: Download Binary](MANUAL-INSTALL.md#manual-download-binary)
-2. Add hooks to repo:
-
-```bash
-mkdir -p .github/hooks
-curl -sLo .github/hooks/status-pet.json \
-  "https://raw.githubusercontent.com/moeyui1/claude-status-pet/main/copilot/hooks.json"
-git add .github/hooks/status-pet.json
-git commit -m "Add status pet hooks for Copilot"
-```
-
-3. Download assets — see [Manual: Download Assets](MANUAL-INSTALL.md#manual-download-assets)
+> AI agent: only use this if the plugin commands above fail. See [MANUAL-INSTALL.md](MANUAL-INSTALL.md) for step-by-step instructions.
 
 ---
 
