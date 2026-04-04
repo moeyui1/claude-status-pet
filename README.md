@@ -108,22 +108,6 @@ Both tools can run simultaneously — each gets its own pet window.
 ## Other Installation Methods
 
 <details>
-<summary>📥 Download pre-built binary</summary>
-
-Download from [GitHub Releases](https://github.com/moeyui1/claude-status-pet/releases):
-
-| Platform | Binary |
-|----------|--------|
-| Windows x64 | `claude-status-pet-windows-x64.exe` |
-| macOS ARM (Apple Silicon) | `claude-status-pet-macos-arm64` |
-| macOS Intel | `claude-status-pet-macos-x64` |
-| Linux x64 | `claude-status-pet-linux-x64` |
-
-Then follow [docs/INSTALL.md](docs/INSTALL.md) to configure hooks.
-
-</details>
-
-<details>
 <summary>🔧 Build from source</summary>
 
 Prerequisites: [Rust](https://rustup.rs/), [Node.js](https://nodejs.org/)
@@ -136,35 +120,6 @@ npx tauri build
 ```
 
 Binary output: `pet-app/src-tauri/target/release/claude-status-pet(.exe)`
-
-</details>
-
-<details>
-<summary>⚙️ Manual hook setup (Claude Code)</summary>
-
-Add to your `~/.claude/settings.json`:
-
-```json
-{
-  "hooks": {
-    "UserPromptSubmit": [
-      { "hooks": [{ "type": "command", "command": "~/.claude/pet-data/bin/claude-status-pet write-status --adapter claude", "async": true }] }
-    ],
-    "PreToolUse": [
-      { "hooks": [{ "type": "command", "command": "~/.claude/pet-data/bin/claude-status-pet write-status --adapter claude", "async": true }] }
-    ],
-    "Stop": [
-      { "hooks": [{ "type": "command", "command": "~/.claude/pet-data/bin/claude-status-pet write-status --adapter claude", "async": true }] }
-    ],
-    "SessionStart": [
-      { "matcher": "startup", "hooks": [{ "type": "command", "command": "~/.claude/pet-data/bin/claude-status-pet write-status --adapter claude", "async": true }] }
-    ],
-    "SessionEnd": [
-      { "hooks": [{ "type": "command", "command": "~/.claude/pet-data/bin/claude-status-pet write-status --adapter claude", "async": true }] }
-    ]
-  }
-}
-```
 
 </details>
 

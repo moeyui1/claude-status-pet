@@ -109,22 +109,6 @@ copilot plugin install claude-status-pet-copilot
 ## 其他安装方式
 
 <details>
-<summary>📥 下载预编译二进制</summary>
-
-从 [GitHub Releases](https://github.com/moeyui1/claude-status-pet/releases) 下载：
-
-| 平台 | 文件 |
-|------|------|
-| Windows x64 | `claude-status-pet-windows-x64.exe` |
-| macOS ARM (Apple Silicon) | `claude-status-pet-macos-arm64` |
-| macOS Intel | `claude-status-pet-macos-x64` |
-| Linux x64 | `claude-status-pet-linux-x64` |
-
-下载后参照 [docs/INSTALL.md](docs/INSTALL.md) 配置钩子。
-
-</details>
-
-<details>
 <summary>🔧 从源码构建</summary>
 
 前置条件：[Rust](https://rustup.rs/)、[Node.js](https://nodejs.org/)
@@ -137,35 +121,6 @@ npx tauri build
 ```
 
 输出路径：`pet-app/src-tauri/target/release/claude-status-pet(.exe)`
-
-</details>
-
-<details>
-<summary>⚙️ 手动配置钩子（Claude Code）</summary>
-
-在 `~/.claude/settings.json` 中添加：
-
-```json
-{
-  "hooks": {
-    "UserPromptSubmit": [
-      { "hooks": [{ "type": "command", "command": "~/.claude/pet-data/bin/claude-status-pet write-status --adapter claude", "async": true }] }
-    ],
-    "PreToolUse": [
-      { "hooks": [{ "type": "command", "command": "~/.claude/pet-data/bin/claude-status-pet write-status --adapter claude", "async": true }] }
-    ],
-    "Stop": [
-      { "hooks": [{ "type": "command", "command": "~/.claude/pet-data/bin/claude-status-pet write-status --adapter claude", "async": true }] }
-    ],
-    "SessionStart": [
-      { "matcher": "startup", "hooks": [{ "type": "command", "command": "~/.claude/pet-data/bin/claude-status-pet write-status --adapter claude", "async": true }] }
-    ],
-    "SessionEnd": [
-      { "hooks": [{ "type": "command", "command": "~/.claude/pet-data/bin/claude-status-pet write-status --adapter claude", "async": true }] }
-    ]
-  }
-}
-```
 
 </details>
 

@@ -373,7 +373,7 @@ function addDivider(parent) {
   parent.appendChild(d);
 }
 
-function addColorRow(parent, label, currentVal, defaultVal, onchange) {
+function addColorRow(parent, label, currentVal, defaultVal, onchange, allowTransparent) {
   const row = document.createElement('div');
   row.className = 'menu-config-row';
   const lbl = document.createElement('span');
@@ -382,7 +382,7 @@ function addColorRow(parent, label, currentVal, defaultVal, onchange) {
   const input = document.createElement('input');
   input.type = 'color';
   input.className = 'menu-color-input';
-  input.value = currentVal || defaultVal;
+  input.value = (currentVal && currentVal !== 'transparent') ? currentVal : defaultVal;
   input.oninput = (e) => onchange(e.target.value);
   const reset = document.createElement('span');
   reset.className = 'menu-reset';
@@ -391,6 +391,14 @@ function addColorRow(parent, label, currentVal, defaultVal, onchange) {
   reset.onclick = () => { input.value = defaultVal; onchange(''); };
   row.appendChild(lbl);
   row.appendChild(input);
+  if (allowTransparent) {
+    const tp = document.createElement('span');
+    tp.className = 'menu-reset';
+    tp.textContent = '◻';
+    tp.title = 'Transparent';
+    tp.onclick = () => onchange('transparent');
+    row.appendChild(tp);
+  }
   row.appendChild(reset);
   parent.appendChild(row);
 }
@@ -502,7 +510,7 @@ function buildConfigPage() {
   addDivider(charMenu);
   addSliderRow(charMenu, 'Scale', petScale, 1, 2, 0.1, (v) => { petScale = v; saveConfig('petScale', String(v)); }, '%');
   addColorRow(charMenu, 'Text', petTextColor, '#ffffff', (v) => { petTextColor = v; saveConfig('petTextColor', v); });
-  addColorRow(charMenu, 'Label', petSessionBg, '#e06c3c', (v) => { petSessionBg = v; saveConfig('petSessionBg', v); });
+  addColorRow(charMenu, 'Label', petSessionBg, '#e06c3c', (v) => { petSessionBg = v; saveConfig('petSessionBg', v); }, true);
   addColorRow(charMenu, 'ASCII Fill', petFillColor, '#ffffff', (v) => { petFillColor = v; saveConfig('petFillColor', v); });
   addColorRow(charMenu, 'Background', petBgColor, '#ffffff', (v) => { petBgColor = v; saveConfig('petBgColor', v); });
   addDivider(charMenu);
