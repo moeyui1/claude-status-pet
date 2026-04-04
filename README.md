@@ -56,7 +56,7 @@ Then run `/pet update` to download the binary and assets.
 
 **Option 2 — Ask your AI agent** (works with Claude Code, Copilot, etc.):
 
-> Read https://raw.githubusercontent.com/moeyui1/claude-status-pet/main/INSTALL.md and install it for me
+> Read https://raw.githubusercontent.com/moeyui1/claude-status-pet/main/docs/INSTALL.md and install it for me
 
 That's it! A pet will appear on your next session. 🎉
 
@@ -119,7 +119,7 @@ Download from [GitHub Releases](https://github.com/moeyui1/claude-status-pet/rel
 | macOS Intel | `claude-status-pet-macos-x64` |
 | Linux x64 | `claude-status-pet-linux-x64` |
 
-Then follow [INSTALL.md](INSTALL.md) to configure hooks.
+Then follow [docs/INSTALL.md](docs/INSTALL.md) to configure hooks.
 
 </details>
 

@@ -56,7 +56,7 @@ copilot plugin install claude-status-pet-copilot
 
 **方式二 — 让 AI 助手安装**（适用于 Claude Code、Copilot 等）：
 
-> Read https://raw.githubusercontent.com/moeyui1/claude-status-pet/main/INSTALL.md and install it for me
+> Read https://raw.githubusercontent.com/moeyui1/claude-status-pet/main/docs/INSTALL.md and install it for me
 
 搞定！下次会话时桌面宠物就会出现 🎉
 
@@ -120,7 +120,7 @@ copilot plugin install claude-status-pet-copilot
 | macOS Intel | `claude-status-pet-macos-x64` |
 | Linux x64 | `claude-status-pet-linux-x64` |
 
-下载后参照 [INSTALL.md](INSTALL.md) 配置钩子。
+下载后参照 [docs/INSTALL.md](docs/INSTALL.md) 配置钩子。
 
 </details>
 

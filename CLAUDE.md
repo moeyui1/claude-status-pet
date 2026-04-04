@@ -34,6 +34,9 @@ claude-status-pet/
 ├── skills/
 │   └── pet/SKILL.md         # /pet slash command (works with Claude Code + Copilot via ~/.claude/skills/)
 ├── docs/
+│   ├── INSTALL.md           # Agent-readable install instructions
+│   ├── MANUAL-INSTALL.md    # Manual install steps (binary, hooks, assets)
+│   ├── CUSTOM-CHARACTERS.md
 │   ├── HOOKS.md             # Hook event → status mapping reference
 │   └── images/              # Compressed showcase GIFs
 ├── pet-app/                 # Tauri desktop app
@@ -56,7 +59,6 @@ claude-status-pet/
 ├── .github/workflows/
 │   └── release.yml          # CI: builds binaries + asset zip on version tags
 ├── CONTRIBUTING.md          # Adding characters + adapters
-├── INSTALL.md               # Agent-readable install instructions
 ├── README.md                # User-facing (English)
 └── README.zh-CN.md          # User-facing (Chinese)
 ```
