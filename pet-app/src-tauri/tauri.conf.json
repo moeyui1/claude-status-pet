@@ -1,6 +1,6 @@
 {
   "productName": "claude-status-pet",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "identifier": "com.claude.status-pet",
   "build": {
     "frontendDist": "../src",
