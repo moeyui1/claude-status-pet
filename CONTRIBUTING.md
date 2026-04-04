@@ -83,46 +83,43 @@ For characters bundled with the app (like Ferris):
 
 For characters downloaded at runtime (like Mona, Kuromi):
 
-### 1. Add GIF URLs to `download_dlc` in `pet-app/src-tauri/src/lib.rs`
+### 1. Create a DLC config file
 
-Add a new match arm in the `download_dlc` function with GIF URLs:
+Create `dlc/mychar.json`:
 
-```rust
-"mychar" => vec![
-    ("mychar/happy.gif", "https://media.giphy.com/media/.../giphy.gif"),
-    ("mychar/typing.gif", "https://media.giphy.com/media/.../giphy.gif"),
-    // ...
-],
+```json
+{
+  "name": "My Character",
+  "type": "gif",
+  "downloads": [
+    { "path": "mychar/happy.gif", "url": "https://example.com/happy.gif" },
+    { "path": "mychar/typing.gif", "url": "https://example.com/typing.gif" }
+  ],
+  "states": {
+    "idle": ["mychar/happy.gif"],
+    "thinking": ["mychar/typing.gif"],
+    "reading": ["mychar/happy.gif"],
+    "editing": ["mychar/typing.gif"],
+    "searching": ["mychar/typing.gif"],
+    "running": ["mychar/typing.gif"],
+    "delegating": ["mychar/happy.gif"],
+    "waiting": ["mychar/happy.gif"],
+    "error": ["mychar/happy.gif"],
+    "offline": ["mychar/happy.gif"],
+    "unknown": ["mychar/happy.gif"]
+  }
+}
 ```
 
-### 2. Add character config in the same function
+**Fields:**
+- **`name`** — Display name shown in the right-click menu
+- **`type`** — `"gif"` or `"svg"`
+- **`downloads`** — Array of `{path, url}` pairs. `path` is the local file path under the assets dir; `url` is where to download it from
+- **`states`** — Maps each pet state to an array of image paths (same as `character.json`)
 
-Add a new match arm for the `character.json` generation:
+The app auto-discovers all `dlc/*.json` files and shows them in the DLC menu. No code changes needed.
 
-```rust
-"mychar" => serde_json::json!({
-    "name": "My Character", "type": "gif",
-    "states": {
-        "idle": ["mychar/happy.gif"],
-        "thinking": ["mychar/curious.gif"],
-        // ...
-    }
-}),
-```
-
-### 3. Register in the DLC menu
-
-In `pet-app/src/app.js`, add to the `knownDlcs` array in `buildMenu()`:
-
-```javascript
-const knownDlcs = [
-  ['mona', 'Mona (GitHub)'],
-  ['kuromi', 'Kuromi (Sanrio)'],
-  ['mychar', 'My Character'],  // ← add here
-];
-```
-
-### 4. Test
+### 2. Test
 
 ```bash
 cd pet-app && npx tauri build

@@ -33,6 +33,9 @@ claude-status-pet/
 │   └── README.md
 ├── skills/
 │   └── pet/SKILL.md         # /pet slash command (works with Claude Code + Copilot via ~/.claude/skills/)
+├── dlc/                     # DLC character configs (packaged into pet-assets.zip)
+│   ├── mona.json            # Mona download URLs + state mapping
+│   └── kuromi.json          # Kuromi download URLs + state mapping
 ├── docs/
 │   ├── INSTALL.md           # Agent-readable install instructions
 │   ├── MANUAL-INSTALL.md    # Manual install steps (binary, hooks, assets)

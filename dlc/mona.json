@@ -1,0 +1,32 @@
+{
+  "name": "Mona (GitHub)",
+  "type": "gif",
+  "downloads": [
+    { "path": "mona/love.gif",      "url": "https://media.giphy.com/media/jrdgDVFrcgJpNlonWO/giphy.gif" },
+    { "path": "mona/angry.gif",     "url": "https://media.giphy.com/media/kmCCrDo2vlIu6Kswop/giphy.gif" },
+    { "path": "mona/looking.gif",   "url": "https://media.giphy.com/media/9f8mk4P3X2Nvch1z2o/giphy.gif" },
+    { "path": "mona/mona.gif",      "url": "https://media.giphy.com/media/OFEabGCcVqsckIGn8G/giphy.gif" },
+    { "path": "mona/tongue.gif",    "url": "https://media.giphy.com/media/WcYnTzdrjQphdu33xs/giphy.gif" },
+    { "path": "mona/shocked.gif",   "url": "https://media.giphy.com/media/JdQFsdoJBcHaPOANdK/giphy.gif" },
+    { "path": "mona/smirk.gif",     "url": "https://media.giphy.com/media/0vTOscboHgOyBSuK4r/giphy.gif" },
+    { "path": "mona/laugh.gif",     "url": "https://media.giphy.com/media/RgutegYIHk2Nhxj4m5/giphy.gif" },
+    { "path": "mona/ohbrother.gif", "url": "https://media.giphy.com/media/pMzEfC42AYlqT2WPaf/giphy.gif" },
+    { "path": "mona/hearts.gif",    "url": "https://media.giphy.com/media/wJBYx2Yh84XS4sTzmz/giphy.gif" },
+    { "path": "mona/sick.gif",      "url": "https://media.giphy.com/media/nfL2nlWacI8d9jgVXb/giphy.gif" },
+    { "path": "mona/tech.gif",      "url": "https://media.giphy.com/media/cDZJ17fbzWVle68VCB/giphy.gif" },
+    { "path": "mona/ducks.gif",     "url": "https://media.giphy.com/media/QxT6pLq6ekKiCkLkf0/giphy.gif" }
+  ],
+  "states": {
+    "idle":       ["mona/love.gif", "mona/hearts.gif", "mona/smirk.gif"],
+    "thinking":   ["mona/looking.gif", "mona/mona.gif"],
+    "reading":    ["mona/mona.gif", "mona/looking.gif"],
+    "editing":    ["mona/tongue.gif", "mona/laugh.gif"],
+    "searching":  ["mona/tech.gif", "mona/looking.gif"],
+    "running":    ["mona/tongue.gif", "mona/tech.gif"],
+    "delegating": ["mona/ducks.gif", "mona/smirk.gif"],
+    "waiting":    ["mona/shocked.gif", "mona/mona.gif"],
+    "error":      ["mona/angry.gif", "mona/sick.gif"],
+    "offline":    ["mona/ohbrother.gif", "mona/mona.gif"],
+    "unknown":    ["mona/love.gif"]
+  }
+}

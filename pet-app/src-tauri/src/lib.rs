@@ -264,49 +264,34 @@ async fn download_dlc(assets_dir: tauri::State<'_, Option<PathBuf>>, dlc_name: S
 }
 
 fn download_dlc_blocking(dir: &PathBuf, dlc_name: &str) -> Result<bool, String> {
+    // Read DLC config from dlc/<name>.json
+    let config_path = dir.join("dlc").join(format!("{}.json", dlc_name));
+    let config_str = fs::read_to_string(&config_path)
+        .map_err(|e| format!("DLC config not found: {}: {}", config_path.display(), e))?;
+    let config: serde_json::Value = serde_json::from_str(&config_str)
+        .map_err(|e| format!("Invalid DLC config: {}", e))?;
 
-    let gifs: Vec<(&str, &str)> = match dlc_name {
-        "mona" => vec![
-            ("mona/love.gif",      "https://media.giphy.com/media/jrdgDVFrcgJpNlonWO/giphy.gif"),
-            ("mona/angry.gif",     "https://media.giphy.com/media/kmCCrDo2vlIu6Kswop/giphy.gif"),
-            ("mona/looking.gif",   "https://media.giphy.com/media/9f8mk4P3X2Nvch1z2o/giphy.gif"),
-            ("mona/mona.gif",      "https://media.giphy.com/media/OFEabGCcVqsckIGn8G/giphy.gif"),
-            ("mona/tongue.gif",    "https://media.giphy.com/media/WcYnTzdrjQphdu33xs/giphy.gif"),
-            ("mona/shocked.gif",   "https://media.giphy.com/media/JdQFsdoJBcHaPOANdK/giphy.gif"),
-            ("mona/smirk.gif",     "https://media.giphy.com/media/0vTOscboHgOyBSuK4r/giphy.gif"),
-            ("mona/laugh.gif",     "https://media.giphy.com/media/RgutegYIHk2Nhxj4m5/giphy.gif"),
-            ("mona/ohbrother.gif", "https://media.giphy.com/media/pMzEfC42AYlqT2WPaf/giphy.gif"),
-            ("mona/hearts.gif",    "https://media.giphy.com/media/wJBYx2Yh84XS4sTzmz/giphy.gif"),
-            ("mona/sick.gif",      "https://media.giphy.com/media/nfL2nlWacI8d9jgVXb/giphy.gif"),
-            ("mona/tech.gif",      "https://media.giphy.com/media/cDZJ17fbzWVle68VCB/giphy.gif"),
-            ("mona/ducks.gif",     "https://media.giphy.com/media/QxT6pLq6ekKiCkLkf0/giphy.gif"),
-        ],
-        "kuromi" => vec![
-            ("kuromi/bling.gif",    "https://media.giphy.com/media/JNxq0xOWfidCDzqUH3/giphy.gif"),
-            ("kuromi/charming.gif", "https://media.giphy.com/media/gkLG3Ki3OTXDwVb4rY/giphy.gif"),
-            ("kuromi/kuromi.gif",   "https://media.giphy.com/media/MphoCSnXeA6wR4L8IS/giphy.gif"),
-            ("kuromi/lilrya.gif",   "https://media.giphy.com/media/4G0nkrrXm8Xe1VgPzF/giphy.gif"),
-            ("kuromi/jump.gif",     "https://media.giphy.com/media/cQSjIBgUC2NbMKEm9q/giphy.gif"),
-            ("kuromi/sleeping.gif", "https://media.giphy.com/media/ZIskbLAG8Qeiq2dbV5/giphy.gif"),
-            ("kuromi/heart.gif",    "https://media.giphy.com/media/VpCEcS3ZJ4qlKcD8LF/giphy.gif"),
-            ("kuromi/think.gif",    "https://media.giphy.com/media/dCRVRbdbZUlNt1sRPd/giphy.gif"),
-            ("kuromi/angry.gif",    "https://media.giphy.com/media/Qtvvgwbl1svKYcUGIT/giphy.gif"),
-        ],
-        _ => return Err(format!("Unknown DLC: {}", dlc_name)),
-    };
+    let downloads = config["downloads"].as_array()
+        .ok_or_else(|| "DLC config missing 'downloads' array".to_string())?;
 
-    let dlc_dir = dir.join(&dlc_name);
+    let dlc_dir = dir.join(dlc_name);
     let _ = fs::create_dir_all(&dlc_dir);
 
-    // Download each GIF using ureq HTTP client
+    // Download each file
     let mut failed = Vec::new();
-    for (name, url) in &gifs {
-        let dest = dir.join(name);
+    for item in downloads {
+        let path = item["path"].as_str().unwrap_or("");
+        let url = item["url"].as_str().unwrap_or("");
+        if path.is_empty() || url.is_empty() { continue; }
+        let dest = dir.join(path);
+        if let Some(parent) = dest.parent() {
+            let _ = fs::create_dir_all(parent);
+        }
         match download_file(url, &dest) {
             Ok(_) => {}
             Err(e) => {
-                eprintln!("Failed to download {}: {}", name, e);
-                failed.push(*name);
+                eprintln!("Failed to download {}: {}", path, e);
+                failed.push(path.to_string());
             }
         }
     }
@@ -315,44 +300,13 @@ fn download_dlc_blocking(dir: &PathBuf, dlc_name: &str) -> Result<bool, String> 
         return Err(format!("Failed to download: {}", failed.join(", ")));
     }
 
-    // Write character.json
-    let config = match dlc_name {
-        "mona" => serde_json::json!({
-            "name": "Mona (GitHub)", "type": "gif",
-            "states": {
-                "idle": ["mona/love.gif", "mona/hearts.gif", "mona/smirk.gif"],
-                "thinking": ["mona/looking.gif", "mona/mona.gif"],
-                "reading": ["mona/mona.gif", "mona/looking.gif"],
-                "editing": ["mona/tongue.gif", "mona/laugh.gif"],
-                "searching": ["mona/tech.gif", "mona/looking.gif"],
-                "running": ["mona/tongue.gif", "mona/tech.gif"],
-                "delegating": ["mona/ducks.gif", "mona/smirk.gif"],
-                "waiting": ["mona/shocked.gif", "mona/mona.gif"],
-                "error": ["mona/angry.gif", "mona/sick.gif"],
-                "offline": ["mona/ohbrother.gif", "mona/mona.gif"],
-                "unknown": ["mona/love.gif"]
-            }
-        }),
-        "kuromi" => serde_json::json!({
-            "name": "Kuromi (Sanrio)", "type": "gif",
-            "states": {
-                "idle": ["kuromi/charming.gif", "kuromi/lilrya.gif"],
-                "thinking": ["kuromi/think.gif", "kuromi/bling.gif"],
-                "reading": ["kuromi/kuromi.gif"],
-                "editing": ["kuromi/jump.gif", "kuromi/charming.gif"],
-                "searching": ["kuromi/think.gif"],
-                "running": ["kuromi/jump.gif", "kuromi/charming.gif"],
-                "delegating": ["kuromi/heart.gif", "kuromi/lilrya.gif"],
-                "waiting": ["kuromi/bling.gif", "kuromi/lilrya.gif"],
-                "error": ["kuromi/angry.gif"],
-                "offline": ["kuromi/sleeping.gif"],
-                "unknown": ["kuromi/charming.gif"]
-            }
-        }),
-        _ => unreachable!(),
-    };
-
-    let _ = fs::write(dlc_dir.join("character.json"), serde_json::to_string_pretty(&config).unwrap());
+    // Write character.json from the states in the DLC config
+    let character = serde_json::json!({
+        "name": config["name"],
+        "type": config["type"],
+        "states": config["states"]
+    });
+    let _ = fs::write(dlc_dir.join("character.json"), serde_json::to_string_pretty(&character).unwrap());
 
     Ok(true)
 }
@@ -403,6 +357,33 @@ fn load_custom_asset(assets_dir: tauri::State<'_, Option<PathBuf>>, path: String
     };
     let b64 = base64::engine::general_purpose::STANDARD.encode(&bytes);
     Some(format!("data:{};base64,{}", mime, b64))
+}
+
+#[derive(Clone, Serialize)]
+struct DlcInfo {
+    id: String,
+    name: String,
+    installed: bool,
+}
+
+#[tauri::command]
+fn list_available_dlcs(assets_dir: tauri::State<'_, Option<PathBuf>>) -> Vec<DlcInfo> {
+    let mut dlcs = Vec::new();
+    let Some(dir) = assets_dir.inner().as_ref() else { return dlcs };
+    let dlc_dir = dir.join("dlc");
+    let Ok(entries) = fs::read_dir(&dlc_dir) else { return dlcs };
+    for entry in entries.filter_map(|e| e.ok()) {
+        let path = entry.path();
+        if path.extension().and_then(|e| e.to_str()) != Some("json") { continue; }
+        let id = path.file_stem().unwrap_or_default().to_string_lossy().to_string();
+        let Ok(content) = fs::read_to_string(&path) else { continue };
+        let Ok(v) = serde_json::from_str::<serde_json::Value>(&content) else { continue };
+        let name = v["name"].as_str().unwrap_or(&id).to_string();
+        // Check if already downloaded (has character.json in assets/<id>/)
+        let installed = dir.join(&id).join("character.json").exists();
+        dlcs.push(DlcInfo { id, name, installed });
+    }
+    dlcs
 }
 
 #[derive(Clone, Serialize)]
@@ -786,7 +767,7 @@ pub fn run() {
         .manage(session_id_shared)
         .manage(lock_path_shared)
         .manage(assets_dir)
-        .invoke_handler(tauri::generate_handler![get_status, get_session_id, get_assets_dir, load_asset, load_text_asset, load_custom_asset, is_dlc_installed, download_dlc, list_character_packs, list_unlocked_sessions, bind_session])
+        .invoke_handler(tauri::generate_handler![get_status, get_session_id, get_assets_dir, load_asset, load_text_asset, load_custom_asset, is_dlc_installed, download_dlc, list_available_dlcs, list_character_packs, list_unlocked_sessions, bind_session])
         .setup(move |app| {
             let window = app.get_webview_window("main").unwrap();
 

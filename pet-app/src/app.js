@@ -170,6 +170,7 @@ let asciiInterval = null;
 let menuPage = 'main';
 let appVersion = '0.0.0';
 let customPacks = [];
+let availableDlcs = [];  // [{id, name, installed}] from dlc/*.json
 let boundSessionId = '';
 let sessionPoll = null;
 const dlcInstalledCache = {};
@@ -446,19 +447,20 @@ function buildMenu() {
   addDivider(charMenu);
 
   // DLC characters
-  const dlcLabel = document.createElement('div');
-  dlcLabel.className = 'menu-section-label';
-  dlcLabel.textContent = 'DLC';
-  charMenu.appendChild(dlcLabel);
+  if (availableDlcs.length > 0) {
+    const dlcLabel = document.createElement('div');
+    dlcLabel.className = 'menu-section-label';
+    dlcLabel.textContent = 'DLC';
+    charMenu.appendChild(dlcLabel);
 
-  const knownDlcs = [['mona', 'Mona (GitHub)'], ['kuromi', 'Kuromi (Sanrio)']];
-  for (const [key, fallbackLabel] of knownDlcs) {
-    const installed = isDlcInstalled(key);
-    const cls = mode === key ? 'active' : '';
-    if (installed) {
-      addMenuItem(charMenu, fallbackLabel, () => selectChar(key), cls);
-    } else {
-      addMenuItem(charMenu, fallbackLabel + ' ↓', () => downloadAndSelectDlc(key), cls);
+    for (const dlc of availableDlcs) {
+      const installed = isDlcInstalled(dlc.id);
+      const cls = mode === dlc.id ? 'active' : '';
+      if (installed) {
+        addMenuItem(charMenu, dlc.name, () => selectChar(dlc.id), cls);
+      } else {
+        addMenuItem(charMenu, dlc.name + ' ↓', () => downloadAndSelectDlc(dlc.id), cls);
+      }
     }
   }
 
@@ -731,43 +733,43 @@ async function preloadAssets() {
   } catch(e) {}
 
   // Discover DLC and custom characters
-  if (window.__TAURI__ && hasExternalAssets) {
-    // DLC characters
-    for (const dlcName of ['mona', 'kuromi']) {
-      try {
-        const installed = await window.__TAURI__.core.invoke('is_dlc_installed', { dlcName });
-        dlcInstalledCache[dlcName] = installed;
-        if (installed) {
+  if (window.__TAURI__) {
+    // Load available DLCs from dlc/*.json configs
+    try {
+      availableDlcs = await window.__TAURI__.core.invoke('list_available_dlcs');
+      for (const dlc of availableDlcs) {
+        dlcInstalledCache[dlc.id] = dlc.installed;
+        if (dlc.installed) {
           try {
-            const jsonStr = await window.__TAURI__.core.invoke('load_text_asset', { path: dlcName + '/character.json' });
+            const jsonStr = await window.__TAURI__.core.invoke('load_text_asset', { path: dlc.id + '/character.json' });
             if (jsonStr) {
-              const config = JSON.parse(jsonStr);
-              GIF_MODES[dlcName] = config.states;
+              GIF_MODES[dlc.id] = JSON.parse(jsonStr).states;
             }
           } catch(e) {}
         }
-      } catch(e) { dlcInstalledCache[dlcName] = false; }
-    }
-
-    // Custom character packs
-    try {
-      const packs = await window.__TAURI__.core.invoke('list_character_packs');
-      customPacks = packs.filter(p => p.group === 'custom' && p.installed);
-      for (const pack of customPacks) {
-        try {
-          const jsonStr = await window.__TAURI__.core.invoke('load_text_asset', { path: pack.id + '/character.json' });
-          if (jsonStr) {
-            const config = JSON.parse(jsonStr);
-            GIF_MODES[pack.id] = config.states;
-          }
-        } catch(e) {}
       }
     } catch(e) {}
+
+    // Custom character packs
+    if (hasExternalAssets) {
+      try {
+        const packs = await window.__TAURI__.core.invoke('list_character_packs');
+        customPacks = packs.filter(p => p.group === 'custom' && p.installed);
+        for (const pack of customPacks) {
+          try {
+            const jsonStr = await window.__TAURI__.core.invoke('load_text_asset', { path: pack.id + '/character.json' });
+            if (jsonStr) {
+              GIF_MODES[pack.id] = JSON.parse(jsonStr).states;
+            }
+          } catch(e) {}
+        }
+      } catch(e) {}
+    }
   }
 
   // If current mode is a DLC that's not installed, auto-download it
-  const knownDlcs = ['mona', 'kuromi'];
-  if (knownDlcs.includes(mode) && !dlcInstalledCache[mode] && window.__TAURI__) {
+  const isDlcMode = availableDlcs.some(d => d.id === mode);
+  if (isDlcMode && !dlcInstalledCache[mode] && window.__TAURI__) {
     statusText.textContent = 'Downloading ' + mode + '...';
     bubble.classList.remove('hidden');
     try {

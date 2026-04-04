@@ -28,7 +28,9 @@ jobs:
           done
 
       - name: Create asset zip
-        run: cd assets && zip -r ../pet-assets.zip ferris/
+        run: |
+          cp -r dlc/ assets/dlc/
+          cd assets && zip -r ../pet-assets.zip ferris/ dlc/
 
       - name: Upload asset zip
         uses: softprops/action-gh-release@v2.6.1

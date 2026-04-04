@@ -1,0 +1,28 @@
+{
+  "name": "Kuromi (Sanrio)",
+  "type": "gif",
+  "downloads": [
+    { "path": "kuromi/bling.gif",    "url": "https://media.giphy.com/media/JNxq0xOWfidCDzqUH3/giphy.gif" },
+    { "path": "kuromi/charming.gif", "url": "https://media.giphy.com/media/gkLG3Ki3OTXDwVb4rY/giphy.gif" },
+    { "path": "kuromi/kuromi.gif",   "url": "https://media.giphy.com/media/MphoCSnXeA6wR4L8IS/giphy.gif" },
+    { "path": "kuromi/lilrya.gif",   "url": "https://media.giphy.com/media/4G0nkrrXm8Xe1VgPzF/giphy.gif" },
+    { "path": "kuromi/jump.gif",     "url": "https://media.giphy.com/media/cQSjIBgUC2NbMKEm9q/giphy.gif" },
+    { "path": "kuromi/sleeping.gif", "url": "https://media.giphy.com/media/ZIskbLAG8Qeiq2dbV5/giphy.gif" },
+    { "path": "kuromi/heart.gif",    "url": "https://media.giphy.com/media/VpCEcS3ZJ4qlKcD8LF/giphy.gif" },
+    { "path": "kuromi/think.gif",    "url": "https://media.giphy.com/media/dCRVRbdbZUlNt1sRPd/giphy.gif" },
+    { "path": "kuromi/angry.gif",    "url": "https://media.giphy.com/media/Qtvvgwbl1svKYcUGIT/giphy.gif" }
+  ],
+  "states": {
+    "idle":       ["kuromi/charming.gif", "kuromi/lilrya.gif"],
+    "thinking":   ["kuromi/think.gif", "kuromi/bling.gif"],
+    "reading":    ["kuromi/kuromi.gif"],
+    "editing":    ["kuromi/jump.gif", "kuromi/charming.gif"],
+    "searching":  ["kuromi/think.gif"],
+    "running":    ["kuromi/jump.gif", "kuromi/charming.gif"],
+    "delegating": ["kuromi/heart.gif", "kuromi/lilrya.gif"],
+    "waiting":    ["kuromi/bling.gif", "kuromi/lilrya.gif"],
+    "error":      ["kuromi/angry.gif"],
+    "offline":    ["kuromi/sleeping.gif"],
+    "unknown":    ["kuromi/charming.gif"]
+  }
+}
