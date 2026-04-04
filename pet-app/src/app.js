@@ -545,6 +545,8 @@ async function downloadAndSelectDlc(dlcName) {
   try {
     await window.__TAURI__.core.invoke('download_dlc', { dlcName });
     dlcInstalledCache[dlcName] = true;
+    // Re-check assets dir (download_dlc may have created it)
+    try { hasExternalAssets = !!(await window.__TAURI__.core.invoke('get_assets_dir')); } catch(e) {}
     // Load character.json for the newly downloaded DLC
     try {
       const jsonStr = await window.__TAURI__.core.invoke('load_text_asset', { path: dlcName + '/character.json' });
@@ -771,6 +773,8 @@ async function preloadAssets() {
     try {
       await window.__TAURI__.core.invoke('download_dlc', { dlcName: mode });
       dlcInstalledCache[mode] = true;
+      // Re-check assets dir (download_dlc may have created it)
+      try { hasExternalAssets = !!(await window.__TAURI__.core.invoke('get_assets_dir')); } catch(e) {}
       const jsonStr = await window.__TAURI__.core.invoke('load_text_asset', { path: mode + '/character.json' });
       if (jsonStr) {
         GIF_MODES[mode] = JSON.parse(jsonStr).states;
