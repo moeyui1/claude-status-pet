@@ -4,343 +4,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Claude Status Pet — Desktop Pet for AI Coding Assistants</title>
-<meta name="description" content="A desktop pet that shows what your AI coding assistant is doing in real time. Built with Rust + Tauri.">
-<style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-:root {
-  --bg: #0d1117;
-  --bg2: #161b22;
-  --bg3: #21262d;
-  --text: #e6edf3;
-  --text2: #8b949e;
-  --accent: #58a6ff;
-  --accent2: #1f6feb;
-  --orange: #f0883e;
-  --green: #3fb950;
-  --purple: #bc8cff;
-  --radius: 12px;
-  --max-w: 1100px;
-}
-
-html { scroll-behavior: smooth; }
-
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  line-height: 1.6;
-  overflow-x: hidden;
-}
-
-a { color: var(--accent); text-decoration: none; transition: opacity 0.2s; }
-a:hover { opacity: 0.8; }
-
-/* ── Hero ── */
-.hero {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 2rem 1.5rem;
-  background: radial-gradient(ellipse at 50% 0%, #1a2744 0%, var(--bg) 70%);
-  position: relative;
-}
-
-.hero::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 120px;
-  background: linear-gradient(transparent, var(--bg));
-}
-
-.hero-emoji {
-  font-size: 4rem;
-  margin-bottom: 1rem;
-  animation: float 3s ease-in-out infinite;
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-12px); }
-}
-
-.hero h1 {
-  font-size: clamp(2rem, 5vw, 3.5rem);
-  font-weight: 800;
-  margin-bottom: 0.5rem;
-  background: linear-gradient(135deg, var(--accent), var(--purple));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.hero .tagline {
-  font-size: clamp(1rem, 2.5vw, 1.3rem);
-  color: var(--text2);
-  max-width: 600px;
-  margin-bottom: 1.5rem;
-}
-
-.badges {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  justify-content: center;
-  margin-bottom: 2rem;
-}
-
-.badges img { height: 22px; }
-
-.cta-row {
-  display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
-  justify-content: center;
-  margin-bottom: 3rem;
-}
-
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: 600;
-  transition: transform 0.15s, box-shadow 0.15s;
-  border: none;
-  cursor: pointer;
-}
-
-.btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.4); }
-
-.btn-primary {
-  background: linear-gradient(135deg, var(--accent2), var(--accent));
-  color: #fff;
-}
-
-.btn-secondary {
-  background: var(--bg3);
-  color: var(--text);
-  border: 1px solid #30363d;
-}
-
-.showcase {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1rem;
-  max-width: 800px;
-  width: 100%;
-  position: relative;
-  z-index: 1;
-}
-
-.showcase img {
-  width: 100%;
-  border-radius: var(--radius);
-  border: 1px solid #30363d;
-  transition: transform 0.3s;
-}
-
-.showcase img:hover { transform: scale(1.05); }
-
-/* ── Section ── */
-section {
-  max-width: var(--max-w);
-  margin: 0 auto;
-  padding: 5rem 1.5rem;
-}
-
-.section-title {
-  font-size: 2rem;
-  font-weight: 700;
-  text-align: center;
-  margin-bottom: 0.5rem;
-}
-
-.section-sub {
-  text-align: center;
-  color: var(--text2);
-  margin-bottom: 3rem;
-  max-width: 600px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-/* ── Features ── */
-.features-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 1.5rem;
-}
-
-.feature-card {
-  background: var(--bg2);
-  border: 1px solid #30363d;
-  border-radius: var(--radius);
-  padding: 1.5rem;
-  transition: transform 0.2s, border-color 0.2s;
-}
-
-.feature-card:hover {
-  transform: translateY(-4px);
-  border-color: var(--accent);
-}
-
-.feature-icon {
-  font-size: 2rem;
-  margin-bottom: 0.75rem;
-}
-
-.feature-card h3 {
-  font-size: 1.1rem;
-  margin-bottom: 0.5rem;
-}
-
-.feature-card p {
-  color: var(--text2);
-  font-size: 0.95rem;
-}
-
-/* ── Characters ── */
-.chars-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 1.5rem;
-}
-
-.char-card {
-  background: var(--bg2);
-  border: 1px solid #30363d;
-  border-radius: var(--radius);
-  overflow: hidden;
-  transition: transform 0.2s;
-}
-
-.char-card:hover { transform: translateY(-4px); }
-
-.char-card img {
-  width: 100%;
-  display: block;
-}
-
-.char-card .char-name {
-  padding: 0.75rem 1rem;
-  font-weight: 600;
-  text-align: center;
-}
-
-.char-card .char-type {
-  color: var(--text2);
-  font-size: 0.85rem;
-  font-weight: 400;
-}
-
-/* ── Install ── */
-.install-section {
-  background: var(--bg2);
-  border: 1px solid #30363d;
-  border-radius: var(--radius);
-  max-width: 700px;
-  margin: 0 auto;
-  overflow: hidden;
-}
-
-.install-tabs {
-  display: flex;
-  border-bottom: 1px solid #30363d;
-}
-
-.install-tab {
-  flex: 1;
-  padding: 0.75rem;
-  text-align: center;
-  cursor: pointer;
-  background: transparent;
-  border: none;
-  color: var(--text2);
-  font-size: 0.95rem;
-  font-weight: 500;
-  transition: color 0.2s, background 0.2s;
-}
-
-.install-tab.active {
-  color: var(--accent);
-  background: var(--bg3);
-  border-bottom: 2px solid var(--accent);
-}
-
-.install-tab:hover:not(.active) { color: var(--text); }
-
-.install-panel {
-  display: none;
-  padding: 1.5rem;
-}
-
-.install-panel.active { display: block; }
-
-.install-panel pre {
-  background: var(--bg);
-  border: 1px solid #30363d;
-  border-radius: 8px;
-  padding: 1rem;
-  overflow-x: auto;
-  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
-  font-size: 0.9rem;
-  line-height: 1.7;
-  color: var(--green);
-  margin-bottom: 1rem;
-}
-
-.install-panel pre:last-child { margin-bottom: 0; }
-
-.install-panel .step {
-  color: var(--text2);
-  font-size: 0.9rem;
-  margin-bottom: 0.5rem;
-}
-
-/* ── Footer ── */
-footer {
-  text-align: center;
-  padding: 3rem 1.5rem;
-  color: var(--text2);
-  font-size: 0.9rem;
-  border-top: 1px solid #21262d;
-}
-
-footer a { color: var(--text2); }
-footer a:hover { color: var(--accent); }
-
-.footer-links {
-  display: flex;
-  gap: 2rem;
-  justify-content: center;
-  margin-bottom: 1rem;
-}
-
-/* ── Responsive ── */
-@media (max-width: 640px) {
-  .showcase { grid-template-columns: repeat(2, 1fr); }
-  .features-grid { grid-template-columns: 1fr; }
-  .chars-grid { grid-template-columns: repeat(2, 1fr); }
-  .cta-row { flex-direction: column; align-items: center; }
-}
-</style>
+<meta name="description" content="A desktop pet that shows what your AI coding assistant is doing in real time. Works with Claude Code and GitHub Copilot CLI.">
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <!-- Hero -->
 <div class="hero">
-  <div class="hero-emoji">🦀</div>
+  <div class="hero-mascot">🦀</div>
   <h1>Claude Status Pet</h1>
   <p class="tagline">A desktop pet that shows what your AI coding assistant is doing — in real time.</p>
+  <p class="supports">Works with <a href="https://docs.anthropic.com/en/docs/claude-code"><strong>Claude Code</strong></a> and <a href="https://docs.github.com/en/copilot/how-tos/copilot-cli"><strong>GitHub Copilot CLI</strong></a></p>
 
   <div class="badges">
     <a href="https://github.com/moeyui1/claude-status-pet/actions/workflows/release.yml"><img src="https://img.shields.io/github/actions/workflow/status/moeyui1/claude-status-pet/release.yml?style=flat-square&logo=github&label=build" alt="Build"></a>
@@ -365,7 +39,7 @@ footer a:hover { color: var(--accent); }
 
 <!-- Features -->
 <section>
-  <h2 class="section-title">Features</h2>
+  <h2 class="section-title">✨ Features</h2>
   <p class="section-sub">Lightweight, real-time, and delightful — your AI assistant's mood ring.</p>
 
   <div class="features-grid">
@@ -404,7 +78,7 @@ footer a:hover { color: var(--accent); }
 
 <!-- Characters -->
 <section>
-  <h2 class="section-title">Characters</h2>
+  <h2 class="section-title">🎭 Characters</h2>
   <p class="section-sub">Pick your companion. Download DLC characters with one click.</p>
 
   <div class="chars-grid">
@@ -429,14 +103,14 @@ footer a:hover { color: var(--accent); }
 
 <!-- Install -->
 <section>
-  <h2 class="section-title">Get Started</h2>
+  <h2 class="section-title">🚀 Get Started</h2>
   <p class="section-sub">Install in seconds with a single command.</p>
 
-  <div class="install-section">
+  <div class="install-box">
     <div class="install-tabs">
       <button class="install-tab active" onclick="switchTab(0)">Claude Code</button>
       <button class="install-tab" onclick="switchTab(1)">GitHub Copilot CLI</button>
-      <button class="install-tab" onclick="switchTab(2)">Any AI Agent</button>
+      <button class="install-tab" onclick="switchTab(2)">Other Agents</button>
     </div>
 
     <div class="install-panel active">
@@ -458,7 +132,7 @@ copilot plugin install claude-status-pet-copilot</pre>
     <div class="install-panel">
       <p class="step">Ask your AI assistant:</p>
       <pre>Read https://raw.githubusercontent.com/moeyui1/claude-status-pet/main/docs/INSTALL.md and install it for me</pre>
-      <p class="step">Works with any AI coding agent that supports hooks. 🎉</p>
+      <p class="step">Currently supported: Claude Code and GitHub Copilot CLI. Extensible to any agent with hook support — <a href="https://github.com/moeyui1/claude-status-pet/blob/main/CONTRIBUTING.md#adding-a-new-ai-agent-adapter">PRs welcome</a>!</p>
     </div>
   </div>
 </section>
@@ -471,7 +145,7 @@ copilot plugin install claude-status-pet-copilot</pre>
     <a href="https://github.com/moeyui1/claude-status-pet/blob/main/CONTRIBUTING.md">Contributing</a>
     <a href="https://github.com/moeyui1/claude-status-pet/blob/main/LICENSE">License</a>
   </div>
-  <p>Made with 🦀 and ❤️ by <a href="https://github.com/moeyui1">moeyui1</a></p>
+  <p>Made with 🦀 and ❤️ by <a href="https://github.com/moeyui1">moeyui1</a>, <a href="https://claude.ai">Claude Code</a> &amp; <a href="https://github.com/features/copilot">GitHub Copilot</a></p>
 </footer>
 
 <script>

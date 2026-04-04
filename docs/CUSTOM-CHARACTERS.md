@@ -1,6 +1,6 @@
 # Custom Character Packs
 
-> This document is designed to be read by an AI coding assistant (Claude Code, GitHub Copilot, Cursor, etc.) to create, install, export, and manage custom character packs for Claude Status Pet.
+> This document is designed to be read by an AI coding assistant (Claude Code, GitHub Copilot CLI) to create, install, export, and manage custom character packs for Claude Status Pet.
 
 ## What You're Building
 

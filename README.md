@@ -61,7 +61,7 @@ copilot plugin install claude-status-pet-copilot
 
 Then run `/pet update` to download the binary and assets.
 
-**Option 2 — Ask your AI agent** (works with Claude Code, Copilot, etc.):
+**Option 2 — Ask your AI agent** (Claude Code or Copilot CLI):
 
 > Read https://raw.githubusercontent.com/moeyui1/claude-status-pet/main/docs/INSTALL.md and install it for me
 
@@ -111,6 +111,8 @@ copilot plugin install claude-status-pet-copilot
 Or see [`copilot/README.md`](copilot/README.md) for manual setup.
 
 Both tools can run simultaneously — each gets its own pet window.
+
+> 💡 Extensible to any AI agent with hook support — [PRs welcome](CONTRIBUTING.md#adding-a-new-ai-agent-adapter)!
 
 ## Other Installation Methods
 

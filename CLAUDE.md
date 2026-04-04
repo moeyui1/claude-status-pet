@@ -1,6 +1,6 @@
 # Claude Status Pet — Developer Guide for AI Coders
 
-This document is for AI coding assistants (Claude Code, GitHub Copilot, Cursor, etc.) working on this repo. Read this before making changes.
+This document is for AI coding assistants (Claude Code, GitHub Copilot CLI) working on this repo. Read this before making changes.
 
 ## What This Project Is
 

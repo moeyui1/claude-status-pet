@@ -1,6 +1,6 @@
 # Claude Status Pet — Installation Guide
 
-> This document is designed to be read by any AI coding assistant (Claude Code, GitHub Copilot, Cursor, etc.) to automatically install the desktop pet.
+> This document is designed to be read by AI coding assistants (Claude Code, GitHub Copilot CLI) to automatically install the desktop pet.
 
 ## ⚠️ Important Notes for AI Agents
 

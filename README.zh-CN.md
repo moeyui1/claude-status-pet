@@ -61,7 +61,7 @@ copilot plugin install claude-status-pet-copilot
 
 安装后运行 `/pet update` 下载二进制和资源。
 
-**方式二 — 让 AI 助手安装**（适用于 Claude Code、Copilot 等）：
+**方式二 — 让 AI 助手安装**（Claude Code 或 Copilot CLI）：
 
 > Read https://raw.githubusercontent.com/moeyui1/claude-status-pet/main/docs/INSTALL.md and install it for me
 
@@ -112,6 +112,8 @@ copilot plugin install claude-status-pet-copilot
 或参阅 [`copilot/README.md`](copilot/README.md) 进行手动配置。
 
 两个工具可以同时运行 — 各自拥有独立的宠物窗口。
+
+> 💡 理论上可扩展支持任何带 Hook 的 AI Agent — [欢迎 PR](CONTRIBUTING.md#adding-a-new-ai-agent-adapter)！
 
 ## 其他安装方式
 
