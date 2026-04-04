@@ -2,6 +2,12 @@
 
 [English](README.md) | [中文](README.zh-CN.md)
 
+[![Build and Release](https://img.shields.io/github/actions/workflow/status/moeyui1/claude-status-pet/release.yml?style=flat-square&logo=github&label=build)](https://github.com/moeyui1/claude-status-pet/actions/workflows/release.yml)
+[![Latest Release](https://img.shields.io/github/v/release/moeyui1/claude-status-pet?style=flat-square&logo=github&color=blue)](https://github.com/moeyui1/claude-status-pet/releases/latest)
+[![License](https://img.shields.io/github/license/moeyui1/claude-status-pet?style=flat-square&color=green)](LICENSE)
+[![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey?style=flat-square&logo=tauri)](https://github.com/moeyui1/claude-status-pet/releases)
+[![Made with Rust](https://img.shields.io/badge/made%20with-Rust-orange?style=flat-square&logo=rust)](https://www.rust-lang.org/)
+
 实时显示 AI 编程助手工作状态的桌面宠物 🦀
 
 <table>
