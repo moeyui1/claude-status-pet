@@ -159,10 +159,9 @@ This stops the pet, removes all data, scripts, and assets. Then uninstall the pl
 
 ## How It Works
 
-```mermaid
-graph LR
-    A["🤖 AI Assistant<br/>(Claude Code, Copilot, ...)"] -- "hook events<br/>PreToolUse, Stop,<br/>UserPromptSubmit" --> B["📝 status-writer<br/>writes JSON to<br/>~/.claude/pet-data/"]
-    B -- "file watch<br/>(notify crate)" --> C["🦀 Desktop Pet<br/>(Tauri app)"]
+```
+🤖 AI Assistant ──hook event──▶ 📝 write-status ──JSON──▶ 🦀 Desktop Pet (Tauri)
+(Claude / Copilot)              status-{id}.json          file watcher → UI update
 ```
 
 The pet is **decoupled from any specific tool** — it just watches a JSON status file. See [`docs/HOOKS.md`](docs/HOOKS.md) for the full hook event → status mapping and how to add support for other assistants.

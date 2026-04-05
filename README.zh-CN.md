@@ -160,10 +160,9 @@ npx tauri build
 
 ## 工作原理
 
-```mermaid
-graph LR
-    A["🤖 AI 助手<br/>(Claude Code, Copilot, ...)"] -- "钩子事件<br/>PreToolUse, Stop,<br/>UserPromptSubmit" --> B["📝 状态写入器<br/>写入 JSON 到<br/>~/.claude/pet-data/"]
-    B -- "文件监听<br/>(notify crate)" --> C["🦀 桌面宠物<br/>(Tauri 应用)"]
+```
+🤖 AI 助手 ──钩子事件──▶ 📝 write-status ──JSON──▶ 🦀 桌面宠物 (Tauri)
+(Claude / Copilot)         status-{id}.json         文件监听 → UI 更新
 ```
 
 宠物应用**与具体工具完全解耦** — 它只监听一个 JSON 状态文件。完整的钩子事件到状态映射请参阅 [`docs/HOOKS.md`](docs/HOOKS.md)。
