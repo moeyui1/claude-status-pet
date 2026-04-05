@@ -35,7 +35,7 @@ Done! The plugin auto-downloads the binary on first session start.
 
 ### Manual Install
 
-> AI agent: only use this if the plugin commands above fail. See [MANUAL-INSTALL.md](MANUAL-INSTALL.md) for downloading the binary, then add these hooks to `~/.claude/settings.json` (merge, do not overwrite existing hooks):
+> AI agent: only use this if the plugin commands above fail. See [MANUAL-INSTALL.md](MANUAL-INSTALL.md) for step-by-step instructions (binary, hooks, skill, assets), then add these hooks to `~/.claude/settings.json` (merge, do not overwrite existing hooks):
 
 ```json
 {

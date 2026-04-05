@@ -115,6 +115,18 @@ copilot plugin install claude-status-pet-copilot
 
 > 💡 理论上可扩展支持任何带 Hook 的 AI Agent — [欢迎 PR](CONTRIBUTING.md#adding-a-new-ai-agent-adapter)！
 
+## 兼容性
+
+| AI Agent | 插件安装 | 手动安装 | 状态 |
+|----------|:---:|:---:|------|
+| [Claude Code](https://docs.anthropic.com/en/docs/claude-code) (CLI) | ✅ | ✅ | 完全支持 |
+| [GitHub Copilot CLI](https://docs.github.com/en/copilot/how-tos/copilot-cli) | ✅ | ✅ | 完全支持 |
+| VS Code Copilot Chat | — | — | 暂不支持 |
+| Cursor | — | — | 暂不支持 |
+| OpenCode | — | — | 暂不支持 |
+
+> 想为其他 Agent 添加支持？参见 [添加新适配器](CONTRIBUTING.md#adding-a-new-ai-agent-adapter)。
+
 ## 其他安装方式
 
 <details>

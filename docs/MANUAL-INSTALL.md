@@ -65,6 +65,26 @@ Invoke-WebRequest -Uri "$RAW/copilot/scripts/hook.sh" -OutFile "$scriptsDir\copi
 Invoke-WebRequest -Uri "$RAW/copilot/scripts/hook.ps1" -OutFile "$scriptsDir\copilot-hook.ps1"
 ```
 
+## Manual: Install Skill
+
+The `/pet` slash command (used for `/pet on`, `/pet update`, `/pet status`, `/pet uninstall`) requires a skill file.
+
+**macOS / Linux / Git Bash:**
+
+```bash
+SKILL_DIR="$HOME/.claude/skills/pet"
+mkdir -p "$SKILL_DIR"
+curl -sLo "$SKILL_DIR/SKILL.md" "https://raw.githubusercontent.com/moeyui1/claude-status-pet/main/skills/pet/SKILL.md"
+```
+
+**Windows PowerShell:**
+
+```powershell
+$skillDir = "$env:USERPROFILE\.claude\skills\pet"
+New-Item -ItemType Directory -Path $skillDir -Force | Out-Null
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/moeyui1/claude-status-pet/main/skills/pet/SKILL.md" -OutFile "$skillDir\SKILL.md"
+```
+
 ## Manual: Download Assets
 
 **macOS / Linux / Git Bash:**

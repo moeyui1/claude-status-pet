@@ -1,6 +1,6 @@
 {
   "name": "claude-status-pet",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "A desktop pet that shows Claude Code's working status in real time",
   "author": {
     "name": "moeyui1"

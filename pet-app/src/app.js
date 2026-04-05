@@ -618,7 +618,7 @@ async function showSessionPicker() {
   if (sessionPoll) { clearInterval(sessionPoll); sessionPoll = null; }
   const sessions = await window.__TAURI__.core.invoke('list_unlocked_sessions');
   if (sessions.length === 0) {
-    statusText.textContent = 'No active sessions';
+    statusText.textContent = 'No session found. Please restart your AI assistant.';
     bubble.classList.remove('hidden');
     stateLabel.textContent = 'waiting';
     sessionPoll = setInterval(async () => {
@@ -788,6 +788,13 @@ async function preloadAssets() {
       mode = 'ferris';
       localStorage.setItem('petMode', mode);
     }
+  }
+
+  // Fallback: if mode is not a recognized character, reset to ferris
+  const knownMode = mode === 'ferris' || GIF_MODES[mode] || ASCII_SPECIES[mode] || customPacks.some(p => p.id === mode);
+  if (!knownMode) {
+    mode = 'ferris';
+    localStorage.setItem('petMode', mode);
   }
 
   // If current mode is a DLC that's installed, preload it

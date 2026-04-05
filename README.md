@@ -114,6 +114,18 @@ Both tools can run simultaneously — each gets its own pet window.
 
 > 💡 Extensible to any AI agent with hook support — [PRs welcome](CONTRIBUTING.md#adding-a-new-ai-agent-adapter)!
 
+## Compatibility
+
+| AI Agent | Plugin Install | Manual Install | Status |
+|----------|:---:|:---:|--------|
+| [Claude Code](https://docs.anthropic.com/en/docs/claude-code) (CLI) | ✅ | ✅ | Fully supported |
+| [GitHub Copilot CLI](https://docs.github.com/en/copilot/how-tos/copilot-cli) | ✅ | ✅ | Fully supported |
+| VS Code Copilot Chat | — | — | Not supported yet |
+| Cursor | — | — | Not supported yet |
+| OpenCode | — | — | Not supported yet |
+
+> Want to add support for another agent? See [Adding a New Adapter](CONTRIBUTING.md#adding-a-new-ai-agent-adapter).
+
 ## Other Installation Methods
 
 <details>
