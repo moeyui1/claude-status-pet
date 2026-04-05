@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Claude Status Pet — Desktop Pet for AI Coding Assistants</title>
-<meta name="description" content="A desktop pet that shows what your AI coding assistant is doing in real time. Works with Claude Code and GitHub Copilot CLI.">
+<meta name="description" content="A desktop pet that shows what your AI coding assistant is doing in real time. Works with Claude Code, GitHub Copilot CLI, and VS Code Copilot.">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -14,7 +14,7 @@
   <div class="hero-mascot">🦀</div>
   <h1>Claude Status Pet</h1>
   <p class="tagline">A desktop pet that shows what your AI coding assistant is doing — in real time.</p>
-  <p class="supports">Works with <a href="https://docs.anthropic.com/en/docs/claude-code"><strong>Claude Code</strong></a> and <a href="https://docs.github.com/en/copilot/how-tos/copilot-cli"><strong>GitHub Copilot CLI</strong></a></p>
+  <p class="supports">Works with <a href="https://docs.anthropic.com/en/docs/claude-code"><strong>Claude Code</strong></a>, <a href="https://docs.github.com/en/copilot/how-tos/copilot-cli"><strong>GitHub Copilot CLI</strong></a>, and <strong>VS Code Copilot</strong></p>
 
   <div class="badges">
     <a href="https://github.com/moeyui1/claude-status-pet/actions/workflows/release.yml"><img src="https://img.shields.io/github/actions/workflow/status/moeyui1/claude-status-pet/release.yml?style=flat-square&logo=github&label=build" alt="Build"></a>
@@ -110,7 +110,8 @@
     <div class="install-tabs">
       <button class="install-tab active" onclick="switchTab(0)">Claude Code</button>
       <button class="install-tab" onclick="switchTab(1)">GitHub Copilot CLI</button>
-      <button class="install-tab" onclick="switchTab(2)">Other Agents</button>
+      <button class="install-tab" onclick="switchTab(2)">VS Code Copilot</button>
+      <button class="install-tab" onclick="switchTab(3)">Other Agents</button>
     </div>
 
     <div class="install-panel active">
@@ -130,9 +131,19 @@ copilot plugin install claude-status-pet-copilot</pre>
     </div>
 
     <div class="install-panel">
+      <p class="step">In VS Code, open the command palette and run:</p>
+      <pre>Chat: Install Plugin From Source</pre>
+      <p class="step">Enter the repository URL:</p>
+      <pre>https://github.com/moeyui1/claude-status-pet</pre>
+      <p class="step">Then download the binary:</p>
+      <pre>/pet update</pre>
+      <p class="step">Launch with <code>/pet on</code>. 🎉</p>
+    </div>
+
+    <div class="install-panel">
       <p class="step">Ask your AI assistant:</p>
       <pre>Read https://raw.githubusercontent.com/moeyui1/claude-status-pet/main/docs/INSTALL.md and install it for me</pre>
-      <p class="step">Currently supported: Claude Code and GitHub Copilot CLI. Extensible to any agent with hook support — <a href="https://github.com/moeyui1/claude-status-pet/blob/main/CONTRIBUTING.md#adding-a-new-ai-agent-adapter">PRs welcome</a>!</p>
+      <p class="step">Currently supported: Claude Code, GitHub Copilot CLI, and VS Code Copilot. Extensible to any agent with hook support — <a href="https://github.com/moeyui1/claude-status-pet/blob/main/CONTRIBUTING.md#adding-a-new-ai-agent-adapter">PRs welcome</a>!</p>
     </div>
   </div>
 </section>

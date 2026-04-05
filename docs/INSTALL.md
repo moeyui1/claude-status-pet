@@ -1,6 +1,6 @@
 # Claude Status Pet — Installation Guide
 
-> This document is designed to be read by AI coding assistants (Claude Code, GitHub Copilot CLI) to automatically install the desktop pet.
+> This document is designed to be read by AI coding assistants (Claude Code, GitHub Copilot CLI, VS Code Copilot) to automatically install the desktop pet.
 
 ## ⚠️ Important Notes for AI Agents
 
@@ -77,6 +77,32 @@ Done! Use `/pet on` to launch the pet.
 ### Manual Install
 
 > AI agent: only use this if the plugin commands above fail. See [MANUAL-INSTALL.md](MANUAL-INSTALL.md) for step-by-step instructions.
+
+---
+
+## For VS Code Copilot Users
+
+### Quick Install (Plugin)
+
+> **AI agent:** Use `Chat: Install Plugin From Source` from the VS Code command palette.
+
+Run the VS Code command:
+```
+Chat: Install Plugin From Source
+```
+Enter: `https://github.com/moeyui1/claude-status-pet`
+
+This installs hooks and the `/pet` skill. Then download the binary and assets:
+
+```
+/pet update
+```
+
+Done! Use `/pet on` to launch the pet.
+
+### Manual Install
+
+> AI agent: only use this if the plugin install above fails. See [MANUAL-INSTALL.md](MANUAL-INSTALL.md) for step-by-step instructions (binary, VS Code hooks, skill, assets).
 
 ---
 

@@ -65,6 +65,34 @@ Invoke-WebRequest -Uri "$RAW/copilot/scripts/hook.sh" -OutFile "$scriptsDir\copi
 Invoke-WebRequest -Uri "$RAW/copilot/scripts/hook.ps1" -OutFile "$scriptsDir\copilot-hook.ps1"
 ```
 
+## Manual: Install VS Code Copilot Hooks
+
+VS Code hooks call the binary directly (no scripts needed — VS Code pipes stdin to the command).
+
+**macOS / Linux / Git Bash:**
+
+```bash
+RAW="https://raw.githubusercontent.com/moeyui1/claude-status-pet/main"
+
+# Global hooks (all workspaces)
+HOOKS_DIR="$HOME/.copilot/hooks"
+mkdir -p "$HOOKS_DIR"
+curl -sLo "$HOOKS_DIR/status-pet-vscode.json" "$RAW/vscode/hooks/hooks.json"
+```
+
+**Windows PowerShell:**
+
+```powershell
+$RAW = "https://raw.githubusercontent.com/moeyui1/claude-status-pet/main"
+
+# Global hooks (all workspaces)
+$hooksDir = "$env:USERPROFILE\.copilot\hooks"
+New-Item -ItemType Directory -Path $hooksDir -Force | Out-Null
+Invoke-WebRequest -Uri "$RAW/vscode/hooks/hooks.json" -OutFile "$hooksDir\status-pet-vscode.json"
+```
+
+> **Alternative:** For per-workspace hooks, place the file at `.github/hooks/status-pet-vscode.json` in the project root.
+
 ## Manual: Install Skill
 
 The `/pet` slash command (used for `/pet on`, `/pet update`, `/pet status`, `/pet uninstall`) requires a skill file.

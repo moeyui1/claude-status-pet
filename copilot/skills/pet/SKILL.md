@@ -47,7 +47,7 @@ Sub-paths:
 Simply launch the pet binary. The binary has built-in PID lock detection, so duplicate windows are automatically prevented.
 
 > **Claude Code** provides `${CLAUDE_SESSION_ID}` — use it to bind directly to the current session.
-> **Copilot CLI** does not provide a session ID variable — the pet will auto-bind to the most recently updated session.
+> **Copilot CLI / VS Code Copilot** do not provide a session ID variable — the pet will auto-bind to the most recently updated session.
 
 **PowerShell (Claude Code):**
 ```powershell
@@ -107,6 +107,7 @@ Update the pet to the latest release.
 >
 > - **Claude Code (plugin install):** Run `/plugin marketplace update claude-status-pet` — this updates the binary and hooks automatically. Then only update the skill file (step 4 below).
 > - **GitHub Copilot CLI (plugin install):** Run `copilot plugin update claude-status-pet-copilot` in a terminal — this updates hooks and skill automatically. Then follow steps 1-2 and 5 below for binary and assets.
+> - **VS Code Copilot (plugin install):** Run `Chat: Install Plugin From Source` with `https://github.com/moeyui1/claude-status-pet` — this updates hooks and skill automatically. Then follow steps 1-2 and 5 below for binary and assets.
 > - **Manual install (either agent):** Follow all steps below.
 
 > **Important:** Close all running pets before updating. After updating, inform the user to restart with `/pet on`.

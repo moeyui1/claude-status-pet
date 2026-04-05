@@ -6,7 +6,7 @@
 /// - Tool input: snake_case keys (file_path, command, etc.)
 /// - Session ID: provided in JSON
 
-use super::{Adapter, NormalizedEvent, StdinInput};
+use super::{Adapter, NormalizedEvent, StdinInput, basename, truncate, extract_str};
 use std::path::Path;
 
 pub struct ClaudeAdapter;
@@ -37,7 +37,7 @@ impl Adapter for ClaudeAdapter {
 
                 let detail = if tool_name.starts_with("mcp__") {
                     // MCP tools: format as "server: tool"
-                    let parts: Vec<&str> = tool_name.splitn(4, "__").collect();
+                    let parts: Vec<&str> = tool_name.splitn(3, "__").collect();
                     if parts.len() >= 3 {
                         format!("{}: {}", parts[1], parts[2])
                     } else {
@@ -101,19 +101,4 @@ fn extract_file(input: Option<&serde_json::Value>) -> Option<String> {
         .or_else(|| v.get("file"))
         .and_then(|v| v.as_str())
         .map(|s| s.to_string())
-}
-
-fn extract_str(input: Option<&serde_json::Value>, key: &str) -> Option<String> {
-    input?.get(key).and_then(|v| v.as_str()).map(|s| s.to_string())
-}
-
-fn basename(path: &str) -> &str {
-    path.rsplit(&['/', '\\']).next().unwrap_or(path)
-}
-
-fn truncate(s: &str, max: usize) -> &str {
-    if s.len() <= max { return s; }
-    let mut idx = max;
-    while idx > 0 && !s.is_char_boundary(idx) { idx -= 1; }
-    &s[..idx]
 }

@@ -211,9 +211,10 @@ For deeper integration, create an adapter in `pet-app/src-tauri/src/adapter/`:
 
 ```
 adapter/
-├── mod.rs        ← register new adapter here
+├── mod.rs        ← register new adapter here + shared helpers
 ├── claude.rs     ← Claude Code adapter
-├── copilot.rs    ← GitHub Copilot adapter
+├── copilot.rs    ← GitHub Copilot CLI adapter
+├── vscode.rs     ← VS Code Copilot adapter
 └── myagent.rs    ← your adapter
 ```
 
@@ -250,6 +251,7 @@ pub fn get_adapter(name: &str) -> Option<Box<dyn Adapter>> {
     match name {
         "claude" => Some(Box::new(claude::ClaudeAdapter)),
         "copilot" => Some(Box::new(copilot::CopilotAdapter)),
+        "vscode" => Some(Box::new(vscode::VscodeAdapter)),
         "myagent" => Some(Box::new(myagent::MyAgentAdapter)),
         _ => None,
     }

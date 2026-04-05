@@ -188,6 +188,130 @@ mod tests {
         assert!(ev.session_name.contains("my-app"));
     }
 
+    // ── VS Code adapter tests ──
+
+    #[test]
+    fn test_vscode_session_start() {
+        let stdin = make_stdin(Some("SessionStart"), None, None, Some("vsc-001"), Some("/proj"));
+        let ev = adapter::vscode::VscodeAdapter.parse(&stdin).unwrap();
+        assert_eq!(ev.event, "prompt");
+        assert!(ev.session_id.starts_with("vscode-"));
+        assert!(ev.session_name.contains("VS Code"));
+    }
+
+    #[test]
+    fn test_vscode_user_prompt() {
+        let stdin = make_stdin(Some("UserPromptSubmit"), None, None, Some("vsc-001"), Some("/proj"));
+        let ev = adapter::vscode::VscodeAdapter.parse(&stdin).unwrap();
+        assert_eq!(ev.event, "prompt");
+    }
+
+    #[test]
+    fn test_vscode_pre_tool_edit() {
+        let input = serde_json::json!({"filePath": "/foo/bar.ts"});
+        let stdin = make_stdin(Some("PreToolUse"), Some("replace_string_in_file"), Some(input), Some("vsc-001"), Some("/proj"));
+        let ev = adapter::vscode::VscodeAdapter.parse(&stdin).unwrap();
+        assert_eq!(ev.event, "tool");
+        assert_eq!(ev.tool, "replace_string_in_file");
+        assert!(ev.detail.contains("bar.ts"));
+    }
+
+    #[test]
+    fn test_vscode_pre_tool_read() {
+        let input = serde_json::json!({"filePath": "/foo/main.rs"});
+        let stdin = make_stdin(Some("PreToolUse"), Some("read_file"), Some(input), Some("vsc-001"), Some("/proj"));
+        let ev = adapter::vscode::VscodeAdapter.parse(&stdin).unwrap();
+        assert_eq!(ev.event, "tool");
+        assert!(ev.detail.contains("main.rs"));
+    }
+
+    #[test]
+    fn test_vscode_pre_tool_search() {
+        let input = serde_json::json!({"query": "TODO fixme"});
+        let stdin = make_stdin(Some("PreToolUse"), Some("grep_search"), Some(input), Some("vsc-001"), Some("/proj"));
+        let ev = adapter::vscode::VscodeAdapter.parse(&stdin).unwrap();
+        assert_eq!(ev.event, "tool");
+        assert!(ev.detail.contains("TODO fixme"));
+    }
+
+    #[test]
+    fn test_vscode_pre_tool_terminal() {
+        let input = serde_json::json!({"command": "npm test"});
+        let stdin = make_stdin(Some("PreToolUse"), Some("run_in_terminal"), Some(input), Some("vsc-001"), Some("/proj"));
+        let ev = adapter::vscode::VscodeAdapter.parse(&stdin).unwrap();
+        assert_eq!(ev.event, "tool");
+        assert!(ev.detail.contains("npm test"));
+    }
+
+    #[test]
+    fn test_vscode_pre_tool_mcp() {
+        let stdin = make_stdin(Some("PreToolUse"), Some("mcp__github__search_code"), None, Some("vsc-001"), Some("/proj"));
+        let ev = adapter::vscode::VscodeAdapter.parse(&stdin).unwrap();
+        assert!(ev.detail.contains("github: search_code"));
+    }
+
+    #[test]
+    fn test_vscode_pre_tool_mcp_single_underscore() {
+        // VS Code MCP tools use single underscore: mcp_server_tool_name
+        let stdin = make_stdin(Some("PreToolUse"), Some("mcp_gitkraken_git_add_or_commit"), None, Some("vsc-001"), Some("/proj"));
+        let ev = adapter::vscode::VscodeAdapter.parse(&stdin).unwrap();
+        assert!(ev.detail.contains("gitkraken"), "detail should contain server name, got: {}", ev.detail);
+        assert!(ev.detail.contains("git_add_or_commit"), "detail should contain full tool name, got: {}", ev.detail);
+    }
+
+    #[test]
+    fn test_vscode_pre_tool_mcp_toolinput_camelcase() {
+        // VS Code may send camelCase toolInput instead of snake_case tool_input
+        let input = serde_json::json!({ "filePath": "/proj/src/main.rs" });
+        let raw = format!(r#"{{"hookEventName":"PreToolUse","toolName":"read_file","toolInput":{},"sessionId":"vsc-001","cwd":"/proj"}}"#, input);
+        let stdin: StdinInput = serde_json::from_str(&raw).unwrap();
+        let ev = adapter::vscode::VscodeAdapter.parse(&stdin).unwrap();
+        assert!(ev.detail.contains("main.rs"), "should parse filePath from toolInput, got: {}", ev.detail);
+    }
+
+    #[test]
+    fn test_vscode_post_tool_is_thinking() {
+        let stdin = make_stdin(Some("PostToolUse"), None, None, Some("vsc-001"), Some("/proj"));
+        let ev = adapter::vscode::VscodeAdapter.parse(&stdin).unwrap();
+        assert_eq!(ev.event, "prompt"); // thinking, not idle
+    }
+
+    #[test]
+    fn test_vscode_pre_compact_ignored() {
+        let stdin = make_stdin(Some("PreCompact"), None, None, Some("vsc-001"), Some("/proj"));
+        let ev = adapter::vscode::VscodeAdapter.parse(&stdin);
+        assert!(ev.is_none());
+    }
+
+    #[test]
+    fn test_vscode_subagent_start() {
+        let stdin = make_stdin(Some("SubagentStart"), None, None, Some("vsc-001"), Some("/proj"));
+        let ev = adapter::vscode::VscodeAdapter.parse(&stdin).unwrap();
+        assert_eq!(ev.event, "subagent");
+    }
+
+    #[test]
+    fn test_vscode_subagent_stop() {
+        let stdin = make_stdin(Some("SubagentStop"), None, None, Some("vsc-001"), Some("/proj"));
+        let ev = adapter::vscode::VscodeAdapter.parse(&stdin).unwrap();
+        assert_eq!(ev.event, "prompt");
+    }
+
+    #[test]
+    fn test_vscode_stop() {
+        let stdin = make_stdin(Some("Stop"), None, None, Some("vsc-001"), Some("/proj"));
+        let ev = adapter::vscode::VscodeAdapter.parse(&stdin).unwrap();
+        assert_eq!(ev.event, "done");
+    }
+
+    #[test]
+    fn test_vscode_session_name_has_suffix() {
+        let stdin = make_stdin(Some("SessionStart"), None, None, Some("vsc-001"), Some("/projects/my-app"));
+        let ev = adapter::vscode::VscodeAdapter.parse(&stdin).unwrap();
+        assert!(ev.session_name.contains("VS Code"));
+        assert!(ev.session_name.contains("my-app"));
+    }
+
     // ── Helper ──
 
     fn make_stdin(

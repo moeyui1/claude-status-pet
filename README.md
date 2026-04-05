@@ -120,7 +120,7 @@ Both tools can run simultaneously — each gets its own pet window.
 |----------|:---:|:---:|--------|
 | [Claude Code](https://docs.anthropic.com/en/docs/claude-code) (CLI) | ✅ | ✅ | Fully supported |
 | [GitHub Copilot CLI](https://docs.github.com/en/copilot/how-tos/copilot-cli) | ✅ | ✅ | Fully supported |
-| VS Code Copilot Chat | — | — | Not supported yet |
+| VS Code Copilot (Agent Mode) | ✅ | ✅ | Fully supported |
 | Cursor | — | — | Not supported yet |
 | OpenCode | — | — | Not supported yet |
 
