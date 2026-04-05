@@ -198,15 +198,21 @@ case "$OS" in
 esac
 curl -sLo "$DIR/bin/$ASSET" "$BASE/releases/latest/download/$ASSET"
 chmod +x "$DIR/bin/$ASSET" 2>/dev/null || true
-ln -sf "$ASSET" "$DIR/bin/claude-status-pet" 2>/dev/null || true
+ln -sf "$DIR/bin/$ASSET" "$DIR/bin/claude-status-pet" 2>/dev/null || true
 echo "[2/6] Binary updated"
 
 # 3. Update hooks (only for installed hook locations)
 HOOK_UPDATED=0
 if [ -d "$HOME/.copilot/hooks" ]; then
-  curl -sLo "$HOME/.copilot/hooks/status-pet.json" "$RAW/copilot/hooks.json"
-  curl -sLo "$HOME/.copilot/hooks/status-pet-vscode.json" "$RAW/vscode/hooks/hooks.json"
-  HOOK_UPDATED=1; echo "[3/6] Copilot and VS Code hooks updated"
+  if [ -f "$HOME/.copilot/hooks/status-pet.json" ]; then
+    curl -sLo "$HOME/.copilot/hooks/status-pet.json" "$RAW/copilot/hooks.json"
+    HOOK_UPDATED=1
+  fi
+  if [ -f "$HOME/.copilot/hooks/status-pet-vscode.json" ]; then
+    curl -sLo "$HOME/.copilot/hooks/status-pet-vscode.json" "$RAW/vscode/hooks/hooks.json"
+    HOOK_UPDATED=1
+  fi
+  [ "$HOOK_UPDATED" -eq 1 ] && echo "[3/6] Installed hooks updated"
 fi
 [ "$HOOK_UPDATED" -eq 0 ] && echo "[3/6] No hook locations to update (skipped)"
 
