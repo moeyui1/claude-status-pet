@@ -46,37 +46,9 @@ Sub-paths:
 
 Simply launch the pet binary. The binary has built-in PID lock detection, so duplicate windows are automatically prevented.
 
-> **Claude Code** provides `${CLAUDE_SESSION_ID}` — use it to bind directly to the current session.
-> **Copilot CLI / VS Code Copilot** do not provide a session ID variable — the pet will auto-bind to the most recently updated session.
+> Copilot CLI does not provide a session ID variable — the pet will auto-bind to the most recently updated session.
 
-**PowerShell (Claude Code):**
-```powershell
-$dir = "$env:USERPROFILE\.claude\pet-data"
-$bin = Get-ChildItem "$dir\bin\claude-status-pet*" | Select-Object -First 1
-if (-not $bin) { Write-Host "Pet binary not found"; return }
-$sid = "${CLAUDE_SESSION_ID}"
-$sf = "$dir\status-$sid.json"
-$a = @("run","--status-file",$sf,"--session-id",$sid)
-$assets = "$dir\assets"
-if (Test-Path $assets) { $a += "--assets-dir"; $a += $assets }
-Start-Process $bin.FullName -ArgumentList $a -WindowStyle Hidden
-Write-Host "Pet launched"
-```
-
-**bash (Claude Code):**
-```bash
-DIR="$HOME/.claude/pet-data"
-BIN=$(ls "$DIR/bin/claude-status-pet"* 2>/dev/null | head -1)
-[ -z "$BIN" ] && echo "Pet binary not found" && exit 1
-SID="${CLAUDE_SESSION_ID}"
-SF="$DIR/status-$SID.json"
-ARGS="run --status-file $SF --session-id $SID"
-[ -d "$DIR/assets" ] && ARGS="$ARGS --assets-dir $DIR/assets"
-nohup "$BIN" $ARGS >/dev/null 2>&1 &
-echo "Pet launched"
-```
-
-**PowerShell (Copilot CLI):**
+**PowerShell:**
 ```powershell
 $dir = "$env:USERPROFILE\.claude\pet-data"
 $bin = Get-ChildItem "$dir\bin\claude-status-pet*" | Select-Object -First 1
@@ -88,7 +60,7 @@ Start-Process $bin.FullName -ArgumentList $a -WindowStyle Hidden
 Write-Host "Pet launched"
 ```
 
-**bash (Copilot CLI):**
+**bash:**
 ```bash
 DIR="$HOME/.claude/pet-data"
 BIN=$(ls "$DIR/bin/claude-status-pet"* 2>/dev/null | head -1)
@@ -103,12 +75,9 @@ echo "Pet launched"
 
 Update the pet to the latest release.
 
-> **Detect the agent platform and use the appropriate update method:**
+> **For plugin install:** Run `copilot plugin update claude-status-pet-copilot` in a terminal — this updates hooks and skill automatically. Then follow steps 1-2 and 5 below for binary and assets.
 >
-> - **Claude Code (plugin install):** Run `/plugin marketplace update claude-status-pet` — this updates the binary and hooks automatically. Then only update the skill file (step 4 below).
-> - **GitHub Copilot CLI (plugin install):** Run `copilot plugin update claude-status-pet-copilot` in a terminal — this updates hooks and skill automatically. Then follow steps 1-2 and 5 below for binary and assets.
-> - **VS Code Copilot (plugin install):** Run `Chat: Install Plugin From Source` with `https://github.com/moeyui1/claude-status-pet` — this updates hooks and skill automatically. Then follow steps 1-2 and 5 below for binary and assets.
-> - **Manual install (either agent):** Follow all steps below.
+> **For manual install:** Follow all steps below.
 
 > **Important:** Close all running pets before updating. After updating, inform the user to restart with `/pet on`.
 
@@ -133,23 +102,13 @@ Write-Host "[2/6] Binary updated"
 
 # 3. Update hooks (only for installed hook locations)
 $hookUpdated = $false
-# Copilot/VS Code global hooks
 $copilotHooksDir = "$env:USERPROFILE\.copilot\hooks"
 if (Test-Path $copilotHooksDir) {
     $copilotHookFile = "$copilotHooksDir\status-pet.json"
-    $vscodeHookFile = "$copilotHooksDir\status-pet-vscode.json"
-
     if (Test-Path $copilotHookFile) {
         Invoke-WebRequest -Uri "$RAW/copilot/hooks.json" -OutFile $copilotHookFile
-        $hookUpdated = $true
+        $hookUpdated = $true; Write-Host "[3/6] Copilot hooks updated"
     }
-
-    if (Test-Path $vscodeHookFile) {
-        Invoke-WebRequest -Uri "$RAW/vscode/hooks/hooks.json" -OutFile $vscodeHookFile
-        $hookUpdated = $true
-    }
-
-    if ($hookUpdated) { Write-Host "[3/6] Installed hooks updated" }
 }
 if (-not $hookUpdated) { Write-Host "[3/6] No hook locations to update (skipped)" }
 
@@ -163,7 +122,7 @@ Write-Host "[4/6] Hook scripts updated"
 # 4. Update skill
 $skillDir = "$env:USERPROFILE\.claude\skills\pet"
 New-Item -ItemType Directory -Path $skillDir -Force | Out-Null
-Invoke-WebRequest -Uri "$RAW/skills/pet/SKILL.md" -OutFile "$skillDir\SKILL.md"
+Invoke-WebRequest -Uri "$RAW/copilot/skills/pet/SKILL.md" -OutFile "$skillDir\SKILL.md"
 Write-Host "[5/6] Skill updated"
 
 # 5. Update assets
@@ -203,16 +162,9 @@ echo "[2/6] Binary updated"
 
 # 3. Update hooks (only for installed hook locations)
 HOOK_UPDATED=0
-if [ -d "$HOME/.copilot/hooks" ]; then
-  if [ -f "$HOME/.copilot/hooks/status-pet.json" ]; then
-    curl -sLo "$HOME/.copilot/hooks/status-pet.json" "$RAW/copilot/hooks.json"
-    HOOK_UPDATED=1
-  fi
-  if [ -f "$HOME/.copilot/hooks/status-pet-vscode.json" ]; then
-    curl -sLo "$HOME/.copilot/hooks/status-pet-vscode.json" "$RAW/vscode/hooks/hooks.json"
-    HOOK_UPDATED=1
-  fi
-  [ "$HOOK_UPDATED" -eq 1 ] && echo "[3/6] Installed hooks updated"
+if [ -f "$HOME/.copilot/hooks/status-pet.json" ]; then
+  curl -sLo "$HOME/.copilot/hooks/status-pet.json" "$RAW/copilot/hooks.json"
+  HOOK_UPDATED=1; echo "[3/6] Copilot hooks updated"
 fi
 [ "$HOOK_UPDATED" -eq 0 ] && echo "[3/6] No hook locations to update (skipped)"
 
@@ -225,7 +177,7 @@ echo "[4/6] Hook scripts updated"
 
 # 4. Update skill
 mkdir -p "$HOME/.claude/skills/pet"
-curl -sLo "$HOME/.claude/skills/pet/SKILL.md" "$RAW/skills/pet/SKILL.md"
+curl -sLo "$HOME/.claude/skills/pet/SKILL.md" "$RAW/copilot/skills/pet/SKILL.md"
 echo "[5/6] Skill updated"
 
 # 5. Update assets
@@ -317,5 +269,4 @@ echo "Uninstall complete."
 
 After running, tell the user:
 - "Pet uninstalled. All data, scripts, and assets have been removed."
-- If using Claude Code plugin: "Run `/plugin uninstall claude-status-pet` to also remove the plugin hooks."
-- If using Copilot plugin: "Run `copilot plugin uninstall claude-status-pet-copilot` to also remove the plugin."
+- "If using the plugin, run `copilot plugin uninstall claude-status-pet-copilot` to also remove the plugin."
