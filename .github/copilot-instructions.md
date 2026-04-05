@@ -18,6 +18,8 @@ Each AI agent gets an adapter that normalizes its hook JSON into a common `Norma
 - `claude.rs` — PascalCase events from stdin (`PreToolUse`, `Stop`)
 - `copilot.rs` — camelCase events from `--copilot-event` CLI arg; `postToolUse` → thinking (prevents idle flash); `userPromptSubmitted` → ignored
 
+See `docs/HOOKS.md` for full event→state mapping reference.
+
 ### Frontend (`pet-app/src/`)
 
 Plain HTML/CSS/JS, no framework, no build step. All animations are CSS `@keyframes`. Assets loaded as base64 data URLs (WebView2 blocks `file://`).
@@ -26,7 +28,7 @@ Plain HTML/CSS/JS, no framework, no build step. All animations are CSS `@keyfram
 
 ```bash
 cd pet-app && npm install && npx tauri build    # full build (requires Rust + MSVC on Windows)
-cd pet-app/src-tauri && cargo test              # run all 24 unit tests
+cd pet-app/src-tauri && cargo test              # run unit tests
 cd pet-app/src-tauri && cargo test test_name    # run a single test
 cd pet-app/src-tauri && cargo check             # fast compile check without building
 ```
@@ -52,3 +54,13 @@ Then: `git tag vX.Y.Z && git push origin --tags` — CI builds binaries + asset 
 ## SKILL files
 
 `skills/pet/SKILL.md` and `copilot/skills/pet/SKILL.md` must be kept in sync (the copilot copy is for plugin packaging). SKILL commands use native shell (PowerShell/bash), never Node.js.
+
+## Documentation Index
+
+| Doc | Covers |
+|-----|--------|
+| `CLAUDE.md` | Full developer guide — project structure, binary modes, states, status file format |
+| `CONTRIBUTING.md` | Adding characters (SVG/GIF/ASCII), `character.json` schema |
+| `docs/HOOKS.md` | Hook event→state mapping for Claude Code & Copilot |
+| `docs/INSTALL.md` | Agent-readable install instructions (plugin + manual paths) |
+| `docs/CUSTOM-CHARACTERS.md` | Custom character pack creation guide |
