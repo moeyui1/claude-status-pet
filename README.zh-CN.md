@@ -135,22 +135,16 @@ npx tauri build
 
 ## 卸载
 
-右键宠物 → 退出来关闭，然后：
+最简单的方式 — 在 AI 助手中运行：
 
 ```
-/plugin uninstall claude-status-pet
-/plugin marketplace remove claude-status-pet
-rm -rf ~/.claude/pet-data    # 可选：删除下载的资源
+/pet uninstall
 ```
 
-<details>
-<summary>手动卸载</summary>
+这会停止宠物进程，删除所有数据、脚本和资源。然后卸载插件：
 
-1. 从 `~/.claude/settings.json` 中删除引用了 `claude-status-pet` 的钩子配置
-2. `rm -rf ~/.claude/skills/pet`
-3. `rm -rf ~/.claude/pet-data`
-
-</details>
+- Claude Code: `/plugin uninstall claude-status-pet`
+- Copilot CLI: `copilot plugin uninstall claude-status-pet-copilot`
 
 ## 工作原理
 

@@ -17,6 +17,7 @@ The user will run `/pet` with an optional subcommand. Parse the arguments and ex
 - `/pet` or `/pet on` — Launch the pet (session selection handled by the app UI)
 - `/pet update` — Update binary, hooks, skill, and assets to the latest release
 - `/pet status` — Show current config, active sessions, and installed character packs
+- `/pet uninstall` — Uninstall the pet completely (stop processes, remove all data, uninstall plugin)
 - `/pet help` — Show available commands
 
 > **Closing the pet:** Right-click the pet → Exit. There is no `/pet off` command.
@@ -239,3 +240,61 @@ foreach ($sub in @("assets","characters")) {
 ```
 
 Always give a short confirmation after executing.
+
+### /pet uninstall
+
+> **Important:** Confirm with the user before proceeding. This is destructive and cannot be undone.
+
+**PowerShell:**
+```powershell
+# 1. Stop running pets
+Get-Process | Where-Object { $_.ProcessName -like "claude-status-pet*" } | ForEach-Object { Stop-Process -Id $_.Id -Force -ErrorAction SilentlyContinue }
+Start-Sleep -Milliseconds 500
+Write-Host "[1/4] Stopped running pets"
+
+# 2. Remove pet-data (binary, scripts, assets, config, status files)
+$dir = "$env:USERPROFILE\.claude\pet-data"
+if (Test-Path $dir) { Remove-Item $dir -Recurse -Force; Write-Host "[2/4] Removed $dir" }
+else { Write-Host "[2/4] $dir not found (skipped)" }
+
+# 3. Remove copilot hooks
+$copilotHook = "$env:USERPROFILE\.copilot\hooks\status-pet.json"
+if (Test-Path $copilotHook) { Remove-Item $copilotHook -Force; Write-Host "[3/4] Removed Copilot hooks" }
+else { Write-Host "[3/4] No Copilot hooks (skipped)" }
+
+# 4. Remove skill
+$skillDir = "$env:USERPROFILE\.claude\skills\pet"
+if (Test-Path $skillDir) { Remove-Item $skillDir -Recurse -Force; Write-Host "[4/4] Removed skill" }
+else { Write-Host "[4/4] No skill (skipped)" }
+
+Write-Host "Uninstall complete."
+```
+
+**bash:**
+```bash
+# 1. Stop running pets
+pkill -f claude-status-pet 2>/dev/null; sleep 0.5
+echo "[1/4] Stopped running pets"
+
+# 2. Remove pet-data
+DIR="$HOME/.claude/pet-data"
+if [ -d "$DIR" ]; then rm -rf "$DIR"; echo "[2/4] Removed $DIR"
+else echo "[2/4] $DIR not found (skipped)"; fi
+
+# 3. Remove copilot hooks
+HOOK="$HOME/.copilot/hooks/status-pet.json"
+if [ -f "$HOOK" ]; then rm -f "$HOOK"; echo "[3/4] Removed Copilot hooks"
+else echo "[3/4] No Copilot hooks (skipped)"; fi
+
+# 4. Remove skill
+SKILL="$HOME/.claude/skills/pet"
+if [ -d "$SKILL" ]; then rm -rf "$SKILL"; echo "[4/4] Removed skill"
+else echo "[4/4] No skill (skipped)"; fi
+
+echo "Uninstall complete."
+```
+
+After running, tell the user:
+- "Pet uninstalled. All data, scripts, and assets have been removed."
+- If using Claude Code plugin: "Run `/plugin uninstall claude-status-pet` to also remove the plugin hooks."
+- If using Copilot plugin: "Run `copilot plugin uninstall claude-status-pet-copilot` to also remove the plugin."

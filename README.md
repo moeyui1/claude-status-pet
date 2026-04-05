@@ -134,22 +134,16 @@ Binary output: `pet-app/src-tauri/target/release/claude-status-pet(.exe)`
 
 ## Uninstall
 
-Right-click the pet → Exit to close it, then:
+The easiest way — run in your AI assistant:
 
 ```
-/plugin uninstall claude-status-pet
-/plugin marketplace remove claude-status-pet
-rm -rf ~/.claude/pet-data    # optional: remove downloaded assets
+/pet uninstall
 ```
 
-<details>
-<summary>Manual uninstall</summary>
+This stops the pet, removes all data, scripts, and assets. Then uninstall the plugin:
 
-1. Remove hooks from `~/.claude/settings.json` (delete entries referencing `claude-status-pet`)
-2. `rm -rf ~/.claude/skills/pet`
-3. `rm -rf ~/.claude/pet-data`
-
-</details>
+- Claude Code: `/plugin uninstall claude-status-pet`
+- Copilot CLI: `copilot plugin uninstall claude-status-pet-copilot`
 
 ## How It Works
 
