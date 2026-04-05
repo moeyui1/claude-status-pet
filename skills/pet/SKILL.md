@@ -133,11 +133,23 @@ Write-Host "[2/6] Binary updated"
 
 # 3. Update hooks (only for installed hook locations)
 $hookUpdated = $false
-# Copilot global hooks
+# Copilot/VS Code global hooks
 $copilotHooksDir = "$env:USERPROFILE\.copilot\hooks"
 if (Test-Path $copilotHooksDir) {
-    Invoke-WebRequest -Uri "$RAW/copilot/hooks.json" -OutFile "$copilotHooksDir\status-pet.json"
-    $hookUpdated = $true; Write-Host "[3/6] Copilot hooks updated"
+    $copilotHookFile = "$copilotHooksDir\status-pet.json"
+    $vscodeHookFile = "$copilotHooksDir\status-pet-vscode.json"
+
+    if (Test-Path $copilotHookFile) {
+        Invoke-WebRequest -Uri "$RAW/copilot/hooks.json" -OutFile $copilotHookFile
+        $hookUpdated = $true
+    }
+
+    if (Test-Path $vscodeHookFile) {
+        Invoke-WebRequest -Uri "$RAW/vscode/hooks/hooks.json" -OutFile $vscodeHookFile
+        $hookUpdated = $true
+    }
+
+    if ($hookUpdated) { Write-Host "[3/6] Installed hooks updated" }
 }
 if (-not $hookUpdated) { Write-Host "[3/6] No hook locations to update (skipped)" }
 
@@ -186,13 +198,15 @@ case "$OS" in
 esac
 curl -sLo "$DIR/bin/$ASSET" "$BASE/releases/latest/download/$ASSET"
 chmod +x "$DIR/bin/$ASSET" 2>/dev/null || true
+ln -sf "$ASSET" "$DIR/bin/claude-status-pet" 2>/dev/null || true
 echo "[2/6] Binary updated"
 
 # 3. Update hooks (only for installed hook locations)
 HOOK_UPDATED=0
 if [ -d "$HOME/.copilot/hooks" ]; then
   curl -sLo "$HOME/.copilot/hooks/status-pet.json" "$RAW/copilot/hooks.json"
-  HOOK_UPDATED=1; echo "[3/6] Copilot hooks updated"
+  curl -sLo "$HOME/.copilot/hooks/status-pet-vscode.json" "$RAW/vscode/hooks/hooks.json"
+  HOOK_UPDATED=1; echo "[3/6] Copilot and VS Code hooks updated"
 fi
 [ "$HOOK_UPDATED" -eq 0 ] && echo "[3/6] No hook locations to update (skipped)"
 

@@ -21,6 +21,7 @@ esac
 
 curl -sLo "$INSTALL_DIR/$ASSET" "https://github.com/moeyui1/claude-status-pet/releases/latest/download/$ASSET"
 chmod +x "$INSTALL_DIR/$ASSET" 2>/dev/null || true
+ln -sf "$ASSET" "$INSTALL_DIR/claude-status-pet" 2>/dev/null || true
 ```
 
 **Windows PowerShell:**
