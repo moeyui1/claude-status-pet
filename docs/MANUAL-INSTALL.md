@@ -68,7 +68,9 @@ Invoke-WebRequest -Uri "$RAW/copilot/scripts/hook.ps1" -OutFile "$scriptsDir\cop
 
 ## Manual: Install VS Code Copilot Hooks
 
-VS Code hooks call the binary directly (no scripts needed — VS Code pipes stdin to the command).
+> **Note:** If you installed via `Chat: Install Plugin From Source`, hooks are loaded automatically from the plugin — skip this section.
+
+For manual installation only. VS Code hooks call the binary directly (no scripts needed — VS Code pipes stdin to the command).
 
 **macOS / Linux / Git Bash:**
 

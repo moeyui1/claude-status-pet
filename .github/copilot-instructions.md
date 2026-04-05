@@ -42,7 +42,7 @@ cd pet-app/src-tauri && cargo check             # fast compile check without bui
 - **All `truncate()` must use `is_char_boundary()`** to avoid UTF-8 panics.
 - **`write-status` must never spawn child processes.** PowerShell `&` waits for all children — spawning GUI from write-status blocks the hook.
 - **Session IDs must be validated** with `is_safe_session_id()` before use in file paths (path traversal prevention).
-- **`.claude-plugin/plugin.json`**: Do NOT add a `"hooks"` field — `hooks/hooks.json` is auto-discovered by the plugin system.
+- **`.claude-plugin/plugin.json`**: Do NOT add a `"hooks"` field — `hooks/hooks.json` is auto-discovered by the Claude Code plugin system. (Note: `vscode/plugin.json` DOES need `"hooks"` — VS Code's agent-plugin system requires explicit declaration.)
 - **Debug logging**: Disabled by default. Set env var `PET_DEBUG=1` to enable logging to `pet-debug.log`.
 - **Deployed binary filename**: `claude-status-pet-windows-x64.exe` (not `claude-status-pet.exe`).
 

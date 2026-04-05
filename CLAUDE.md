@@ -32,7 +32,7 @@ claude-status-pet/
 │   ├── skills/pet/SKILL.md  # /pet skill (copy of skills/pet/SKILL.md for plugin packaging)
 │   └── README.md
 ├── vscode/
-│   ├── plugin.json          # VS Code Copilot plugin manifest
+│   ├── plugin.json          # VS Code Copilot plugin manifest (has "hooks" field — required by VS Code)
 │   ├── hooks/
 │   │   └── hooks.json       # VS Code hooks → calls binary with --adapter vscode
 │   └── skills/pet/SKILL.md  # /pet skill (copy of skills/pet/SKILL.md for plugin packaging)
@@ -190,7 +190,7 @@ WebView2 blocks `file://` URLs. Assets loaded via `load_asset` Tauri command →
 
 ## Common Pitfalls
 
-- **plugin.json**: Do NOT add `"hooks"` field — `hooks/hooks.json` is auto-discovered
+- **`.claude-plugin/plugin.json`**: Do NOT add `"hooks"` field — `hooks/hooks.json` is auto-discovered by Claude Code. (`vscode/plugin.json` DOES need `"hooks"` — VS Code requires explicit declaration.)
 - **Building**: Use `npx tauri build` from `pet-app/`, NOT `cargo build` from `src-tauri/`
 - **Hook blocking**: write-status must never block. No network calls, no spawning children. Write file → `process::exit(0)`
 - **PowerShell `&`**: Waits for ALL child processes. NEVER spawn GUI from inside `& binary.exe`

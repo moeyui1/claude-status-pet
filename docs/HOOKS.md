@@ -107,9 +107,9 @@ Both Claude Code and GitHub Copilot now use the same fine-grained states for too
 
 ### VS Code Copilot
 
-Install via plugin: run `Chat: Install Plugin From Source` with `https://github.com/moeyui1/claude-status-pet`.
+Install via plugin: run `Chat: Install Plugin From Source` with `https://github.com/moeyui1/claude-status-pet`. Hooks are loaded automatically from `vscode/plugin.json`.
 
-Or copy hook config manually to `.github/hooks/` (workspace-level) or `~/.copilot/hooks/` (global):
+For **manual install only** (if plugin install is not available), copy hook config to `.github/hooks/` (workspace-level) or `~/.copilot/hooks/` (global):
 
 ```bash
 # Workspace-level (per project)

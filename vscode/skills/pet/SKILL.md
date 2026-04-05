@@ -255,4 +255,4 @@ echo "Uninstall complete."
 
 After running, tell the user:
 - "Pet uninstalled. All data, scripts, and assets have been removed."
-- "To remove VS Code plugin hooks, open VS Code Extensions, find Claude Status Pet, and uninstall it."
+- "To also remove the VS Code plugin and its hooks, run `Chat: Uninstall Plugin` from the command palette, or use `Chat: Install Plugin From Source` to reinstall later."
