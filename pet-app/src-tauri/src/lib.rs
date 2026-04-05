@@ -531,7 +531,7 @@ fn cmd_write_status(args: &[String]) {
             (event, tool_arg, detail, sid, sname, false)
         } else {
             eprintln!("Usage: claude-status-pet write-status --event <prompt|tool|done|error|offline> [--tool <name>] [--detail <text>] [--session-id <id>]");
-            eprintln!("   or: claude-status-pet write-status --adapter <claude|copilot> < stdin.json");
+            eprintln!("   or: claude-status-pet write-status --adapter <claude|copilot|vscode> < stdin.json");
             std::process::exit(1);
         };
 

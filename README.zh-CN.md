@@ -121,7 +121,7 @@ copilot plugin install claude-status-pet-copilot
 |----------|:---:|:---:|------|
 | [Claude Code](https://docs.anthropic.com/en/docs/claude-code) (CLI) | ✅ | ✅ | 完全支持 |
 | [GitHub Copilot CLI](https://docs.github.com/en/copilot/how-tos/copilot-cli) | ✅ | ✅ | 完全支持 |
-| VS Code Copilot Chat | — | — | 暂不支持 |
+| VS Code Copilot (Agent Mode) | ✅ | ✅ | 完全支持 |
 | Cursor | — | — | 暂不支持 |
 | OpenCode | — | — | 暂不支持 |
 

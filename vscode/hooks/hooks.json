@@ -1,0 +1,60 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "type": "command",
+        "command": "~/.claude/pet-data/bin/claude-status-pet write-status --adapter vscode",
+        "windows": "& \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" write-status --adapter vscode",
+        "timeout": 1
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "type": "command",
+        "command": "~/.claude/pet-data/bin/claude-status-pet write-status --adapter vscode",
+        "windows": "& \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" write-status --adapter vscode",
+        "timeout": 1
+      }
+    ],
+    "PreToolUse": [
+      {
+        "type": "command",
+        "command": "~/.claude/pet-data/bin/claude-status-pet write-status --adapter vscode",
+        "windows": "& \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" write-status --adapter vscode",
+        "timeout": 1
+      }
+    ],
+    "PostToolUse": [
+      {
+        "type": "command",
+        "command": "~/.claude/pet-data/bin/claude-status-pet write-status --adapter vscode",
+        "windows": "& \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" write-status --adapter vscode",
+        "timeout": 1
+      }
+    ],
+    "SubagentStart": [
+      {
+        "type": "command",
+        "command": "~/.claude/pet-data/bin/claude-status-pet write-status --adapter vscode",
+        "windows": "& \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" write-status --adapter vscode",
+        "timeout": 1
+      }
+    ],
+    "SubagentStop": [
+      {
+        "type": "command",
+        "command": "~/.claude/pet-data/bin/claude-status-pet write-status --adapter vscode",
+        "windows": "& \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" write-status --adapter vscode",
+        "timeout": 1
+      }
+    ],
+    "Stop": [
+      {
+        "type": "command",
+        "command": "~/.claude/pet-data/bin/claude-status-pet write-status --adapter vscode",
+        "windows": "& \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" write-status --adapter vscode",
+        "timeout": 1
+      }
+    ]
+  }
+}

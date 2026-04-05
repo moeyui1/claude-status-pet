@@ -1,6 +1,6 @@
 # Claude Status Pet — Developer Guide for AI Coders
 
-This document is for AI coding assistants (Claude Code, GitHub Copilot CLI) working on this repo. Read this before making changes.
+This document is for AI coding assistants (Claude Code, GitHub Copilot CLI, VS Code Copilot) working on this repo. Read this before making changes.
 
 ## What This Project Is
 
@@ -31,6 +31,11 @@ claude-status-pet/
 │   │   └── hook.ps1         # PowerShell hook handler (deployed to ~/.claude/pet-data/scripts/)
 │   ├── skills/pet/SKILL.md  # /pet skill (copy of skills/pet/SKILL.md for plugin packaging)
 │   └── README.md
+├── vscode/
+│   ├── plugin.json          # VS Code Copilot plugin manifest
+│   ├── hooks/
+│   │   └── hooks.json       # VS Code hooks → calls binary with --adapter vscode
+│   └── skills/pet/SKILL.md  # /pet skill (copy of skills/pet/SKILL.md for plugin packaging)
 ├── skills/
 │   └── pet/SKILL.md         # /pet slash command (works with Claude Code + Copilot via ~/.claude/skills/)
 ├── dlc/                     # DLC character configs (packaged into pet-assets.zip)
@@ -71,6 +76,7 @@ claude-status-pet/
 ```
 claude-status-pet write-status --adapter claude         # CLI: parse stdin, write status, exit
 claude-status-pet write-status --adapter copilot --copilot-event preToolUse  # CLI: Copilot with event arg
+claude-status-pet write-status --adapter vscode          # CLI: VS Code Copilot (event from stdin)
 claude-status-pet write-status --event tool --tool edit  # CLI: generic args, any agent
 claude-status-pet run --status-file <path>                # GUI: launch Tauri window
 claude-status-pet demo --assets-dir <path>               # GUI: cycle all states for recording
@@ -84,13 +90,13 @@ claude-status-pet demo --assets-dir <path>               # GUI: cycle all states
 
 ## Adapter System
 
-Two adapters in `src/adapter/` (VS Code Copilot adapter planned — 待支持):
+Three adapters in `src/adapter/`:
 
 | Adapter | Event source | Tool names | Session ID | Quirks |
 |---------|-------------|------------|------------|--------|
 | `claude` | stdin `hook_event_name` (PascalCase) | `Edit`, `Read`, `Bash` | stdin `session_id` | None |
 | `copilot` | `--copilot-event` CLI arg | stdin `toolName` (camelCase) | stdin `sessionId` | sessionStart=thinking, userPromptSubmitted=ignored, postToolUse=thinking |
-| `vscode` | _(待支持)_ | — | — | — |
+| `vscode` | stdin `hookEventName` (PascalCase) | `replace_string_in_file`, `read_file` | stdin `sessionId` | PostToolUse=thinking, PreCompact=ignored |
 
 ### StdinInput parsing
 
@@ -213,7 +219,7 @@ cargo test
 
 Use the `/release` skill or manually:
 
-1. Update version in: `plugin.json`, `tauri.conf.json`, `Cargo.toml`, `package.json`
+1. Update version in: `plugin.json` (3 files), `tauri.conf.json`, `Cargo.toml`, `package.json`
 2. Commit, tag: `git tag v0.X.0 && git push origin --tags`
 3. CI builds binaries + asset zip. Pre-release tags (`-rc`, `-beta`) marked as pre-release.
 

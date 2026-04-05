@@ -78,15 +78,7 @@ fn contains_any(haystack: &str, needles: &[&str]) -> bool {
 }
 
 fn truncate(s: &str, max: usize) -> &str {
-    if s.len() <= max {
-        s
-    } else {
-        let mut idx = max;
-        while idx > 0 && !s.is_char_boundary(idx) {
-            idx -= 1;
-        }
-        &s[..idx]
-    }
+    crate::adapter::truncate(s, max)
 }
 
 #[cfg(test)]

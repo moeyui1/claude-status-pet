@@ -10,7 +10,7 @@
 /// - postToolUse: mapped to "prompt"/thinking (avoids idle flash between tools)
 /// - sessionEnd: writes offline (does NOT close the window)
 
-use super::{Adapter, NormalizedEvent, StdinInput};
+use super::{Adapter, NormalizedEvent, StdinInput, basename, truncate, md5_short, get_str};
 use std::path::Path;
 
 pub struct CopilotAdapter;
@@ -122,36 +122,4 @@ impl Adapter for CopilotAdapter {
             launch_only,
         })
     }
-}
-
-fn get_str(v: &serde_json::Value, keys: &[&str]) -> Option<String> {
-    for key in keys {
-        if let Some(s) = v.get(key).and_then(|v| v.as_str()) {
-            if !s.is_empty() {
-                return Some(s.to_string());
-            }
-        }
-    }
-    None
-}
-
-fn basename(path: &str) -> &str {
-    path.rsplit(&['/', '\\']).next().unwrap_or(path)
-}
-
-fn truncate(s: &str, max: usize) -> &str {
-    if s.len() <= max { return s; }
-    let mut idx = max;
-    while idx > 0 && !s.is_char_boundary(idx) { idx -= 1; }
-    &s[..idx]
-}
-
-/// Simple MD5-like hash (first 8 hex chars) for session ID generation
-fn md5_short(input: &str) -> String {
-    // Simple hash — not cryptographic, just for unique IDs
-    let mut hash: u64 = 0;
-    for (i, b) in input.bytes().enumerate() {
-        hash = hash.wrapping_mul(31).wrapping_add(b as u64).wrapping_add(i as u64);
-    }
-    format!("{:08x}", hash)
 }
