@@ -148,11 +148,11 @@ mod tests {
     }
 
     #[test]
-    fn test_copilot_prompt_ignored() {
+    fn test_copilot_prompt_submitted() {
         std::env::set_var("COPILOT_HOOK_EVENT", "userPromptSubmitted");
         let stdin = make_stdin(None, None, None, None, Some("/proj"));
-        let ev = adapter::copilot::CopilotAdapter.parse(&stdin);
-        assert!(ev.is_none());
+        let ev = adapter::copilot::CopilotAdapter.parse(&stdin).unwrap();
+        assert_eq!(ev.event, "prompt");
     }
 
     #[test]
