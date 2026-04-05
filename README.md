@@ -45,23 +45,27 @@ A desktop pet that shows what your AI coding assistant is doing — in real time
 
 ## Quick Start
 
-**Option 1 — Plugin install** (Claude Code):
+**Claude Code** — Plugin install:
 
 ```
 /plugin marketplace add moeyui1/claude-status-pet
 /plugin install claude-status-pet
 ```
 
-**Option 1b — Plugin install** (GitHub Copilot CLI):
+**GitHub Copilot CLI** — Plugin install:
 
 ```
 copilot plugin marketplace add moeyui1/claude-status-pet
 copilot plugin install claude-status-pet-copilot
 ```
 
+**VS Code Copilot** — Plugin install:
+
+Open Command Palette → `Chat: Install Plugin From Source` → enter `https://github.com/moeyui1/claude-status-pet`
+
 Then run `/pet update` to download the binary and assets.
 
-**Option 2 — Ask your AI agent** (Claude Code or Copilot CLI):
+**Or ask your AI agent** (any of the above):
 
 > Read https://raw.githubusercontent.com/moeyui1/claude-status-pet/main/docs/INSTALL.md and install it for me
 
@@ -83,7 +87,7 @@ That's it! A pet will appear on your next session. 🎉
 - Customize colors, background, font size
 - Exit the pet
 
-**`/pet` commands** (in Claude Code or Copilot CLI):
+**`/pet` commands** (in Claude Code, Copilot CLI, or VS Code Copilot):
 
 | Command | Action |
 |---------|--------|
@@ -99,21 +103,6 @@ Ask your AI assistant:
 
 > Read https://raw.githubusercontent.com/moeyui1/claude-status-pet/main/docs/CUSTOM-CHARACTERS.md and create a custom character pack for me
 
-## GitHub Copilot Support
-
-Also works with **GitHub Copilot CLI**! Install via plugin:
-
-```
-copilot plugin marketplace add moeyui1/claude-status-pet
-copilot plugin install claude-status-pet-copilot
-```
-
-Or see [`copilot/README.md`](copilot/README.md) for manual setup.
-
-Both tools can run simultaneously — each gets its own pet window.
-
-> 💡 Extensible to any AI agent with hook support — [PRs welcome](CONTRIBUTING.md#adding-a-new-ai-agent-adapter)!
-
 ## Compatibility
 
 | AI Agent | Plugin Install | Manual Install | Status |
@@ -125,6 +114,8 @@ Both tools can run simultaneously — each gets its own pet window.
 | OpenCode | — | — | Not supported yet |
 
 > Want to add support for another agent? See [Adding a New Adapter](CONTRIBUTING.md#adding-a-new-ai-agent-adapter).
+>
+> 💡 Multiple agents can run simultaneously — each gets its own pet window.
 
 ## Other Installation Methods
 
@@ -156,6 +147,7 @@ This stops the pet, removes all data, scripts, and assets. Then uninstall the pl
 
 - Claude Code: `/plugin uninstall claude-status-pet`
 - Copilot CLI: `copilot plugin uninstall claude-status-pet-copilot`
+- VS Code: Command Palette → `Chat: Uninstall Plugin`
 
 ## How It Works
 

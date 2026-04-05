@@ -45,23 +45,27 @@
 
 ## 快速开始
 
-**方式一 — 插件安装**（Claude Code）：
+**Claude Code** — 插件安装：
 
 ```
 /plugin marketplace add moeyui1/claude-status-pet
 /plugin install claude-status-pet
 ```
 
-**方式一b — 插件安装**（GitHub Copilot CLI）：
+**GitHub Copilot CLI** — 插件安装：
 
 ```
 copilot plugin marketplace add moeyui1/claude-status-pet
 copilot plugin install claude-status-pet-copilot
 ```
 
+**VS Code Copilot** — 插件安装：
+
+打开命令面板 → `Chat: Install Plugin From Source` → 输入 `https://github.com/moeyui1/claude-status-pet`
+
 安装后运行 `/pet update` 下载二进制和资源。
 
-**方式二 — 让 AI 助手安装**（Claude Code 或 Copilot CLI）：
+**或让 AI 助手安装**（以上任意一种）：
 
 > Read https://raw.githubusercontent.com/moeyui1/claude-status-pet/main/docs/INSTALL.md and install it for me
 
@@ -83,7 +87,7 @@ copilot plugin install claude-status-pet-copilot
 - 自定义颜色、背景、字体大小
 - 退出宠物
 
-**`/pet` 命令**（Claude Code 或 Copilot CLI 中使用）：
+**`/pet` 命令**（Claude Code、Copilot CLI 或 VS Code Copilot 中使用）：
 
 | 命令 | 功能 |
 |------|------|
@@ -100,21 +104,6 @@ copilot plugin install claude-status-pet-copilot
 
 > Read https://raw.githubusercontent.com/moeyui1/claude-status-pet/main/docs/CUSTOM-CHARACTERS.md and create a custom character pack for me
 
-## GitHub Copilot 支持
-
-同时支持 **GitHub Copilot CLI**！通过插件安装：
-
-```
-copilot plugin marketplace add moeyui1/claude-status-pet
-copilot plugin install claude-status-pet-copilot
-```
-
-或参阅 [`copilot/README.md`](copilot/README.md) 进行手动配置。
-
-两个工具可以同时运行 — 各自拥有独立的宠物窗口。
-
-> 💡 理论上可扩展支持任何带 Hook 的 AI Agent — [欢迎 PR](CONTRIBUTING.md#adding-a-new-ai-agent-adapter)！
-
 ## 兼容性
 
 | AI Agent | 插件安装 | 手动安装 | 状态 |
@@ -126,6 +115,8 @@ copilot plugin install claude-status-pet-copilot
 | OpenCode | — | — | 暂不支持 |
 
 > 想为其他 Agent 添加支持？参见 [添加新适配器](CONTRIBUTING.md#adding-a-new-ai-agent-adapter)。
+>
+> 💡 多个 Agent 可以同时运行 — 各自拥有独立的宠物窗口。
 
 ## 其他安装方式
 
@@ -157,6 +148,7 @@ npx tauri build
 
 - Claude Code: `/plugin uninstall claude-status-pet`
 - Copilot CLI: `copilot plugin uninstall claude-status-pet-copilot`
+- VS Code: 命令面板 → `Chat: Uninstall Plugin`
 
 ## 工作原理
 
