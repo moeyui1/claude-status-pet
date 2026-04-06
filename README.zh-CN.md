@@ -71,7 +71,7 @@ copilot plugin install claude-status-pet-copilot
 ## 功能特性
 
 - 🔴 **实时状态** — 宠物会随着助手读取、编辑、搜索、思考而做出不同反应
-- 🎭 **10+ 角色** — Ferris（SVG）、Mona & Kuromi（GIF DLC）、6 种 ASCII 艺术小伙伴
+- 🎭 **15+ 角色** — Ferris（SVG）、Mona & Kuromi（GIF）、Go Gopher（SVG）、Fluent Emoji & Cat（PNG）、6 种 ASCII 艺术小伙伴
 - 💃 **动画效果** — 每种状态都有独特动画（浮动、摇摆、弹跳、睡觉）
 - 🪟 **多会话支持** — 每个会话都有自己的宠物窗口
 - 🎨 **自由定制** — 右键更换角色、调整颜色、字体大小
@@ -80,7 +80,7 @@ copilot plugin install claude-status-pet-copilot
 ## 使用方法
 
 **右键点击**宠物打开菜单：
-- 切换角色（Ferris、Mona、Kuromi、Chonk、Cat、Ghost、Robot、Duck、Axolotl、Snail）
+- 切换角色（Ferris、Go Gopher、Mona、Kuromi、Fluent Emoji、Fluent Cat、Chonk、Cat、Ghost、Robot、Duck、Axolotl、Snail）
 - 自定义颜色、背景、字体大小
 - 退出宠物
 

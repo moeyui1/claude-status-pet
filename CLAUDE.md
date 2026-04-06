@@ -40,7 +40,10 @@ claude-status-pet/
 │   └── pet/SKILL.md         # /pet slash command (works with Claude Code + Copilot via ~/.claude/skills/)
 ├── dlc/                     # DLC character configs (packaged into pet-assets.zip)
 │   ├── mona.json            # Mona download URLs + state mapping
-│   └── kuromi.json          # Kuromi download URLs + state mapping
+│   ├── kuromi.json          # Kuromi download URLs + state mapping
+│   ├── gopher.json          # Go Gopher (CC0 SVGs)
+│   ├── fluent-emoji.json    # Fluent Emoji faces (MIT PNGs)
+│   └── fluent-cat.json      # Fluent Cat emoji (MIT PNGs)
 ├── docs/
 │   ├── INSTALL.md           # Agent-readable install instructions
 │   ├── MANUAL-INSTALL.md    # Manual install steps (binary, hooks, assets)
@@ -130,7 +133,7 @@ All `truncate()` functions use `is_char_boundary()` to avoid UTF-8 panics.
 Characters defined by `character.json` files:
 
 - **Bundled**: `pet-app/src/ferris/character.json`
-- **DLC**: `~/.claude/pet-data/assets/{mona,kuromi}/character.json` (downloaded by `download_dlc` Rust command using `ureq` HTTP client)
+- **DLC**: `~/.claude/pet-data/assets/{mona,kuromi,gopher,fluent-emoji,...}/character.json` (downloaded by `download_dlc` Rust command using `ureq` HTTP client)
 - **Custom**: `~/.claude/pet-data/characters/*/character.json` (user-installed packs)
 
 DLC download is async (`spawn_blocking`) with 30s HTTP timeout per file. Auto-downloads missing DLC on startup if selected character requires it.
@@ -180,6 +183,8 @@ All hook processing and DLC download in Rust (using `ureq` for HTTP). No Node.js
 
 ### Image licensing
 - **Ferris SVGs** (CC0) are bundled in the repo
+- **Go Gopher SVGs** (CC0) from egonelbre/gophers — downloaded at runtime via `download_dlc`
+- **Fluent Emoji PNGs** (MIT) from microsoft/fluentui-emoji — downloaded at runtime via `download_dlc`
 - **Mona/Kuromi GIFs** (GIPHY) are NOT in the repo — downloaded at runtime via `download_dlc`
 
 ### Window transparency

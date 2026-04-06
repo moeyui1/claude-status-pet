@@ -6,8 +6,9 @@ Want to add a new character to Claude Status Pet? Here's how.
 
 | Format | Example | Config | Best for |
 |--------|---------|--------|----------|
-| **SVG images** | Ferris | `character.json` in bundled frontend | Detailed vector illustrations |
+| **SVG images** | Ferris, Go Gopher | `character.json` in bundled frontend or DLC | Detailed vector illustrations |
 | **GIF animations** | Mona, Kuromi | `character.json` in assets dir | Animated mascots, stickers |
+| **PNG images** | Fluent Emoji, Fluent Cat | `character.json` in assets dir | 3D rendered emoji |
 | **ASCII art** | Chonk, Cat, Ghost | Hardcoded in `app.js` | Lightweight text art |
 
 ## The `character.json` Format
@@ -79,9 +80,9 @@ For characters bundled with the app (like Ferris):
 
 4. The app will auto-discover it from the bundled frontend.
 
-## Adding a GIF DLC Character
+## Adding a DLC Character
 
-For characters downloaded at runtime (like Mona, Kuromi):
+For characters downloaded at runtime (like Mona, Gopher, Fluent Emoji):
 
 ### 1. Create a DLC config file
 
@@ -90,6 +91,7 @@ Create `dlc/mychar.json`:
 ```json
 {
   "name": "My Character",
+  "version": 1,
   "type": "gif",
   "downloads": [
     { "path": "mychar/happy.gif", "url": "https://example.com/happy.gif" },
@@ -113,7 +115,8 @@ Create `dlc/mychar.json`:
 
 **Fields:**
 - **`name`** — Display name shown in the right-click menu
-- **`type`** — `"gif"` or `"svg"`
+- **`version`** — Integer version; bump when updating downloads/states so `/pet update` refreshes the DLC
+- **`type`** — `"gif"`, `"svg"`, or `"png"`
 - **`downloads`** — Array of `{path, url}` pairs. `path` is the local file path under the assets dir; `url` is where to download it from
 - **`states`** — Maps each pet state to an array of image paths (same as `character.json`)
 
@@ -167,13 +170,14 @@ unzip my-pack.zip -d ~/.claude/pet-data/characters/
 
 ```
 ~/.claude/pet-data/
-├── assets/              ← DLC characters (mona, kuromi)
+├── assets/              ← DLC characters (mona, gopher, fluent-emoji, etc.)
+│   ├── dlc/             ← DLC config JSONs
 │   ├── mona/
 │   │   ├── character.json
 │   │   └── *.gif
-│   └── kuromi/
+│   └── gopher/
 │       ├── character.json
-│       └── *.gif
+│       └── *.svg
 ├── characters/          ← Custom user packs (drop packs here)
 │   └── my-pack/
 │       ├── character.json

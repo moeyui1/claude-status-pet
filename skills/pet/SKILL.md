@@ -39,7 +39,7 @@ Sub-paths:
 - `status-*.json` — Active session status files
 - `pet-*.lock` — PID lock files (one per running pet window)
 - `config.json` — User config (`character`)
-- `assets/` — DLC characters (mona, kuromi)
+- `assets/` — DLC characters (mona, gopher, fluent-emoji, etc.)
 - `characters/` — User-installed custom packs
 
 ### /pet on

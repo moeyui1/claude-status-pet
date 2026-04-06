@@ -71,7 +71,7 @@ That's it! A pet will appear on your next session. 🎉
 ## Features
 
 - 🔴 **Real-time status** — watch your pet react as the assistant reads, edits, searches, thinks
-- 🎭 **10+ characters** — Ferris (SVG), Mona & Kuromi (GIF DLC), and 6 ASCII art buddies
+- 🎭 **15+ characters** — Ferris (SVG), Mona & Kuromi (GIF), Go Gopher (SVG), Fluent Emoji & Cat (PNG), and 6 ASCII art buddies
 - 💃 **Animated** — unique animations per state (floating, wiggling, bouncing, sleeping)
 - 🪟 **Multi-session** — each session gets its own pet window
 - 🎨 **Customizable** — right-click to change character, colors, font size
@@ -80,7 +80,7 @@ That's it! A pet will appear on your next session. 🎉
 ## Usage
 
 **Right-click** the pet to open the menu:
-- Switch character (Ferris, Mona, Kuromi, Chonk, Cat, Ghost, Robot, Duck, Axolotl, Snail)
+- Switch character (Ferris, Go Gopher, Mona, Kuromi, Fluent Emoji, Fluent Cat, Chonk, Cat, Ghost, Robot, Duck, Axolotl, Snail)
 - Customize colors, background, font size
 - Exit the pet
 
