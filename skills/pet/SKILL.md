@@ -116,6 +116,17 @@ New-Item -ItemType Directory -Path $assetsDir -Force | Out-Null
 Invoke-WebRequest -Uri "$BASE/releases/latest/download/pet-assets.zip" -OutFile "$env:TEMP\pet-assets.zip"
 Expand-Archive -Path "$env:TEMP\pet-assets.zip" -DestinationPath $assetsDir -Force
 Remove-Item "$env:TEMP\pet-assets.zip" -ErrorAction SilentlyContinue
+# Clean outdated DLC so they re-download on next use
+Get-ChildItem "$assetsDir\dlc\*.json" -ErrorAction SilentlyContinue | ForEach-Object {
+    $dlcId = $_.BaseName; $charJson = "$assetsDir\$dlcId\character.json"
+    if (Test-Path $charJson) {
+        $cfg = Get-Content $_.FullName | ConvertFrom-Json
+        $inst = Get-Content $charJson | ConvertFrom-Json
+        if ($cfg.version -and (!$inst.version -or $inst.version -lt $cfg.version)) {
+            Remove-Item "$assetsDir\$dlcId" -Recurse -Force
+        }
+    }
+}
 Write-Host "[4/4] Assets updated"
 
 Write-Host "Update complete! Run /pet on to start."
@@ -155,6 +166,16 @@ mkdir -p "$DIR/assets"
 curl -sLo /tmp/pet-assets.zip "$BASE/releases/latest/download/pet-assets.zip"
 unzip -o /tmp/pet-assets.zip -d "$DIR/assets"
 rm -f /tmp/pet-assets.zip
+# Clean outdated DLC so they re-download on next use
+for cfg in "$DIR/assets/dlc/"*.json; do
+  [ -f "$cfg" ] || continue
+  id=$(basename "$cfg" .json)
+  cj="$DIR/assets/$id/character.json"
+  [ -f "$cj" ] || continue
+  cv=$(grep -o '"version"[[:space:]]*:[[:space:]]*[0-9]*' "$cfg" | grep -o '[0-9]*')
+  iv=$(grep -o '"version"[[:space:]]*:[[:space:]]*[0-9]*' "$cj" | grep -o '[0-9]*')
+  [ -n "$cv" ] && { [ -z "$iv" ] || [ "$iv" -lt "$cv" ]; } && rm -rf "$DIR/assets/$id"
+done
 echo "[4/4] Assets updated"
 
 echo "Update complete! Run /pet on to start."

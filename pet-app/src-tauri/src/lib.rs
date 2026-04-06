@@ -244,9 +244,15 @@ fn bind_session(
 fn is_dlc_installed(assets_dir: tauri::State<'_, Option<PathBuf>>, dlc_name: String) -> bool {
     if let Some(dir) = assets_dir.inner().as_ref() {
         let dlc_dir = dir.join(&dlc_name);
+        let char_json = dlc_dir.join("character.json");
+        if !char_json.exists() { return false; }
+        // Check if any asset files exist
         if let Ok(entries) = fs::read_dir(&dlc_dir) {
             return entries.filter_map(|e| e.ok()).any(|e| {
-                e.path().extension().and_then(|ext| ext.to_str()) == Some("gif")
+                matches!(
+                    e.path().extension().and_then(|ext| ext.to_str()),
+                    Some("gif" | "svg" | "png")
+                )
             });
         }
     }
@@ -315,11 +321,14 @@ fn download_dlc_blocking(dir: &PathBuf, dlc_name: &str) -> Result<bool, String> 
     }
 
     // Write character.json from the states in the DLC config
-    let character = serde_json::json!({
+    let mut character = serde_json::json!({
         "name": config["name"],
         "type": config["type"],
         "states": config["states"]
     });
+    if let Some(ver) = config.get("version") {
+        character["version"] = ver.clone();
+    }
     fs::write(dlc_dir.join("character.json"), serde_json::to_string_pretty(&character).unwrap())
         .map_err(|e| format!("Failed to write character.json: {}", e))?;
 

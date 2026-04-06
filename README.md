@@ -17,9 +17,6 @@ A desktop pet that shows what your AI coding assistant is doing — in real time
 <img src="docs/images/showcase-ferris.gif" width="100%" alt="Ferris demo">
 </td>
 <td align="center">
-<img src="docs/images/showcase-kuromi.gif" width="100%" alt="Kuromi demo">
-</td>
-<td align="center">
 <img src="docs/images/showcase-mona.gif" width="100%" alt="Mona demo">
 </td>
 <td align="center">
@@ -35,9 +32,6 @@ A desktop pet that shows what your AI coding assistant is doing — in real time
 <tr>
 <td align="center">
 <img src="https://github.com/user-attachments/assets/f8174efa-99a5-4891-93db-5b269d7965ed" width="100%" alt="Ferris in action">
-</td>
-<td align="center">
-<img src="https://github.com/user-attachments/assets/645fea27-ef66-46ee-974b-bf0161a8de98" width="100%" alt="Kuromi in action">
 </td>
 </tr>
 </table>
@@ -161,6 +155,7 @@ The pet is **decoupled from any specific tool** — it just watches a JSON statu
 ## Credits
 
 - **Ferris**: [free-ferris-pack](https://github.com/MariaLetta/free-ferris-pack) by Maria Letta (CC0)
+- **Go Gopher**: [gophers](https://github.com/egonelbre/gophers) by Egon Elbre (CC0), original design by Renee French
 - **Mona**: [GitHub on GIPHY](https://giphy.com/GitHub) (downloaded at runtime)
 - **Kuromi**: [Sanrio Korea on GIPHY](https://giphy.com/SanrioKorea) (downloaded at runtime)
 - **ASCII sprites**: inspired by [any-buddy](https://github.com/cpaczek/any-buddy) by cpaczek

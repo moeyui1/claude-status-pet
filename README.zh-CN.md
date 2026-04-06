@@ -17,9 +17,6 @@
 <img src="docs/images/showcase-ferris.gif" width="100%" alt="Ferris 演示">
 </td>
 <td align="center">
-<img src="docs/images/showcase-kuromi.gif" width="100%" alt="Kuromi 演示">
-</td>
-<td align="center">
 <img src="docs/images/showcase-mona.gif" width="100%" alt="Mona 演示">
 </td>
 <td align="center">
@@ -35,9 +32,6 @@
 <tr>
 <td align="center">
 <img src="https://github.com/user-attachments/assets/f8174efa-99a5-4891-93db-5b269d7965ed" width="100%" alt="Ferris 实际效果">
-</td>
-<td align="center">
-<img src="https://github.com/user-attachments/assets/645fea27-ef66-46ee-974b-bf0161a8de98" width="100%" alt="Kuromi 实际效果">
 </td>
 </tr>
 </table>
@@ -162,6 +156,7 @@ npx tauri build
 ## 致谢
 
 - **Ferris**：[free-ferris-pack](https://github.com/MariaLetta/free-ferris-pack)，Maria Letta 作品（CC0 许可）
+- **Go Gopher**：[gophers](https://github.com/egonelbre/gophers)，Egon Elbre 作品（CC0 许可），原设计 Renee French
 - **Mona**：[GitHub on GIPHY](https://giphy.com/GitHub)（运行时从 GIPHY 下载）
 - **Kuromi**：[Sanrio Korea on GIPHY](https://giphy.com/SanrioKorea)（运行时从 GIPHY 下载）
 - **ASCII 角色**：灵感来自 [any-buddy](https://github.com/cpaczek/any-buddy)，cpaczek 作品

@@ -97,6 +97,11 @@ BUNDLED ASSETS
   Downloaded at runtime from GIPHY. Subject to GIPHY Terms of Service.
   https://developers.giphy.com/docs/sdk#terms
 
+- Go Gopher SVG art: CC0-1.0 (Public Domain)
+  From egonelbre/gophers (https://github.com/egonelbre/gophers).
+  The Go gopher was originally designed by Renee French. SVG artwork by Egon Elbre.
+  Downloaded at runtime. Not bundled in this repository.
+
 ================================================================================
 
 LICENSE TEXTS

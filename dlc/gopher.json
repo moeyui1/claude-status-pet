@@ -1,0 +1,32 @@
+{
+  "name": "Go Gopher",
+  "version": 1,
+  "type": "svg",
+  "downloads": [
+    { "path": "gopher/sage.svg",           "url": "https://raw.githubusercontent.com/egonelbre/gophers/master/vector/fairy-tale/sage.svg" },
+    { "path": "gopher/witch-learning.svg",  "url": "https://raw.githubusercontent.com/egonelbre/gophers/master/vector/fairy-tale/witch-learning.svg" },
+    { "path": "gopher/with-C-book.svg",     "url": "https://raw.githubusercontent.com/egonelbre/gophers/master/vector/projects/with-C-book.svg" },
+    { "path": "gopher/vim-go.svg",          "url": "https://raw.githubusercontent.com/egonelbre/gophers/master/vector/projects/vim-go.svg" },
+    { "path": "gopher/hiking.svg",          "url": "https://raw.githubusercontent.com/egonelbre/gophers/master/vector/adventure/hiking.svg" },
+    { "path": "gopher/jet-pack.svg",        "url": "https://raw.githubusercontent.com/egonelbre/gophers/master/vector/science/jet-pack.svg" },
+    { "path": "gopher/standing.svg",        "url": "https://raw.githubusercontent.com/egonelbre/gophers/master/vector/superhero/standing.svg" },
+    { "path": "gopher/heart-balloon.svg",   "url": "https://raw.githubusercontent.com/egonelbre/gophers/master/vector/friends/heart-balloon.svg" },
+    { "path": "gopher/mistake.svg",         "url": "https://raw.githubusercontent.com/egonelbre/gophers/master/vector/science/mistake.svg" },
+    { "path": "gopher/music.svg",           "url": "https://raw.githubusercontent.com/egonelbre/gophers/master/vector/party/music.svg" },
+    { "path": "gopher/scientist.svg",       "url": "https://raw.githubusercontent.com/egonelbre/gophers/master/vector/science/scientist.svg" },
+    { "path": "gopher/knight.svg",          "url": "https://raw.githubusercontent.com/egonelbre/gophers/master/vector/fairy-tale/knight.svg" }
+  ],
+  "states": {
+    "idle":       ["gopher/sage.svg", "gopher/music.svg"],
+    "thinking":   ["gopher/witch-learning.svg", "gopher/scientist.svg"],
+    "reading":    ["gopher/with-C-book.svg"],
+    "editing":    ["gopher/vim-go.svg"],
+    "searching":  ["gopher/hiking.svg"],
+    "running":    ["gopher/jet-pack.svg", "gopher/knight.svg"],
+    "delegating": ["gopher/standing.svg"],
+    "waiting":    ["gopher/heart-balloon.svg"],
+    "error":      ["gopher/mistake.svg"],
+    "offline":    ["gopher/music.svg"],
+    "unknown":    ["gopher/sage.svg"]
+  }
+}
