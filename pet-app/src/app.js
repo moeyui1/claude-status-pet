@@ -436,6 +436,7 @@ function buildMenu() {
   charMenu.innerHTML = '';
   if (menuPage === 'config') { buildConfigPage(); return; }
   if (menuPage === 'ascii') { buildAsciiPage(); return; }
+  if (menuPage === 'dlc') { buildDlcPage(); return; }
 
   // Bundled: Ferris
   addMenuItem(charMenu, 'Ferris (SVG)', () => selectChar('ferris'), mode === 'ferris' ? 'active' : '');
@@ -446,22 +447,11 @@ function buildMenu() {
   addMenuItem(charMenu, 'ASCII Buddies ' + (asciiActive ? '(' + ASCII_SPECIES[mode].name + ')' : '') + ' ▸', () => { menuPage = 'ascii'; buildMenu(); }, asciiActive ? 'active' : '');
   addDivider(charMenu);
 
-  // DLC characters
+  // DLC characters → submenu
   if (availableDlcs.length > 0) {
-    const dlcLabel = document.createElement('div');
-    dlcLabel.className = 'menu-section-label';
-    dlcLabel.textContent = 'DLC';
-    charMenu.appendChild(dlcLabel);
-
-    for (const dlc of availableDlcs) {
-      const installed = isDlcInstalled(dlc.id);
-      const cls = mode === dlc.id ? 'active' : '';
-      if (installed) {
-        addMenuItem(charMenu, dlc.name, () => selectChar(dlc.id), cls);
-      } else {
-        addMenuItem(charMenu, dlc.name + ' ↓', () => downloadAndSelectDlc(dlc.id), cls);
-      }
-    }
+    const dlcActive = availableDlcs.some(d => mode === d.id);
+    const activeName = dlcActive ? availableDlcs.find(d => mode === d.id).name : '';
+    addMenuItem(charMenu, 'DLC ' + (dlcActive ? '(' + activeName + ')' : '') + ' ▸', () => { menuPage = 'dlc'; buildMenu(); }, dlcActive ? 'active' : '');
   }
 
   // Custom character packs
@@ -526,6 +516,20 @@ function buildConfigPage() {
     applyConfig();
     buildConfigPage();
   }, 'menu-item-danger');
+}
+
+function buildDlcPage() {
+  addMenuItem(charMenu, '← Back', () => { menuPage = 'main'; buildMenu(); });
+  addDivider(charMenu);
+  for (const dlc of availableDlcs) {
+    const installed = isDlcInstalled(dlc.id);
+    const cls = mode === dlc.id ? 'active' : '';
+    if (installed) {
+      addMenuItem(charMenu, dlc.name, () => { selectChar(dlc.id); menuPage = 'main'; }, cls);
+    } else {
+      addMenuItem(charMenu, dlc.name + ' ↓', () => { downloadAndSelectDlc(dlc.id); menuPage = 'main'; }, cls);
+    }
+  }
 }
 
 function isDlcInstalled(dlcName) {

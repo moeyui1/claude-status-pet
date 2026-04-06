@@ -1,0 +1,37 @@
+{
+  "name": "Fluent Emoji",
+  "version": 1,
+  "type": "png",
+  "downloads": [
+    { "path": "fluent-emoji/smiling_eyes.png",     "url": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Smiling%20face%20with%20smiling%20eyes/3D/smiling_face_with_smiling_eyes_3d.png" },
+    { "path": "fluent-emoji/relieved.png",          "url": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Relieved%20face/3D/relieved_face_3d.png" },
+    { "path": "fluent-emoji/thinking.png",          "url": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Thinking%20face/3D/thinking_face_3d.png" },
+    { "path": "fluent-emoji/monocle.png",           "url": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Face%20with%20monocle/3D/face_with_monocle_3d.png" },
+    { "path": "fluent-emoji/nerd.png",              "url": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Nerd%20face/3D/nerd_face_3d.png" },
+    { "path": "fluent-emoji/tongue.png",            "url": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Face%20with%20tongue/3D/face_with_tongue_3d.png" },
+    { "path": "fluent-emoji/squinting.png",         "url": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Grinning%20squinting%20face/3D/grinning_squinting_face_3d.png" },
+    { "path": "fluent-emoji/raised_eyebrow.png",    "url": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Face%20with%20raised%20eyebrow/3D/face_with_raised_eyebrow_3d.png" },
+    { "path": "fluent-emoji/sweat.png",             "url": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Grinning%20face%20with%20sweat/3D/grinning_face_with_sweat_3d.png" },
+    { "path": "fluent-emoji/steam.png",             "url": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Face%20with%20steam%20from%20nose/3D/face_with_steam_from_nose_3d.png" },
+    { "path": "fluent-emoji/sunglasses.png",        "url": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Smiling%20face%20with%20sunglasses/3D/smiling_face_with_sunglasses_3d.png" },
+    { "path": "fluent-emoji/pleading.png",          "url": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Pleading%20face/3D/pleading_face_3d.png" },
+    { "path": "fluent-emoji/holding_tears.png",     "url": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Face%20holding%20back%20tears/3D/face_holding_back_tears_3d.png" },
+    { "path": "fluent-emoji/screaming.png",         "url": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Face%20screaming%20in%20fear/3D/face_screaming_in_fear_3d.png" },
+    { "path": "fluent-emoji/knocked_out.png",       "url": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Knocked-out%20face/3D/knocked-out_face_3d.png" },
+    { "path": "fluent-emoji/sleeping.png",          "url": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Sleeping%20face/3D/sleeping_face_3d.png" },
+    { "path": "fluent-emoji/pensive.png",           "url": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Pensive%20face/3D/pensive_face_3d.png" }
+  ],
+  "states": {
+    "idle":       ["fluent-emoji/smiling_eyes.png", "fluent-emoji/relieved.png"],
+    "thinking":   ["fluent-emoji/thinking.png", "fluent-emoji/monocle.png"],
+    "reading":    ["fluent-emoji/nerd.png"],
+    "editing":    ["fluent-emoji/tongue.png", "fluent-emoji/squinting.png"],
+    "searching":  ["fluent-emoji/raised_eyebrow.png"],
+    "running":    ["fluent-emoji/sweat.png", "fluent-emoji/steam.png"],
+    "delegating": ["fluent-emoji/sunglasses.png"],
+    "waiting":    ["fluent-emoji/pleading.png", "fluent-emoji/holding_tears.png"],
+    "error":      ["fluent-emoji/screaming.png", "fluent-emoji/knocked_out.png"],
+    "offline":    ["fluent-emoji/sleeping.png", "fluent-emoji/pensive.png"],
+    "unknown":    ["fluent-emoji/smiling_eyes.png"]
+  }
+}

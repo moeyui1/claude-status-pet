@@ -102,6 +102,11 @@ BUNDLED ASSETS
   The Go gopher was originally designed by Renee French. SVG artwork by Egon Elbre.
   Downloaded at runtime. Not bundled in this repository.
 
+- Fluent Emoji 3D art: MIT License
+  From microsoft/fluentui-emoji (https://github.com/microsoft/fluentui-emoji).
+  Copyright (c) Microsoft Corporation.
+  Downloaded at runtime. Not bundled in this repository.
+
 ================================================================================
 
 LICENSE TEXTS

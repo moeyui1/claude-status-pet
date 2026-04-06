@@ -160,6 +160,7 @@ npx tauri build
 
 - **Ferris**：[free-ferris-pack](https://github.com/MariaLetta/free-ferris-pack)，Maria Letta 作品（CC0 许可）
 - **Go Gopher**：[gophers](https://github.com/egonelbre/gophers)，Egon Elbre 作品（CC0 许可），原设计 Renee French
+- **Fluent Emoji**：[fluentui-emoji](https://github.com/microsoft/fluentui-emoji)，Microsoft 作品（MIT 许可）
 - **Mona**：[GitHub on GIPHY](https://giphy.com/GitHub)（运行时从 GIPHY 下载）
 - **Kuromi**：[Sanrio Korea on GIPHY](https://giphy.com/SanrioKorea)（运行时从 GIPHY 下载）
 - **ASCII 角色**：灵感来自 [any-buddy](https://github.com/cpaczek/any-buddy)，cpaczek 作品

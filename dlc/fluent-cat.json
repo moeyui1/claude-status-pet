@@ -1,0 +1,30 @@
+{
+  "name": "Fluent Cat",
+  "version": 1,
+  "type": "png",
+  "downloads": [
+    { "path": "fluent-cat/grinning.png",       "url": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Grinning%20cat/3D/grinning_cat_3d.png" },
+    { "path": "fluent-cat/smiling_eyes.png",   "url": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Grinning%20cat%20with%20smiling%20eyes/3D/grinning_cat_with_smiling_eyes_3d.png" },
+    { "path": "fluent-cat/tears_of_joy.png",   "url": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Cat%20with%20tears%20of%20joy/3D/cat_with_tears_of_joy_3d.png" },
+    { "path": "fluent-cat/wry_smile.png",      "url": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Cat%20with%20wry%20smile/3D/cat_with_wry_smile_3d.png" },
+    { "path": "fluent-cat/kissing.png",        "url": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Kissing%20cat/3D/kissing_cat_3d.png" },
+    { "path": "fluent-cat/crying.png",         "url": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Crying%20cat/3D/crying_cat_3d.png" },
+    { "path": "fluent-cat/weary.png",          "url": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Weary%20cat/3D/weary_cat_3d.png" },
+    { "path": "fluent-cat/pouting.png",        "url": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Pouting%20cat/3D/pouting_cat_3d.png" },
+    { "path": "fluent-cat/cat_face.png",       "url": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Cat%20face/3D/cat_face_3d.png" },
+    { "path": "fluent-cat/cat.png",            "url": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Cat/3D/cat_3d.png" }
+  ],
+  "states": {
+    "idle":       ["fluent-cat/grinning.png", "fluent-cat/smiling_eyes.png"],
+    "thinking":   ["fluent-cat/cat_face.png", "fluent-cat/wry_smile.png"],
+    "reading":    ["fluent-cat/cat_face.png"],
+    "editing":    ["fluent-cat/tears_of_joy.png", "fluent-cat/smiling_eyes.png"],
+    "searching":  ["fluent-cat/wry_smile.png"],
+    "running":    ["fluent-cat/tears_of_joy.png", "fluent-cat/grinning.png"],
+    "delegating": ["fluent-cat/kissing.png"],
+    "waiting":    ["fluent-cat/cat.png", "fluent-cat/crying.png"],
+    "error":      ["fluent-cat/pouting.png", "fluent-cat/weary.png"],
+    "offline":    ["fluent-cat/crying.png", "fluent-cat/cat.png"],
+    "unknown":    ["fluent-cat/grinning.png"]
+  }
+}

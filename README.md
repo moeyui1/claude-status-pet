@@ -159,6 +159,7 @@ The pet is **decoupled from any specific tool** — it just watches a JSON statu
 
 - **Ferris**: [free-ferris-pack](https://github.com/MariaLetta/free-ferris-pack) by Maria Letta (CC0)
 - **Go Gopher**: [gophers](https://github.com/egonelbre/gophers) by Egon Elbre (CC0), original design by Renee French
+- **Fluent Emoji**: [fluentui-emoji](https://github.com/microsoft/fluentui-emoji) by Microsoft (MIT)
 - **Mona**: [GitHub on GIPHY](https://giphy.com/GitHub) (downloaded at runtime)
 - **Kuromi**: [Sanrio Korea on GIPHY](https://giphy.com/SanrioKorea) (downloaded at runtime)
 - **ASCII sprites**: inspired by [any-buddy](https://github.com/cpaczek/any-buddy) by cpaczek

@@ -1,0 +1,21 @@
+{
+  "name": "Fluent Penguin",
+  "version": 1,
+  "type": "png",
+  "downloads": [
+    { "path": "fluent-penguin/penguin.png", "url": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Penguin/3D/penguin_3d.png" }
+  ],
+  "states": {
+    "idle":       ["fluent-penguin/penguin.png"],
+    "thinking":   ["fluent-penguin/penguin.png"],
+    "reading":    ["fluent-penguin/penguin.png"],
+    "editing":    ["fluent-penguin/penguin.png"],
+    "searching":  ["fluent-penguin/penguin.png"],
+    "running":    ["fluent-penguin/penguin.png"],
+    "delegating": ["fluent-penguin/penguin.png"],
+    "waiting":    ["fluent-penguin/penguin.png"],
+    "error":      ["fluent-penguin/penguin.png"],
+    "offline":    ["fluent-penguin/penguin.png"],
+    "unknown":    ["fluent-penguin/penguin.png"]
+  }
+}
