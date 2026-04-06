@@ -234,18 +234,40 @@ Write-Host "[1/4] Stopped running pets"
 
 # 2. Remove pet-data (binary, scripts, assets, config, status files)
 $dir = "$env:USERPROFILE\.claude\pet-data"
-if (Test-Path $dir) { Remove-Item $dir -Recurse -Force; Write-Host "[2/4] Removed $dir" }
-else { Write-Host "[2/4] $dir not found (skipped)" }
+if (Test-Path $dir) { Remove-Item $dir -Recurse -Force; Write-Host "[2/6] Removed $dir" }
+else { Write-Host "[2/6] $dir not found (skipped)" }
 
 # 3. Remove VS Code hooks
 $vscodeHook = "$env:USERPROFILE\.copilot\hooks\status-pet-vscode.json"
-if (Test-Path $vscodeHook) { Remove-Item $vscodeHook -Force; Write-Host "[3/4] Removed VS Code hooks" }
-else { Write-Host "[3/4] No VS Code hooks (skipped)" }
+if (Test-Path $vscodeHook) { Remove-Item $vscodeHook -Force; Write-Host "[3/6] Removed VS Code hooks" }
+else { Write-Host "[3/6] No VS Code hooks (skipped)" }
 
 # 4. Remove skill
 $skillDir = "$env:USERPROFILE\.claude\skills\pet"
-if (Test-Path $skillDir) { Remove-Item $skillDir -Recurse -Force; Write-Host "[4/4] Removed skill" }
-else { Write-Host "[4/4] No skill (skipped)" }
+if (Test-Path $skillDir) { Remove-Item $skillDir -Recurse -Force; Write-Host "[4/6] Removed skill" }
+else { Write-Host "[4/6] No skill (skipped)" }
+
+# 5. Remove VS Code agent plugin
+$agentPlugin = "$env:USERPROFILE\.vscode\agent-plugins\github.com\moeyui1\claude-status-pet"
+if (Test-Path $agentPlugin) { Remove-Item $agentPlugin -Recurse -Force; Write-Host "[5/6] Removed VS Code plugin" }
+else { Write-Host "[5/6] No VS Code plugin (skipped)" }
+
+# 6. Remove plugin registration from copilot config
+$configPath = "$env:USERPROFILE\.copilot\config.json"
+if (Test-Path $configPath) {
+    $config = Get-Content $configPath -Raw | ConvertFrom-Json
+    $changed = $false
+    if ($config.installed_plugins) {
+        $before = $config.installed_plugins.Count
+        $config.installed_plugins = @($config.installed_plugins | Where-Object { $_.name -notlike "claude-status-pet*" })
+        if ($config.installed_plugins.Count -ne $before) { $changed = $true }
+    }
+    if ($config.marketplaces -and $config.marketplaces.PSObject.Properties["claude-status-pet"]) {
+        $config.marketplaces.PSObject.Properties.Remove("claude-status-pet"); $changed = $true
+    }
+    if ($changed) { $config | ConvertTo-Json -Depth 10 | Set-Content $configPath -Encoding UTF8; Write-Host "[6/6] Cleaned plugin registry" }
+    else { Write-Host "[6/6] Plugin registry already clean" }
+} else { Write-Host "[6/6] No config (skipped)" }
 
 Write-Host "Uninstall complete."
 ```
@@ -254,26 +276,50 @@ Write-Host "Uninstall complete."
 ```bash
 # 1. Stop running pets
 pkill -f claude-status-pet 2>/dev/null; sleep 0.5
-echo "[1/4] Stopped running pets"
+echo "[1/6] Stopped running pets"
 
 # 2. Remove pet-data
 DIR="$HOME/.claude/pet-data"
-if [ -d "$DIR" ]; then rm -rf "$DIR"; echo "[2/4] Removed $DIR"
-else echo "[2/4] $DIR not found (skipped)"; fi
+if [ -d "$DIR" ]; then rm -rf "$DIR"; echo "[2/6] Removed $DIR"
+else echo "[2/6] $DIR not found (skipped)"; fi
 
 # 3. Remove VS Code hooks
 HOOK="$HOME/.copilot/hooks/status-pet-vscode.json"
-if [ -f "$HOOK" ]; then rm -f "$HOOK"; echo "[3/4] Removed VS Code hooks"
-else echo "[3/4] No VS Code hooks (skipped)"; fi
+if [ -f "$HOOK" ]; then rm -f "$HOOK"; echo "[3/6] Removed VS Code hooks"
+else echo "[3/6] No VS Code hooks (skipped)"; fi
 
 # 4. Remove skill
 SKILL="$HOME/.claude/skills/pet"
-if [ -d "$SKILL" ]; then rm -rf "$SKILL"; echo "[4/4] Removed skill"
-else echo "[4/4] No skill (skipped)"; fi
+if [ -d "$SKILL" ]; then rm -rf "$SKILL"; echo "[4/6] Removed skill"
+else echo "[4/6] No skill (skipped)"; fi
+
+# 5. Remove VS Code agent plugin
+AGENT_PLUGIN="$HOME/.vscode/agent-plugins/github.com/moeyui1/claude-status-pet"
+if [ -d "$AGENT_PLUGIN" ]; then rm -rf "$AGENT_PLUGIN"; echo "[5/6] Removed VS Code plugin"
+else echo "[5/6] No VS Code plugin (skipped)"; fi
+
+# 6. Remove plugin registration from copilot config
+CONFIG="$HOME/.copilot/config.json"
+if [ -f "$CONFIG" ] && command -v python3 >/dev/null 2>&1; then
+  python3 -c "
+import json, sys
+with open('$CONFIG') as f: c = json.load(f)
+changed = False
+if 'installed_plugins' in c:
+    before = len(c['installed_plugins'])
+    c['installed_plugins'] = [p for p in c['installed_plugins'] if not p.get('name','').startswith('claude-status-pet')]
+    if len(c['installed_plugins']) != before: changed = True
+if 'marketplaces' in c and 'claude-status-pet' in c['marketplaces']:
+    del c['marketplaces']['claude-status-pet']; changed = True
+if changed:
+    with open('$CONFIG','w') as f: json.dump(c, f, indent=2)
+    print('[6/6] Cleaned plugin registry')
+else: print('[6/6] Plugin registry already clean')
+" 2>/dev/null || echo "[6/6] Could not clean config (skipped)"
+else echo "[6/6] No config (skipped)"; fi
 
 echo "Uninstall complete."
 ```
 
 After running, tell the user:
-- "Pet uninstalled. All data, scripts, and assets have been removed."
-- "To also remove the VS Code plugin and its hooks, run `Chat: Uninstall Plugin` from the command palette, or use `Chat: Install Plugin From Source` to reinstall later."
+- "Pet completely uninstalled. All data, plugins, and hooks have been removed."

@@ -20,6 +20,9 @@
 <img src="docs/images/showcase-mona.gif" width="100%" alt="Mona 演示">
 </td>
 <td align="center">
+<img src="docs/images/showcase-gopher.gif" width="100%" alt="Gopher 演示">
+</td>
+<td align="center">
 <img src="docs/images/showcase-ascii.gif" width="100%" alt="ASCII 演示">
 </td>
 </tr>

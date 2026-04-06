@@ -20,6 +20,9 @@ A desktop pet that shows what your AI coding assistant is doing — in real time
 <img src="docs/images/showcase-mona.gif" width="100%" alt="Mona demo">
 </td>
 <td align="center">
+<img src="docs/images/showcase-gopher.gif" width="100%" alt="Gopher demo">
+</td>
+<td align="center">
 <img src="docs/images/showcase-ascii.gif" width="100%" alt="ASCII demo">
 </td>
 </tr>

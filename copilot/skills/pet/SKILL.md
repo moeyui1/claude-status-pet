@@ -248,18 +248,37 @@ Write-Host "[1/4] Stopped running pets"
 
 # 2. Remove pet-data (binary, scripts, assets, config, status files)
 $dir = "$env:USERPROFILE\.claude\pet-data"
-if (Test-Path $dir) { Remove-Item $dir -Recurse -Force; Write-Host "[2/4] Removed $dir" }
-else { Write-Host "[2/4] $dir not found (skipped)" }
+if (Test-Path $dir) { Remove-Item $dir -Recurse -Force; Write-Host "[2/5] Removed $dir" }
+else { Write-Host "[2/5] $dir not found (skipped)" }
 
 # 3. Remove copilot hooks
 $copilotHook = "$env:USERPROFILE\.copilot\hooks\status-pet.json"
-if (Test-Path $copilotHook) { Remove-Item $copilotHook -Force; Write-Host "[3/4] Removed Copilot hooks" }
-else { Write-Host "[3/4] No Copilot hooks (skipped)" }
+if (Test-Path $copilotHook) { Remove-Item $copilotHook -Force; Write-Host "[3/5] Removed Copilot hooks" }
+else { Write-Host "[3/5] No Copilot hooks (skipped)" }
 
 # 4. Remove skill
 $skillDir = "$env:USERPROFILE\.claude\skills\pet"
-if (Test-Path $skillDir) { Remove-Item $skillDir -Recurse -Force; Write-Host "[4/4] Removed skill" }
-else { Write-Host "[4/4] No skill (skipped)" }
+if (Test-Path $skillDir) { Remove-Item $skillDir -Recurse -Force; Write-Host "[4/5] Removed skill" }
+else { Write-Host "[4/5] No skill (skipped)" }
+
+# 5. Remove plugin registration
+$pluginDir = "$env:USERPROFILE\.copilot\installed-plugins\claude-status-pet"
+if (Test-Path $pluginDir) { Remove-Item $pluginDir -Recurse -Force }
+$configPath = "$env:USERPROFILE\.copilot\config.json"
+if (Test-Path $configPath) {
+    $config = Get-Content $configPath -Raw | ConvertFrom-Json
+    $changed = $false
+    if ($config.installed_plugins) {
+        $before = $config.installed_plugins.Count
+        $config.installed_plugins = @($config.installed_plugins | Where-Object { $_.name -notlike "claude-status-pet*" })
+        if ($config.installed_plugins.Count -ne $before) { $changed = $true }
+    }
+    if ($config.marketplaces -and $config.marketplaces.PSObject.Properties["claude-status-pet"]) {
+        $config.marketplaces.PSObject.Properties.Remove("claude-status-pet"); $changed = $true
+    }
+    if ($changed) { $config | ConvertTo-Json -Depth 10 | Set-Content $configPath -Encoding UTF8 }
+}
+Write-Host "[5/5] Removed plugin"
 
 Write-Host "Uninstall complete."
 ```
@@ -268,26 +287,45 @@ Write-Host "Uninstall complete."
 ```bash
 # 1. Stop running pets
 pkill -f claude-status-pet 2>/dev/null; sleep 0.5
-echo "[1/4] Stopped running pets"
+echo "[1/5] Stopped running pets"
 
 # 2. Remove pet-data
 DIR="$HOME/.claude/pet-data"
-if [ -d "$DIR" ]; then rm -rf "$DIR"; echo "[2/4] Removed $DIR"
-else echo "[2/4] $DIR not found (skipped)"; fi
+if [ -d "$DIR" ]; then rm -rf "$DIR"; echo "[2/5] Removed $DIR"
+else echo "[2/5] $DIR not found (skipped)"; fi
 
 # 3. Remove copilot hooks
 HOOK="$HOME/.copilot/hooks/status-pet.json"
-if [ -f "$HOOK" ]; then rm -f "$HOOK"; echo "[3/4] Removed Copilot hooks"
-else echo "[3/4] No Copilot hooks (skipped)"; fi
+if [ -f "$HOOK" ]; then rm -f "$HOOK"; echo "[3/5] Removed Copilot hooks"
+else echo "[3/5] No Copilot hooks (skipped)"; fi
 
 # 4. Remove skill
 SKILL="$HOME/.claude/skills/pet"
-if [ -d "$SKILL" ]; then rm -rf "$SKILL"; echo "[4/4] Removed skill"
-else echo "[4/4] No skill (skipped)"; fi
+if [ -d "$SKILL" ]; then rm -rf "$SKILL"; echo "[4/5] Removed skill"
+else echo "[4/5] No skill (skipped)"; fi
+
+# 5. Remove plugin registration
+rm -rf "$HOME/.copilot/installed-plugins/claude-status-pet" 2>/dev/null
+CONFIG="$HOME/.copilot/config.json"
+if [ -f "$CONFIG" ] && command -v python3 >/dev/null 2>&1; then
+  python3 -c "
+import json
+with open('$CONFIG') as f: c = json.load(f)
+changed = False
+if 'installed_plugins' in c:
+    b = len(c['installed_plugins'])
+    c['installed_plugins'] = [p for p in c['installed_plugins'] if not p.get('name','').startswith('claude-status-pet')]
+    if len(c['installed_plugins']) != b: changed = True
+if 'marketplaces' in c and 'claude-status-pet' in c['marketplaces']:
+    del c['marketplaces']['claude-status-pet']; changed = True
+if changed:
+    with open('$CONFIG','w') as f: json.dump(c, f, indent=2)
+" 2>/dev/null
+fi
+echo "[5/5] Removed plugin"
 
 echo "Uninstall complete."
 ```
 
 After running, tell the user:
-- "Pet uninstalled. All data, scripts, and assets have been removed."
-- "If using the plugin, run `copilot plugin uninstall claude-status-pet-copilot` to also remove the plugin."
+- "Pet completely uninstalled. All data, plugins, and hooks have been removed."

@@ -249,5 +249,5 @@ echo "Uninstall complete."
 ```
 
 After running, tell the user:
-- "Pet uninstalled. All data, scripts, and assets have been removed."
-- "If using the plugin, run `/plugin uninstall claude-status-pet` to also remove the plugin and its hooks."
+- "Pet uninstalled. All data and assets have been removed."
+- "To also remove the plugin and its hooks, run: `/plugin uninstall claude-status-pet`"
