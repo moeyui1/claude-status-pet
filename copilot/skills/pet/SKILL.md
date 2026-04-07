@@ -76,8 +76,6 @@ echo "Pet launched"
 
 Update the pet to the latest release.
 
-> **For plugin install:** Run `/plugin update claude-status-pet-copilot@claude-status-pet-copilot` inside Copilot CLI — this updates hooks and skill automatically. Then follow steps 1-2 and 5 below for binary and assets.
->
 > **Important:** Close all running pets before updating. After updating, inform the user to restart with `/pet on`.
 
 **PowerShell:**

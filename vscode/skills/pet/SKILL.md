@@ -76,8 +76,6 @@ echo "Pet launched"
 
 Update the pet to the latest release.
 
-> **For plugin install:** Run `Chat: Install Plugin From Source` with `https://github.com/moeyui1/claude-status-pet` — this updates hooks and skill automatically. Then follow steps 1-2 and 5 below for binary and assets.
->
 > **Important:** Close all running pets before updating. After updating, inform the user to restart with `/pet on`.
 
 **PowerShell:**
