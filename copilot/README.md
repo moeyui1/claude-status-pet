@@ -6,7 +6,7 @@ Run inside a Copilot CLI session:
 
 ```
 /plugin marketplace add moeyui1/claude-status-pet
-/plugin install claude-status-pet@claude-status-pet
+/plugin install claude-status-pet-copilot@claude-status-pet-copilot
 ```
 
 > **⚠️ After first installation, restart your Copilot CLI session** for the hooks and skill to take effect.

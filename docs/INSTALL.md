@@ -35,7 +35,7 @@ Done! The plugin auto-downloads the binary on first session start.
 
 ```
 /plugin marketplace add moeyui1/claude-status-pet
-/plugin install claude-status-pet@claude-status-pet
+/plugin install claude-status-pet-copilot@claude-status-pet-copilot
 ```
 
 This installs hooks and the `/pet` skill. Then download the binary and assets:
