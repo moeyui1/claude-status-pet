@@ -52,8 +52,8 @@ A desktop pet that shows what your AI coding assistant is doing — in real time
 **GitHub Copilot CLI** — Run inside a Copilot CLI session:
 
 ```
-/plugin marketplace add moeyui1/claude-status-pet
-/plugin install claude-status-pet-copilot
+/plugin marketplace add moeyui1/claude-status-pet-copilot
+/plugin install claude-status-pet-copilot@claude-status-pet-copilot
 ```
 
 **VS Code Copilot** — Plugin install:
@@ -145,7 +145,7 @@ The easiest way — run in your AI assistant:
 This stops the pet, removes all data, scripts, and assets. Then uninstall the plugin:
 
 - Claude Code: `/plugin uninstall claude-status-pet`
-- Copilot CLI: `/plugin uninstall claude-status-pet-copilot` (inside Copilot CLI session)
+- Copilot CLI: `/plugin uninstall claude-status-pet-copilot@claude-status-pet-copilot` (inside Copilot CLI session)
 - VS Code: Command Palette → `Chat: Uninstall Plugin`
 
 ## How It Works
