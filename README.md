@@ -49,11 +49,11 @@ A desktop pet that shows what your AI coding assistant is doing — in real time
 /plugin install claude-status-pet
 ```
 
-**GitHub Copilot CLI** — Plugin install:
+**GitHub Copilot CLI** — Run inside a Copilot CLI session:
 
 ```
-copilot plugin marketplace add moeyui1/claude-status-pet
-copilot plugin install claude-status-pet@claude-status-pet
+/plugin marketplace add moeyui1/claude-status-pet-copilot
+/plugin install claude-status-pet-copilot@claude-status-pet-copilot
 ```
 
 **VS Code Copilot** — Plugin install:
@@ -65,6 +65,8 @@ Then run `/pet update` to download the binary and assets.
 **Or ask your AI agent** (any of the above):
 
 > Read https://raw.githubusercontent.com/moeyui1/claude-status-pet/main/docs/INSTALL.md and install it for me
+
+> **⚠️ After first installation, restart your agent session** for the hooks and skill to take effect.
 
 That's it! A pet will appear on your next session. 🎉
 
@@ -143,7 +145,7 @@ The easiest way — run in your AI assistant:
 This stops the pet, removes all data, scripts, and assets. Then uninstall the plugin:
 
 - Claude Code: `/plugin uninstall claude-status-pet`
-- Copilot CLI: `copilot plugin uninstall claude-status-pet@claude-status-pet`
+- Copilot CLI: `/plugin uninstall claude-status-pet-copilot@claude-status-pet-copilot` (inside Copilot CLI session)
 - VS Code: Command Palette → `Chat: Uninstall Plugin`
 
 ## How It Works

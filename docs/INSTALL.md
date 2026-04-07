@@ -25,15 +25,17 @@
 
 Done! The plugin auto-downloads the binary on first session start.
 
+> **⚠️ After first installation, restart your Claude Code session** for the plugin to take effect.
+
 ---
 
 ## For GitHub Copilot CLI Users
 
-> **AI agent: `copilot plugin` is a built-in command in GitHub Copilot CLI.** Run these commands directly in the user's terminal.
+> **AI agent: `/plugin` is a built-in slash command in GitHub Copilot CLI.** Run these commands directly inside a Copilot CLI session.
 
-```bash
-copilot plugin marketplace add moeyui1/claude-status-pet
-copilot plugin install claude-status-pet@claude-status-pet
+```
+/plugin marketplace add moeyui1/claude-status-pet-copilot
+/plugin install claude-status-pet-copilot@claude-status-pet-copilot
 ```
 
 This installs hooks and the `/pet` skill. Then download the binary and assets:
@@ -41,6 +43,8 @@ This installs hooks and the `/pet` skill. Then download the binary and assets:
 ```
 /pet update
 ```
+
+> **⚠️ After first installation, restart your Copilot CLI session** for the hooks and skill to take effect.
 
 Done! Use `/pet on` to launch the pet.
 
@@ -63,6 +67,8 @@ This installs hooks and the `/pet` skill. Then download the binary and assets:
 ```
 
 Done! Use `/pet on` to launch the pet.
+
+> **⚠️ After first installation, restart your VS Code Copilot session** for the hooks and skill to take effect.
 
 ---
 
