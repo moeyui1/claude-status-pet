@@ -90,7 +90,7 @@ $dir  = "$env:USERPROFILE\.claude\pet-data"
 # 1. Close running pets
 Get-Process | Where-Object { $_.ProcessName -like "claude-status-pet*" } | ForEach-Object { Stop-Process -Id $_.Id -Force -ErrorAction SilentlyContinue }
 Start-Sleep -Milliseconds 500
-Write-Host "[1/6] Stopped running pets"
+Write-Host "[1/5] Stopped running pets"
 
 # 2. Download binary
 $binDir = "$dir\bin"
@@ -98,7 +98,7 @@ New-Item -ItemType Directory -Path $binDir -Force | Out-Null
 $asset = "claude-status-pet-windows-x64.exe"
 Invoke-WebRequest -Uri "$BASE/releases/latest/download/$asset" -OutFile "$binDir\$asset"
 Copy-Item "$binDir\$asset" "$binDir\claude-status-pet" -Force
-Write-Host "[2/6] Binary updated"
+Write-Host "[2/5] Binary updated"
 
 # 3. Update hooks (only for installed hook locations)
 $hookUpdated = $false
@@ -107,23 +107,17 @@ if (Test-Path $copilotHooksDir) {
     $copilotHookFile = "$copilotHooksDir\status-pet.json"
     if (Test-Path $copilotHookFile) {
         Invoke-WebRequest -Uri "$RAW/copilot/hooks.json" -OutFile $copilotHookFile
-        $hookUpdated = $true; Write-Host "[3/6] Copilot hooks updated"
+        $hookUpdated = $true; Write-Host "[3/5] Copilot hooks updated"
     }
 }
-if (-not $hookUpdated) { Write-Host "[3/6] No hook locations to update (skipped)" }
+if (-not $hookUpdated) { Write-Host "[3/5] No hook locations to update (skipped)" }
 
 # 3b. Update hook scripts
 $scriptsDir = "$dir\scripts"
 New-Item -ItemType Directory -Path $scriptsDir -Force | Out-Null
 Invoke-WebRequest -Uri "$RAW/copilot/scripts/hook.sh" -OutFile "$scriptsDir\copilot-hook.sh"
 Invoke-WebRequest -Uri "$RAW/copilot/scripts/hook.ps1" -OutFile "$scriptsDir\copilot-hook.ps1"
-Write-Host "[4/6] Hook scripts updated"
-
-# 4. Update skill
-$skillDir = "$env:USERPROFILE\.claude\skills\pet"
-New-Item -ItemType Directory -Path $skillDir -Force | Out-Null
-Invoke-WebRequest -Uri "$RAW/copilot/skills/pet/SKILL.md" -OutFile "$skillDir\SKILL.md"
-Write-Host "[5/6] Skill updated"
+Write-Host "[4/5] Hook scripts updated"
 
 # 5. Update assets
 $assetsDir = "$dir\assets"
@@ -142,7 +136,7 @@ Get-ChildItem "$assetsDir\dlc\*.json" -ErrorAction SilentlyContinue | ForEach-Ob
         }
     }
 }
-Write-Host "[6/6] Assets updated"
+Write-Host "[5/5] Assets updated"
 
 Write-Host "Update complete! Run /pet on to start."
 ```
@@ -156,7 +150,7 @@ DIR="$HOME/.claude/pet-data"
 
 # 1. Close running pets
 pkill -f claude-status-pet 2>/dev/null; sleep 0.5
-echo "[1/6] Stopped running pets"
+echo "[1/5] Stopped running pets"
 
 # 2. Download binary
 mkdir -p "$DIR/bin"
@@ -169,27 +163,22 @@ esac
 curl -sLo "$DIR/bin/$ASSET" "$BASE/releases/latest/download/$ASSET"
 chmod +x "$DIR/bin/$ASSET" 2>/dev/null || true
 ln -sf "$DIR/bin/$ASSET" "$DIR/bin/claude-status-pet" 2>/dev/null || true
-echo "[2/6] Binary updated"
+echo "[2/5] Binary updated"
 
 # 3. Update hooks (only for installed hook locations)
 HOOK_UPDATED=0
 if [ -f "$HOME/.copilot/hooks/status-pet.json" ]; then
   curl -sLo "$HOME/.copilot/hooks/status-pet.json" "$RAW/copilot/hooks.json"
-  HOOK_UPDATED=1; echo "[3/6] Copilot hooks updated"
+  HOOK_UPDATED=1; echo "[3/5] Copilot hooks updated"
 fi
-[ "$HOOK_UPDATED" -eq 0 ] && echo "[3/6] No hook locations to update (skipped)"
+[ "$HOOK_UPDATED" -eq 0 ] && echo "[3/5] No hook locations to update (skipped)"
 
 # 3b. Update hook scripts
 mkdir -p "$DIR/scripts"
 curl -sLo "$DIR/scripts/copilot-hook.sh" "$RAW/copilot/scripts/hook.sh"
 curl -sLo "$DIR/scripts/copilot-hook.ps1" "$RAW/copilot/scripts/hook.ps1"
 chmod +x "$DIR/scripts/copilot-hook.sh" 2>/dev/null || true
-echo "[4/6] Hook scripts updated"
-
-# 4. Update skill
-mkdir -p "$HOME/.claude/skills/pet"
-curl -sLo "$HOME/.claude/skills/pet/SKILL.md" "$RAW/copilot/skills/pet/SKILL.md"
-echo "[5/6] Skill updated"
+echo "[4/5] Hook scripts updated"
 
 # 5. Update assets
 mkdir -p "$DIR/assets"
@@ -206,7 +195,7 @@ for cfg in "$DIR/assets/dlc/"*.json; do
   iv=$(grep -o '"version"[[:space:]]*:[[:space:]]*[0-9]*' "$cj" | grep -o '[0-9]*')
   [ -n "$cv" ] && { [ -z "$iv" ] || [ "$iv" -lt "$cv" ]; } && rm -rf "$DIR/assets/$id"
 done
-echo "[6/6] Assets updated"
+echo "[5/5] Assets updated"
 
 echo "Update complete! Run /pet on to start."
 ```

@@ -94,7 +94,7 @@ $dir  = "$env:USERPROFILE\.claude\pet-data"
 # 1. Close running pets
 Get-Process | Where-Object { $_.ProcessName -like "claude-status-pet*" } | ForEach-Object { Stop-Process -Id $_.Id -Force -ErrorAction SilentlyContinue }
 Start-Sleep -Milliseconds 500
-Write-Host "[1/4] Stopped running pets"
+Write-Host "[1/3] Stopped running pets"
 
 # 2. Download binary
 $binDir = "$dir\bin"
@@ -102,15 +102,9 @@ New-Item -ItemType Directory -Path $binDir -Force | Out-Null
 $asset = "claude-status-pet-windows-x64.exe"
 Invoke-WebRequest -Uri "$BASE/releases/latest/download/$asset" -OutFile "$binDir\$asset"
 Copy-Item "$binDir\$asset" "$binDir\claude-status-pet" -Force
-Write-Host "[2/4] Binary updated"
+Write-Host "[2/3] Binary updated"
 
-# 3. Update skill
-$skillDir = "$env:USERPROFILE\.claude\skills\pet"
-New-Item -ItemType Directory -Path $skillDir -Force | Out-Null
-Invoke-WebRequest -Uri "$RAW/claude/skills/pet/SKILL.md" -OutFile "$skillDir\SKILL.md"
-Write-Host "[3/4] Skill updated"
-
-# 4. Update assets
+# 3. Update assets
 $assetsDir = "$dir\assets"
 New-Item -ItemType Directory -Path $assetsDir -Force | Out-Null
 Invoke-WebRequest -Uri "$BASE/releases/latest/download/pet-assets.zip" -OutFile "$env:TEMP\pet-assets.zip"
@@ -127,7 +121,7 @@ Get-ChildItem "$assetsDir\dlc\*.json" -ErrorAction SilentlyContinue | ForEach-Ob
         }
     }
 }
-Write-Host "[4/4] Assets updated"
+Write-Host "[3/3] Assets updated"
 
 Write-Host "Update complete! Run /pet on to start."
 ```
@@ -141,7 +135,7 @@ DIR="$HOME/.claude/pet-data"
 
 # 1. Close running pets
 pkill -f claude-status-pet 2>/dev/null; sleep 0.5
-echo "[1/4] Stopped running pets"
+echo "[1/3] Stopped running pets"
 
 # 2. Download binary
 mkdir -p "$DIR/bin"
@@ -154,14 +148,9 @@ esac
 curl -sLo "$DIR/bin/$ASSET" "$BASE/releases/latest/download/$ASSET"
 chmod +x "$DIR/bin/$ASSET" 2>/dev/null || true
 ln -sf "$DIR/bin/$ASSET" "$DIR/bin/claude-status-pet" 2>/dev/null || true
-echo "[2/4] Binary updated"
+echo "[2/3] Binary updated"
 
-# 3. Update skill
-mkdir -p "$HOME/.claude/skills/pet"
-curl -sLo "$HOME/.claude/skills/pet/SKILL.md" "$RAW/claude/skills/pet/SKILL.md"
-echo "[3/4] Skill updated"
-
-# 4. Update assets
+# 3. Update assets
 mkdir -p "$DIR/assets"
 curl -sLo /tmp/pet-assets.zip "$BASE/releases/latest/download/pet-assets.zip"
 unzip -o /tmp/pet-assets.zip -d "$DIR/assets"
@@ -176,7 +165,7 @@ for cfg in "$DIR/assets/dlc/"*.json; do
   iv=$(grep -o '"version"[[:space:]]*:[[:space:]]*[0-9]*' "$cj" | grep -o '[0-9]*')
   [ -n "$cv" ] && { [ -z "$iv" ] || [ "$iv" -lt "$cv" ]; } && rm -rf "$DIR/assets/$id"
 done
-echo "[4/4] Assets updated"
+echo "[3/3] Assets updated"
 
 echo "Update complete! Run /pet on to start."
 ```
