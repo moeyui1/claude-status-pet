@@ -51,7 +51,8 @@ Simply launch the pet binary. The binary has built-in PID lock detection, so dup
 **PowerShell:**
 ```powershell
 $dir = "$env:USERPROFILE\.claude\pet-data"
-$bin = Get-ChildItem "$dir\bin\claude-status-pet*" | Select-Object -First 1
+$bin = Get-ChildItem "$dir\bin\claude-status-pet*.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
+if (-not $bin) { $bin = Get-ChildItem "$dir\bin\claude-status-pet*" | Select-Object -First 1 }
 if (-not $bin) { Write-Host "Pet binary not found. Run /pet update first."; return }
 $a = @("run")
 $assets = "$dir\assets"
