@@ -7,5 +7,5 @@
   },
   "license": "MIT",
   "keywords": ["status", "desktop-pet", "ferris", "mona", "hooks"],
-  "skills": "skills/"
+  "skills": "./skills/"
 }
