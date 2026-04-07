@@ -31,14 +31,14 @@ Done! The plugin auto-downloads the binary on first session start.
 
 ## For GitHub Copilot CLI Users
 
-> **AI agent: `/plugin` is a built-in slash command in GitHub Copilot CLI.** Run these commands directly inside a Copilot CLI session.
+> **AI agent:** These commands run in the user's **terminal** (not inside a Copilot CLI session). They are standalone CLI commands.
 
-```
-/plugin marketplace add moeyui1/claude-status-pet
-/plugin install claude-status-pet-copilot@claude-status-pet-copilot
+```bash
+copilot plugin marketplace add moeyui1/claude-status-pet
+copilot plugin install claude-status-pet-copilot@claude-status-pet-copilot
 ```
 
-This installs hooks and the `/pet` skill. Then download the binary and assets:
+This installs hooks and the `/pet` skill. Then **start a Copilot CLI session** and download the binary and assets:
 
 ```
 /pet update
