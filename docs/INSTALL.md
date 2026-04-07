@@ -34,7 +34,7 @@ Done! The plugin auto-downloads the binary on first session start.
 > **AI agent: `/plugin` is a built-in slash command in GitHub Copilot CLI.** Run these commands directly inside a Copilot CLI session.
 
 ```
-/plugin marketplace add moeyui1/claude-status-pet-copilot
+/plugin marketplace add moeyui1/claude-status-pet
 /plugin install claude-status-pet-copilot@claude-status-pet-copilot
 ```
 

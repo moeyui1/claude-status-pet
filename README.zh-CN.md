@@ -52,7 +52,7 @@
 **GitHub Copilot CLI** — 在 Copilot CLI 会话中运行：
 
 ```
-/plugin marketplace add moeyui1/claude-status-pet-copilot
+/plugin marketplace add moeyui1/claude-status-pet
 /plugin install claude-status-pet-copilot@claude-status-pet-copilot
 ```
 
