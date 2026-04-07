@@ -16,28 +16,29 @@ Hook event → claude-status-pet write-status → status-{id}.json → claude-st
 
 ```
 claude-status-pet/
-├── .claude-plugin/          # Claude Code plugin manifest
-│   ├── plugin.json          # DO NOT add "hooks" field — hooks/hooks.json is auto-discovered
-│   └── marketplace.json     # Marketplace registry
+├── .claude-plugin/          # Claude Code marketplace
+│   └── marketplace.json     # Marketplace registry (points to ./claude)
 ├── .claude/
 │   └── skills/release.md    # /release command (project-level skill)
-├── hooks/
-│   └── hooks.json           # Claude Code hooks → calls binary with --adapter claude
+├── claude/                  # Claude Code plugin
+│   ├── .claude-plugin/
+│   │   └── plugin.json      # Plugin manifest (DO NOT add "hooks" — auto-discovered)
+│   ├── hooks/
+│   │   └── hooks.json       # Claude Code hooks → calls binary with --adapter claude
+│   └── skills/pet/SKILL.md  # /pet skill for Claude Code
 ├── copilot/
 │   ├── plugin.json         # Copilot CLI plugin manifest
 │   ├── hooks.json           # GitHub Copilot CLI hooks → calls scripts with event arg
 │   ├── scripts/
 │   │   ├── hook.sh          # Bash hook handler (deployed to ~/.claude/pet-data/scripts/)
 │   │   └── hook.ps1         # PowerShell hook handler (deployed to ~/.claude/pet-data/scripts/)
-│   ├── skills/pet/SKILL.md  # /pet skill (copy of skills/pet/SKILL.md for plugin packaging)
+│   ├── skills/pet/SKILL.md  # /pet skill for Copilot CLI
 │   └── README.md
 ├── vscode/
 │   ├── plugin.json          # VS Code Copilot plugin manifest (has "hooks" field — required by VS Code)
 │   ├── hooks/
 │   │   └── hooks.json       # VS Code hooks → calls binary with --adapter vscode
-│   └── skills/pet/SKILL.md  # /pet skill (copy of skills/pet/SKILL.md for plugin packaging)
-├── skills/
-│   └── pet/SKILL.md         # /pet slash command (works with Claude Code + Copilot via ~/.claude/skills/)
+│   └── skills/pet/SKILL.md  # /pet skill for VS Code Copilot
 ├── dlc/                     # DLC character configs (packaged into pet-assets.zip)
 │   ├── mona.json            # Mona download URLs + state mapping
 │   ├── kuromi.json          # Kuromi download URLs + state mapping
@@ -195,7 +196,7 @@ WebView2 blocks `file://` URLs. Assets loaded via `load_asset` Tauri command →
 
 ## Common Pitfalls
 
-- **`.claude-plugin/plugin.json`**: Do NOT add `"hooks"` field — `hooks/hooks.json` is auto-discovered by Claude Code. (`vscode/plugin.json` DOES need `"hooks"` — VS Code requires explicit declaration.)
+- **`.claude-plugin/plugin.json`**: Do NOT add `"hooks"` field — `hooks/hooks.json` is auto-discovered by Claude Code. Plugin manifest is at `claude/.claude-plugin/plugin.json`. (`vscode/plugin.json` DOES need `"hooks"` — VS Code requires explicit declaration.)
 - **Building**: Use `npx tauri build` from `pet-app/`, NOT `cargo build` from `src-tauri/`
 - **Hook blocking**: write-status must never block. No network calls, no spawning children. Write file → `process::exit(0)`
 - **PowerShell `&`**: Waits for ALL child processes. NEVER spawn GUI from inside `& binary.exe`
@@ -224,7 +225,7 @@ cargo test
 
 Use the `/release` skill or manually:
 
-1. Update version in: `plugin.json` (3 files), `tauri.conf.json`, `Cargo.toml`, `package.json`
+1. Update version in: `claude/.claude-plugin/plugin.json`, `copilot/plugin.json`, `vscode/plugin.json`, `tauri.conf.json`, `Cargo.toml`, `package.json`
 2. Commit, tag: `git tag v0.X.0 && git push origin --tags`
 3. CI builds binaries + asset zip. Pre-release tags (`-rc`, `-beta`) marked as pre-release.
 

@@ -16,7 +16,7 @@ Release a new version of claude-status-pet.
    - Otherwise bump the patch version (e.g. 0.5.2 → 0.5.3)
 
 2. Update version in ALL of these files (they must stay in sync):
-   - `.claude-plugin/plugin.json` → `"version"` field
+   - `claude/.claude-plugin/plugin.json` → `"version"` field
    - `copilot/plugin.json` → `"version"` field
    - `vscode/plugin.json` → `"version"` field
    - `pet-app/src-tauri/tauri.conf.json` → `"version"` field

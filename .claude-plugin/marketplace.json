@@ -6,7 +6,7 @@
   "plugins": [
     {
       "name": "claude-status-pet",
-      "source": "./",
+      "source": "./claude",
       "description": "A desktop pet that shows your AI assistant's working status in real time"
     }
   ]

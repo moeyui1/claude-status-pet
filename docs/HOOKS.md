@@ -6,7 +6,7 @@ This document explains how hook events from different AI assistants are mapped t
 
 | | Claude Code | Copilot CLI | VS Code Copilot |
 |---|---|---|---|
-| **Hook config** | `hooks/hooks.json` | `copilot/hooks.json` | `vscode/hooks/hooks.json` |
+| **Hook config** | `claude/hooks/hooks.json` | `copilot/hooks.json` | `vscode/hooks/hooks.json` |
 | **Status writer** | `write-status --adapter claude` | `write-status --adapter copilot` | `write-status --adapter vscode` |
 | **Platforms** | Claude Code CLI | Copilot CLI | VS Code (agent mode) |
 | **Event naming** | PascalCase (`PreToolUse`) | camelCase (`preToolUse`) | PascalCase (`PreToolUse`) |

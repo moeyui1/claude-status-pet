@@ -48,13 +48,13 @@ cd pet-app/src-tauri && cargo check             # fast compile check without bui
 
 ## Releasing
 
-Version must be updated in 6 files: `.claude-plugin/plugin.json`, `copilot/plugin.json`, `vscode/plugin.json`, `pet-app/src-tauri/tauri.conf.json`, `pet-app/src-tauri/Cargo.toml`, `pet-app/package.json`.
+Version must be updated in 6 files: `claude/.claude-plugin/plugin.json`, `copilot/plugin.json`, `vscode/plugin.json`, `pet-app/src-tauri/tauri.conf.json`, `pet-app/src-tauri/Cargo.toml`, `pet-app/package.json`.
 
 Then: `git tag vX.Y.Z && git push origin --tags` — CI builds binaries + asset zip automatically.
 
 ## SKILL files
 
-`skills/pet/SKILL.md`, `copilot/skills/pet/SKILL.md`, and `vscode/skills/pet/SKILL.md` must be kept in sync (the copilot/vscode copies are for plugin packaging). SKILL commands use native shell (PowerShell/bash), never Node.js.
+`claude/skills/pet/SKILL.md`, `copilot/skills/pet/SKILL.md`, and `vscode/skills/pet/SKILL.md` must be kept in sync (the copilot/vscode copies are for plugin packaging). SKILL commands use native shell (PowerShell/bash), never Node.js.
 
 ## Documentation Index
 

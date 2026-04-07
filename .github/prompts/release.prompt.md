@@ -8,14 +8,14 @@ Release a new version of claude-status-pet.
 
 ## Version
 
-- Read current version from [plugin.json](../../.claude-plugin/plugin.json)
+- Read current version from [plugin.json](../../claude/.claude-plugin/plugin.json)
 - If a version was specified use that, otherwise bump the patch number (e.g. 1.0.5 → 1.0.6)
 
 ## Update version in ALL 6 files
 
 These must stay in sync:
 
-1. `.claude-plugin/plugin.json` → `"version"` field
+1. `claude/.claude-plugin/plugin.json` → `"version"` field
 2. `copilot/plugin.json` → `"version"` field
 3. `vscode/plugin.json` → `"version"` field
 4. `pet-app/src-tauri/tauri.conf.json` → `"version"` field

@@ -107,7 +107,7 @@ Write-Host "[2/4] Binary updated"
 # 3. Update skill
 $skillDir = "$env:USERPROFILE\.claude\skills\pet"
 New-Item -ItemType Directory -Path $skillDir -Force | Out-Null
-Invoke-WebRequest -Uri "$RAW/skills/pet/SKILL.md" -OutFile "$skillDir\SKILL.md"
+Invoke-WebRequest -Uri "$RAW/claude/skills/pet/SKILL.md" -OutFile "$skillDir\SKILL.md"
 Write-Host "[3/4] Skill updated"
 
 # 4. Update assets
@@ -158,7 +158,7 @@ echo "[2/4] Binary updated"
 
 # 3. Update skill
 mkdir -p "$HOME/.claude/skills/pet"
-curl -sLo "$HOME/.claude/skills/pet/SKILL.md" "$RAW/skills/pet/SKILL.md"
+curl -sLo "$HOME/.claude/skills/pet/SKILL.md" "$RAW/claude/skills/pet/SKILL.md"
 echo "[3/4] Skill updated"
 
 # 4. Update assets
