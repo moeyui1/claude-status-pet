@@ -63,7 +63,7 @@ Launch: `~/.claude/pet-data/bin/claude-status-pet run`
 
 ```bash
 copilot plugin marketplace add moeyui1/claude-status-pet
-copilot plugin install claude-status-pet-copilot
+copilot plugin install claude-status-pet@claude-status-pet
 ```
 
 This installs hooks and the `/pet` skill. Then download the binary and assets:
