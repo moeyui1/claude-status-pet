@@ -31,6 +31,7 @@ $installDir = "$env:USERPROFILE\.claude\pet-data\bin"
 New-Item -ItemType Directory -Path $installDir -Force | Out-Null
 $asset = "claude-status-pet-windows-x64.exe"
 Invoke-WebRequest -Uri "https://github.com/moeyui1/claude-status-pet/releases/latest/download/$asset" -OutFile "$installDir\$asset"
+Copy-Item "$installDir\$asset" "$installDir\claude-status-pet" -Force
 ```
 
 ## Manual: Install Copilot Hooks

@@ -98,6 +98,7 @@ $binDir = "$dir\bin"
 New-Item -ItemType Directory -Path $binDir -Force | Out-Null
 $asset = "claude-status-pet-windows-x64.exe"
 Invoke-WebRequest -Uri "$BASE/releases/latest/download/$asset" -OutFile "$binDir\$asset"
+Copy-Item "$binDir\$asset" "$binDir\claude-status-pet" -Force
 Write-Host "[2/5] Binary updated"
 
 # 3. Update hooks (only for installed hook locations)
