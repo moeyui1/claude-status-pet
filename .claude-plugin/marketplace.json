@@ -8,16 +8,6 @@
       "name": "claude-status-pet",
       "source": "./",
       "description": "A desktop pet that shows your AI assistant's working status in real time"
-    },
-    {
-      "name": "claude-status-pet-copilot",
-      "source": "copilot/",
-      "description": "Status pet for GitHub Copilot CLI — hooks + /pet skill"
-    },
-    {
-      "name": "claude-status-pet-vscode",
-      "source": "vscode/",
-      "description": "Status pet for VS Code Copilot — hooks + /pet skill"
     }
   ]
 }
