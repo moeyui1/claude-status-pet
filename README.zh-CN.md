@@ -49,11 +49,11 @@
 /plugin install claude-status-pet
 ```
 
-**GitHub Copilot CLI** — 插件安装：
+**GitHub Copilot CLI** — 在 Copilot CLI 会话中运行：
 
 ```
-copilot plugin marketplace add moeyui1/claude-status-pet
-copilot plugin install claude-status-pet@claude-status-pet
+/plugin marketplace add moeyui1/claude-status-pet
+/plugin install claude-status-pet-copilot
 ```
 
 **VS Code Copilot** — 插件安装：
@@ -65,6 +65,8 @@ copilot plugin install claude-status-pet@claude-status-pet
 **或让 AI 助手安装**（以上任意一种）：
 
 > Read https://raw.githubusercontent.com/moeyui1/claude-status-pet/main/docs/INSTALL.md and install it for me
+
+> **⚠️ 首次安装后，请重启你的 Agent 会话**以使钩子和技能生效。
 
 搞定！下次会话时桌面宠物就会出现 🎉
 
@@ -144,7 +146,7 @@ npx tauri build
 这会停止宠物进程，删除所有数据、脚本和资源。然后卸载插件：
 
 - Claude Code: `/plugin uninstall claude-status-pet`
-- Copilot CLI: `copilot plugin uninstall claude-status-pet@claude-status-pet`
+- Copilot CLI: `/plugin uninstall claude-status-pet-copilot`（在 Copilot CLI 会话中运行）
 - VS Code: 命令面板 → `Chat: Uninstall Plugin`
 
 ## 工作原理
