@@ -1,11 +1,11 @@
 {
-  "name": "claude-status-pet-copilot",
+  "name": "claude-status-pet",
   "owner": {
     "name": "moeyui1"
   },
   "plugins": [
     {
-      "name": "claude-status-pet-copilot",
+      "name": "claude-status-pet",
       "source": "./copilot",
       "description": "A desktop pet that shows your AI assistant's working status in real time"
     }
