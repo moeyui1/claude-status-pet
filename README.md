@@ -102,13 +102,13 @@ Ask your AI assistant:
 
 ## Compatibility
 
-| AI Agent | Plugin Install | Manual Install | Status |
-|----------|:---:|:---:|--------|
-| [Claude Code](https://docs.anthropic.com/en/docs/claude-code) (CLI) | ✅ | ✅ | Fully supported |
-| [GitHub Copilot CLI](https://docs.github.com/en/copilot/how-tos/copilot-cli) | ✅ | ✅ | Fully supported |
-| VS Code Copilot (Agent Mode) | ✅ | ✅ | Fully supported |
-| Cursor | — | — | Not supported yet |
-| OpenCode | — | — | Not supported yet |
+| AI Agent | Plugin Install | Status |
+|----------|:---:|--------|
+| [Claude Code](https://docs.anthropic.com/en/docs/claude-code) (CLI) | ✅ | Fully supported |
+| [GitHub Copilot CLI](https://docs.github.com/en/copilot/how-tos/copilot-cli) | ✅ | Fully supported |
+| VS Code Copilot (Agent Mode) | ✅ | Fully supported |
+| Cursor | — | Not supported yet |
+| OpenCode | — | Not supported yet |
 
 > Want to add support for another agent? See [Adding a New Adapter](CONTRIBUTING.md#adding-a-new-ai-agent-adapter).
 >

@@ -109,20 +109,6 @@ Both Claude Code and GitHub Copilot now use the same fine-grained states for too
 
 Install via plugin: run `Chat: Install Plugin From Source` with `https://github.com/moeyui1/claude-status-pet`. Hooks are loaded automatically from `vscode/plugin.json`.
 
-For **manual install only** (if plugin install is not available), copy hook config to `.github/hooks/` (workspace-level) or `~/.copilot/hooks/` (global):
-
-```bash
-# Workspace-level (per project)
-mkdir -p .github/hooks
-cp vscode/hooks/hooks.json .github/hooks/status-pet-vscode.json
-
-# User-level (all projects)
-mkdir -p ~/.copilot/hooks
-cp vscode/hooks/hooks.json ~/.copilot/hooks/status-pet-vscode.json
-```
-
-No scripts needed — the hooks call the binary directly (VS Code pipes stdin to the command).
-
 ## Adding a New AI Assistant
 
 No scripts needed — just call the binary with CLI args from your hooks:

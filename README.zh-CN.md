@@ -103,13 +103,13 @@ copilot plugin install claude-status-pet@claude-status-pet
 
 ## 兼容性
 
-| AI Agent | 插件安装 | 手动安装 | 状态 |
-|----------|:---:|:---:|------|
-| [Claude Code](https://docs.anthropic.com/en/docs/claude-code) (CLI) | ✅ | ✅ | 完全支持 |
-| [GitHub Copilot CLI](https://docs.github.com/en/copilot/how-tos/copilot-cli) | ✅ | ✅ | 完全支持 |
-| VS Code Copilot (Agent Mode) | ✅ | ✅ | 完全支持 |
-| Cursor | — | — | 暂不支持 |
-| OpenCode | — | — | 暂不支持 |
+| AI Agent | 插件安装 | 状态 |
+|----------|:---:|------|
+| [Claude Code](https://docs.anthropic.com/en/docs/claude-code) (CLI) | ✅ | 完全支持 |
+| [GitHub Copilot CLI](https://docs.github.com/en/copilot/how-tos/copilot-cli) | ✅ | 完全支持 |
+| VS Code Copilot (Agent Mode) | ✅ | 完全支持 |
+| Cursor | — | 暂不支持 |
+| OpenCode | — | 暂不支持 |
 
 > 想为其他 Agent 添加支持？参见 [添加新适配器](CONTRIBUTING.md#adding-a-new-ai-agent-adapter)。
 >

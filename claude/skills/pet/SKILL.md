@@ -81,8 +81,6 @@ Update the pet to the latest release.
 
 > **For plugin install:** Run `/plugin marketplace update claude-status-pet` — this updates the binary and hooks automatically. Then only update the skill file (step 3 below).
 >
-> **For manual install:** Follow all steps below.
-
 > **Important:** Close all running pets before updating. After updating, inform the user to restart with `/pet on`.
 
 **PowerShell:**

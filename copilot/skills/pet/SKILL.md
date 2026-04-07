@@ -77,8 +77,6 @@ Update the pet to the latest release.
 
 > **For plugin install:** Run `copilot plugin update claude-status-pet-copilot` in a terminal — this updates hooks and skill automatically. Then follow steps 1-2 and 5 below for binary and assets.
 >
-> **For manual install:** Follow all steps below.
-
 > **Important:** Close all running pets before updating. After updating, inform the user to restart with `/pet on`.
 
 **PowerShell:**

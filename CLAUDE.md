@@ -47,7 +47,6 @@ claude-status-pet/
 │   └── fluent-cat.json      # Fluent Cat emoji (MIT PNGs)
 ├── docs/
 │   ├── INSTALL.md           # Agent-readable install instructions
-│   ├── MANUAL-INSTALL.md    # Manual install steps (binary, hooks, assets)
 │   ├── CUSTOM-CHARACTERS.md
 │   ├── HOOKS.md             # Hook event → status mapping reference
 │   └── images/              # Compressed showcase GIFs

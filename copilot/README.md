@@ -4,24 +4,12 @@
 
 ```
 copilot plugin marketplace add moeyui1/claude-status-pet
-copilot plugin install claude-status-pet-copilot
+copilot plugin install claude-status-pet@claude-status-pet
 ```
 
 This installs the hooks and `/pet` skill automatically.
 
-> **Note:** You still need to download the binary separately. Use `/pet update` after installing the plugin, or download it manually from [Releases](https://github.com/moeyui1/claude-status-pet/releases).
-
-## Manual Install (Per-Repo)
-
-If you prefer per-repo hooks instead of the plugin:
-
-```bash
-mkdir -p .github/hooks
-curl -sLo .github/hooks/status-pet.json \
-  https://raw.githubusercontent.com/moeyui1/claude-status-pet/main/copilot/hooks.json
-git add .github/hooks/status-pet.json
-git commit -m "Add status pet hooks for Copilot"
-```
+> **Note:** You still need to download the binary separately. Use `/pet update` after installing the plugin.
 
 ## How It Works
 
