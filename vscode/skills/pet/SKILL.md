@@ -52,7 +52,7 @@ Simply launch the pet binary. The binary has built-in PID lock detection, so dup
 ```powershell
 $dir = "$env:USERPROFILE\.claude\pet-data"
 $bin = Get-ChildItem "$dir\bin\claude-status-pet*" | Select-Object -First 1
-if (-not $bin) { Write-Host "Pet binary not found"; return }
+if (-not $bin) { Write-Host "Pet binary not found. Run /pet update first."; return }
 $a = @("run")
 $assets = "$dir\assets"
 if (Test-Path $assets) { $a += "--assets-dir"; $a += $assets }
@@ -64,7 +64,7 @@ Write-Host "Pet launched"
 ```bash
 DIR="$HOME/.claude/pet-data"
 BIN=$(ls "$DIR/bin/claude-status-pet"* 2>/dev/null | head -1)
-[ -z "$BIN" ] && echo "Pet binary not found" && exit 1
+[ -z "$BIN" ] && echo "Pet binary not found. Run /pet update first." && exit 1
 ARGS="run"
 [ -d "$DIR/assets" ] && ARGS="$ARGS --assets-dir $DIR/assets"
 nohup "$BIN" $ARGS >/dev/null 2>&1 &

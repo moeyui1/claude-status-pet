@@ -52,7 +52,7 @@ Simply launch the pet binary. The binary has built-in PID lock detection, so dup
 ```powershell
 $dir = "$env:USERPROFILE\.claude\pet-data"
 $bin = Get-ChildItem "$dir\bin\claude-status-pet*" | Select-Object -First 1
-if (-not $bin) { Write-Host "Pet binary not found"; return }
+if (-not $bin) { Write-Host "Pet binary not found. Run /pet update first."; return }
 $sid = "${CLAUDE_SESSION_ID}"
 $sf = "$dir\status-$sid.json"
 $a = @("run","--status-file",$sf,"--session-id",$sid)
@@ -66,7 +66,7 @@ Write-Host "Pet launched"
 ```bash
 DIR="$HOME/.claude/pet-data"
 BIN=$(ls "$DIR/bin/claude-status-pet"* 2>/dev/null | head -1)
-[ -z "$BIN" ] && echo "Pet binary not found" && exit 1
+[ -z "$BIN" ] && echo "Pet binary not found. Run /pet update first." && exit 1
 SID="${CLAUDE_SESSION_ID}"
 SF="$DIR/status-$SID.json"
 ARGS="run --status-file $SF --session-id $SID"
