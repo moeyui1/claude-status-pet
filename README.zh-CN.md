@@ -46,14 +46,14 @@
 
 ```
 /plugin marketplace add moeyui1/claude-status-pet
-/plugin install claude-status-pet
+/plugin install claude-status-pet@claude-status-pet
 ```
 
 **GitHub Copilot CLI** — 插件安装：
 
 ```
 copilot plugin marketplace add moeyui1/claude-status-pet
-copilot plugin install claude-status-pet-copilot
+copilot plugin install claude-status-pet@claude-status-pet
 ```
 
 **VS Code Copilot** — 插件安装：
@@ -143,8 +143,8 @@ npx tauri build
 
 这会停止宠物进程，删除所有数据、脚本和资源。然后卸载插件：
 
-- Claude Code: `/plugin uninstall claude-status-pet`
-- Copilot CLI: `copilot plugin uninstall claude-status-pet-copilot`
+- Claude Code: `/plugin uninstall claude-status-pet@claude-status-pet`
+- Copilot CLI: `copilot plugin uninstall claude-status-pet@claude-status-pet`
 - VS Code: 命令面板 → `Chat: Uninstall Plugin`
 
 ## 工作原理
