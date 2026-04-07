@@ -72,7 +72,7 @@ impl Adapter for ClaudeAdapter {
                 ("error".into(), String::new(), "Something went wrong".into())
             }
             "SessionEnd" => {
-                ("offline".into(), String::new(), "Session ended".into())
+                ("closed".into(), String::new(), "Session ended".into())
             }
             "SessionStart" => {
                 // Write initial idle status
