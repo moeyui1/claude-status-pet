@@ -1,6 +1,6 @@
 ---
 name: pet
-description: Manage your desktop pet — on, update, status
+description: Manage your desktop pet — on, init, update, status
 user-invocable: true
 ---
 
@@ -15,10 +15,13 @@ The user will run `/pet` with an optional subcommand. Parse the arguments and ex
 ### Subcommands
 
 - `/pet` or `/pet on` — Launch the pet (session selection handled by the app UI)
+- `/pet init` — First-time setup: download the binary and assets
 - `/pet update` — Update binary, hooks, skill, and assets to the latest release
 - `/pet status` — Show current config, active sessions, and installed character packs
 - `/pet uninstall` — Uninstall the pet completely (stop processes, remove all data, uninstall plugin)
 - `/pet help` — Show available commands
+
+> **First time?** Run `/pet init` to download the binary. After that, `/pet on` to launch.
 
 > **Closing the pet:** Right-click the pet → Exit. There is no `/pet off` command.
 >
@@ -53,7 +56,7 @@ Simply launch the pet binary. The binary has built-in PID lock detection, so dup
 $dir = "$env:USERPROFILE\.claude\pet-data"
 $bin = Get-ChildItem "$dir\bin\claude-status-pet*.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
 if (-not $bin) { $bin = Get-ChildItem "$dir\bin\claude-status-pet*" | Select-Object -First 1 }
-if (-not $bin) { Write-Host "Pet binary not found. Run /pet update first."; return }
+if (-not $bin) { Write-Host "Pet binary not found. Run /pet init first."; return }
 Unblock-File $bin.FullName -ErrorAction SilentlyContinue
 $a = @("run")
 $assets = "$dir\assets"
@@ -66,12 +69,16 @@ Write-Host "Pet launched"
 ```bash
 DIR="$HOME/.claude/pet-data"
 BIN=$(ls "$DIR/bin/claude-status-pet"* 2>/dev/null | head -1)
-[ -z "$BIN" ] && echo "Pet binary not found. Run /pet update first." && exit 1
+[ -z "$BIN" ] && echo "Pet binary not found. Run /pet init first." && exit 1
 ARGS="run"
 [ -d "$DIR/assets" ] && ARGS="$ARGS --assets-dir $DIR/assets"
 nohup "$BIN" $ARGS >/dev/null 2>&1 &
 echo "Pet launched"
 ```
+
+### /pet init
+
+Alias for `/pet update`. Run the same steps as `/pet update` below.
 
 ### /pet update
 

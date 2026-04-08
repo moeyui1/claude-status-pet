@@ -139,8 +139,7 @@ mod tests {
 
     #[test]
     fn test_copilot_session_start_writes_thinking() {
-        std::env::set_var("COPILOT_HOOK_EVENT", "sessionStart");
-        let stdin = make_stdin(None, None, None, None, Some("/proj"));
+        let stdin = make_stdin(Some("sessionStart"), None, None, None, Some("/proj"));
         let ev = adapter::copilot::CopilotAdapter.parse(&stdin).unwrap();
         assert_eq!(ev.event, "prompt");
         assert!(!ev.launch_only);
@@ -149,40 +148,35 @@ mod tests {
 
     #[test]
     fn test_copilot_prompt_submitted() {
-        std::env::set_var("COPILOT_HOOK_EVENT", "userPromptSubmitted");
-        let stdin = make_stdin(None, None, None, None, Some("/proj"));
+        let stdin = make_stdin(Some("userPromptSubmitted"), None, None, None, Some("/proj"));
         let ev = adapter::copilot::CopilotAdapter.parse(&stdin).unwrap();
         assert_eq!(ev.event, "prompt");
     }
 
     #[test]
     fn test_copilot_post_tool_is_thinking() {
-        std::env::set_var("COPILOT_HOOK_EVENT", "postToolUse");
-        let stdin = make_stdin(None, None, None, None, Some("/proj"));
+        let stdin = make_stdin(Some("postToolUse"), None, None, None, Some("/proj"));
         let ev = adapter::copilot::CopilotAdapter.parse(&stdin).unwrap();
         assert_eq!(ev.event, "prompt"); // NOT done/idle
     }
 
     #[test]
     fn test_copilot_stop() {
-        std::env::set_var("COPILOT_HOOK_EVENT", "stop");
-        let stdin = make_stdin(None, None, None, None, Some("/proj"));
+        let stdin = make_stdin(Some("stop"), None, None, None, Some("/proj"));
         let ev = adapter::copilot::CopilotAdapter.parse(&stdin).unwrap();
         assert_eq!(ev.event, "done");
     }
 
     #[test]
     fn test_copilot_session_end_complete_is_idle() {
-        std::env::set_var("COPILOT_HOOK_EVENT", "sessionEnd");
-        let stdin = make_stdin(None, None, None, None, Some("/proj"));
+        let stdin = make_stdin(Some("sessionEnd"), None, None, None, Some("/proj"));
         let ev = adapter::copilot::CopilotAdapter.parse(&stdin).unwrap();
         assert_eq!(ev.event, "done"); // complete → idle
     }
 
     #[test]
     fn test_copilot_session_name_has_suffix() {
-        std::env::set_var("COPILOT_HOOK_EVENT", "sessionStart");
-        let stdin = make_stdin(None, None, None, None, Some("/projects/my-app"));
+        let stdin = make_stdin(Some("sessionStart"), None, None, None, Some("/projects/my-app"));
         let ev = adapter::copilot::CopilotAdapter.parse(&stdin).unwrap();
         assert!(ev.session_name.contains("Copilot"));
         assert!(ev.session_name.contains("my-app"));

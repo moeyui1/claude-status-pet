@@ -4,50 +4,61 @@
     "sessionStart": [
       {
         "type": "command",
-        "bash": "bash ~/.claude/pet-data/scripts/copilot-hook.sh sessionStart",
-        "powershell": "& \"$env:USERPROFILE\\.claude\\pet-data\\scripts\\copilot-hook.ps1\" sessionStart",
+        "bash": "~/.claude/pet-data/bin/claude-status-pet write-status --adapter copilot --copilot-event sessionStart",
+        "powershell": "& \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" write-status --adapter copilot --copilot-event sessionStart",
         "timeoutSec": 1
       }
     ],
     "sessionEnd": [
       {
         "type": "command",
-        "bash": "bash ~/.claude/pet-data/scripts/copilot-hook.sh sessionEnd",
-        "powershell": "& \"$env:USERPROFILE\\.claude\\pet-data\\scripts\\copilot-hook.ps1\" sessionEnd",
+        "bash": "~/.claude/pet-data/bin/claude-status-pet write-status --adapter copilot --copilot-event sessionEnd",
+        "powershell": "& \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" write-status --adapter copilot --copilot-event sessionEnd",
         "timeoutSec": 1
       }
     ],
     "userPromptSubmitted": [
       {
         "type": "command",
-        "bash": "bash ~/.claude/pet-data/scripts/copilot-hook.sh userPromptSubmitted",
-        "powershell": "& \"$env:USERPROFILE\\.claude\\pet-data\\scripts\\copilot-hook.ps1\" userPromptSubmitted",
+        "bash": "~/.claude/pet-data/bin/claude-status-pet write-status --adapter copilot --copilot-event userPromptSubmitted",
+        "powershell": "& \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" write-status --adapter copilot --copilot-event userPromptSubmitted",
         "timeoutSec": 1
       }
     ],
     "preToolUse": [
       {
         "type": "command",
-        "bash": "bash ~/.claude/pet-data/scripts/copilot-hook.sh preToolUse",
-        "powershell": "& \"$env:USERPROFILE\\.claude\\pet-data\\scripts\\copilot-hook.ps1\" preToolUse",
+        "bash": "~/.claude/pet-data/bin/claude-status-pet write-status --adapter copilot --copilot-event preToolUse",
+        "powershell": "& \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" write-status --adapter copilot --copilot-event preToolUse",
         "timeoutSec": 1
       }
     ],
     "postToolUse": [
       {
         "type": "command",
-        "bash": "bash ~/.claude/pet-data/scripts/copilot-hook.sh postToolUse",
-        "powershell": "& \"$env:USERPROFILE\\.claude\\pet-data\\scripts\\copilot-hook.ps1\" postToolUse",
+        "bash": "~/.claude/pet-data/bin/claude-status-pet write-status --adapter copilot --copilot-event postToolUse",
+        "powershell": "& \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" write-status --adapter copilot --copilot-event postToolUse",
         "timeoutSec": 1
       }
     ],
     "errorOccurred": [
       {
         "type": "command",
-        "bash": "bash ~/.claude/pet-data/scripts/copilot-hook.sh errorOccurred",
-        "powershell": "& \"$env:USERPROFILE\\.claude\\pet-data\\scripts\\copilot-hook.ps1\" errorOccurred",
+        "bash": "~/.claude/pet-data/bin/claude-status-pet write-status --adapter copilot --copilot-event errorOccurred",
+        "powershell": "& \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" write-status --adapter copilot --copilot-event errorOccurred",
         "timeoutSec": 1
       }
+    ],
+    "stop": [
+      {
+        "type": "command",
+        "bash": "~/.claude/pet-data/bin/claude-status-pet write-status --adapter copilot --copilot-event stop",
+        "powershell": "& \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" write-status --adapter copilot --copilot-event stop",
+        "timeoutSec": 1
+      }
+    ]
+  }
+}
     ],
     "stop": [
       {

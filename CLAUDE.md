@@ -28,10 +28,10 @@ claude-status-pet/
 │   └── skills/pet/SKILL.md  # /pet skill for Claude Code
 ├── copilot/
 │   ├── plugin.json         # Copilot CLI plugin manifest
-│   ├── hooks.json           # GitHub Copilot CLI hooks → calls scripts with event arg
+│   ├── hooks.json           # GitHub Copilot CLI hooks → calls binary with --adapter copilot
 │   ├── scripts/
-│   │   ├── hook.sh          # Bash hook handler (deployed to ~/.claude/pet-data/scripts/)
-│   │   └── hook.ps1         # PowerShell hook handler (deployed to ~/.claude/pet-data/scripts/)
+│   │   ├── hook.sh          # Bash hook handler (legacy, kept for backwards compatibility)
+│   │   └── hook.ps1         # PowerShell hook handler (legacy, kept for backwards compatibility)
 │   ├── skills/pet/SKILL.md  # /pet skill for Copilot CLI
 │   └── README.md
 ├── vscode/

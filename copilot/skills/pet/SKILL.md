@@ -1,6 +1,6 @@
 ---
 name: pet
-description: Manage your desktop pet — on, update, status
+description: Manage your desktop pet — on, init, update, status
 user-invocable: true
 ---
 
@@ -15,10 +15,13 @@ The user will run `/pet` with an optional subcommand. Parse the arguments and ex
 ### Subcommands
 
 - `/pet` or `/pet on` — Launch the pet (session selection handled by the app UI)
+- `/pet init` — First-time setup: download the binary and assets
 - `/pet update` — Update binary, hooks, skill, and assets to the latest release
 - `/pet status` — Show current config, active sessions, and installed character packs
 - `/pet uninstall` — Uninstall the pet completely (stop processes, remove all data, uninstall plugin)
 - `/pet help` — Show available commands
+
+> **First time?** Run `/pet init` to download the binary. After that, `/pet on` to launch.
 
 > **Closing the pet:** Right-click the pet → Exit. There is no `/pet off` command.
 >
@@ -53,7 +56,7 @@ Simply launch the pet binary. The binary has built-in PID lock detection, so dup
 $dir = "$env:USERPROFILE\.claude\pet-data"
 $bin = Get-ChildItem "$dir\bin\claude-status-pet*.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
 if (-not $bin) { $bin = Get-ChildItem "$dir\bin\claude-status-pet*" | Select-Object -First 1 }
-if (-not $bin) { Write-Host "Pet binary not found. Run /pet update first."; return }
+if (-not $bin) { Write-Host "Pet binary not found. Run /pet init first."; return }
 Unblock-File $bin.FullName -ErrorAction SilentlyContinue
 $a = @("run")
 $assets = "$dir\assets"
@@ -66,12 +69,16 @@ Write-Host "Pet launched"
 ```bash
 DIR="$HOME/.claude/pet-data"
 BIN=$(ls "$DIR/bin/claude-status-pet"* 2>/dev/null | head -1)
-[ -z "$BIN" ] && echo "Pet binary not found. Run /pet update first." && exit 1
+[ -z "$BIN" ] && echo "Pet binary not found. Run /pet init first." && exit 1
 ARGS="run"
 [ -d "$DIR/assets" ] && ARGS="$ARGS --assets-dir $DIR/assets"
 nohup "$BIN" $ARGS >/dev/null 2>&1 &
 echo "Pet launched"
 ```
+
+### /pet init
+
+Alias for `/pet update`. Run the same steps as `/pet update` below.
 
 ### /pet update
 
@@ -89,7 +96,7 @@ $dir  = "$env:USERPROFILE\.claude\pet-data"
 # 1. Close running pets
 Get-Process | Where-Object { $_.ProcessName -like "claude-status-pet*" } | ForEach-Object { Stop-Process -Id $_.Id -Force -ErrorAction SilentlyContinue }
 Start-Sleep -Milliseconds 500
-Write-Host "[1/4] Stopped running pets"
+Write-Host "[1/3] Stopped running pets"
 
 # 2. Download binary
 $binDir = "$dir\bin"
@@ -98,7 +105,7 @@ $asset = "claude-status-pet-windows-x64.exe"
 Invoke-WebRequest -Uri "$BASE/releases/latest/download/$asset" -OutFile "$binDir\$asset"
 Unblock-File "$binDir\$asset"
 Copy-Item "$binDir\$asset" "$binDir\claude-status-pet" -Force
-Write-Host "[2/4] Binary updated"
+Write-Host "[2/3] Binary updated"
 
 # 3. Update hooks (only for installed hook locations)
 $hookUpdated = $false
@@ -107,17 +114,10 @@ if (Test-Path $copilotHooksDir) {
     $copilotHookFile = "$copilotHooksDir\status-pet.json"
     if (Test-Path $copilotHookFile) {
         Invoke-WebRequest -Uri "$RAW/copilot/hooks.json" -OutFile $copilotHookFile
-        $hookUpdated = $true; Write-Host "[3/4] Copilot hooks updated"
+        $hookUpdated = $true; Write-Host "[3/3] Copilot hooks updated"
     }
 }
-if (-not $hookUpdated) { Write-Host "[3/4] No hook locations to update (skipped)" }
-
-# 4. Update hook scripts
-$scriptsDir = "$dir\scripts"
-New-Item -ItemType Directory -Path $scriptsDir -Force | Out-Null
-Invoke-WebRequest -Uri "$RAW/copilot/scripts/hook.sh" -OutFile "$scriptsDir\copilot-hook.sh"
-Invoke-WebRequest -Uri "$RAW/copilot/scripts/hook.ps1" -OutFile "$scriptsDir\copilot-hook.ps1"
-Write-Host "[4/4] Hook scripts updated"
+if (-not $hookUpdated) { Write-Host "[3/3] No hook locations to update (skipped)" }
 
 Write-Host "Update complete! Run /pet on to start. Assets will be downloaded automatically on launch."
 ```
@@ -131,7 +131,7 @@ DIR="$HOME/.claude/pet-data"
 
 # 1. Close running pets
 pkill -f claude-status-pet 2>/dev/null; sleep 0.5
-echo "[1/4] Stopped running pets"
+echo "[1/3] Stopped running pets"
 
 # 2. Download binary
 mkdir -p "$DIR/bin"
@@ -144,22 +144,15 @@ esac
 curl -sLo "$DIR/bin/$ASSET" "$BASE/releases/latest/download/$ASSET"
 chmod +x "$DIR/bin/$ASSET" 2>/dev/null || true
 ln -sf "$DIR/bin/$ASSET" "$DIR/bin/claude-status-pet" 2>/dev/null || true
-echo "[2/4] Binary updated"
+echo "[2/3] Binary updated"
 
 # 3. Update hooks (only for installed hook locations)
 HOOK_UPDATED=0
 if [ -f "$HOME/.copilot/hooks/status-pet.json" ]; then
   curl -sLo "$HOME/.copilot/hooks/status-pet.json" "$RAW/copilot/hooks.json"
-  HOOK_UPDATED=1; echo "[3/4] Copilot hooks updated"
+  HOOK_UPDATED=1; echo "[3/3] Copilot hooks updated"
 fi
-[ "$HOOK_UPDATED" -eq 0 ] && echo "[3/4] No hook locations to update (skipped)"
-
-# 4. Update hook scripts
-mkdir -p "$DIR/scripts"
-curl -sLo "$DIR/scripts/copilot-hook.sh" "$RAW/copilot/scripts/hook.sh"
-curl -sLo "$DIR/scripts/copilot-hook.ps1" "$RAW/copilot/scripts/hook.ps1"
-chmod +x "$DIR/scripts/copilot-hook.sh" 2>/dev/null || true
-echo "[4/4] Hook scripts updated"
+[ "$HOOK_UPDATED" -eq 0 ] && echo "[3/3] No hook locations to update (skipped)"
 
 echo "Update complete! Run /pet on to start. Assets will be downloaded automatically on launch."
 ```

@@ -41,7 +41,7 @@ copilot plugin install claude-status-pet-copilot@claude-status-pet-copilot
 This installs hooks and the `/pet` skill. Then **start a Copilot CLI session** and download the binary and assets:
 
 ```
-/pet update
+/pet init
 ```
 
 > **⚠️ After first installation, restart your Copilot CLI session** for the hooks and skill to take effect.
@@ -60,10 +60,12 @@ Chat: Install Plugin From Source
 ```
 Enter: `https://github.com/moeyui1/claude-status-pet`
 
+> **⚠️ Important:** If prompted to choose a plugin, select **`claude-status-pet-vscode`** (not `claude-status-pet` or `claude-status-pet-copilot`). The VS Code variant uses the correct hook format.
+
 This installs hooks and the `/pet` skill. Then download the binary and assets:
 
 ```
-/pet update
+/pet init
 ```
 
 Done! Use `/pet on` to launch the pet.
