@@ -54,6 +54,7 @@ $dir = "$env:USERPROFILE\.claude\pet-data"
 $bin = Get-ChildItem "$dir\bin\claude-status-pet*.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
 if (-not $bin) { $bin = Get-ChildItem "$dir\bin\claude-status-pet*" | Select-Object -First 1 }
 if (-not $bin) { Write-Host "Pet binary not found. Run /pet update first."; return }
+Unblock-File $bin.FullName -ErrorAction SilentlyContinue
 $a = @("run")
 $assets = "$dir\assets"
 if (Test-Path $assets) { $a += "--assets-dir"; $a += $assets }
@@ -95,6 +96,7 @@ $binDir = "$dir\bin"
 New-Item -ItemType Directory -Path $binDir -Force | Out-Null
 $asset = "claude-status-pet-windows-x64.exe"
 Invoke-WebRequest -Uri "$BASE/releases/latest/download/$asset" -OutFile "$binDir\$asset"
+Unblock-File "$binDir\$asset"
 Copy-Item "$binDir\$asset" "$binDir\claude-status-pet" -Force
 Write-Host "[2/4] Binary updated"
 
