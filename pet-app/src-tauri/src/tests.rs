@@ -125,7 +125,7 @@ mod tests {
     fn test_claude_session_end() {
         let stdin = make_stdin(Some("SessionEnd"), None, None, Some("s1"), Some("/proj"));
         let ev = adapter::claude::ClaudeAdapter.parse(&stdin).unwrap();
-        assert_eq!(ev.event, "offline");
+        assert_eq!(ev.event, "closed");
     }
 
     #[test]

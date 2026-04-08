@@ -89,7 +89,7 @@ $dir  = "$env:USERPROFILE\.claude\pet-data"
 # 1. Close running pets
 Get-Process | Where-Object { $_.ProcessName -like "claude-status-pet*" } | ForEach-Object { Stop-Process -Id $_.Id -Force -ErrorAction SilentlyContinue }
 Start-Sleep -Milliseconds 500
-Write-Host "[1/4] Stopped running pets"
+Write-Host "[1/3] Stopped running pets"
 
 # 2. Download binary
 $binDir = "$dir\bin"
@@ -98,7 +98,7 @@ $asset = "claude-status-pet-windows-x64.exe"
 Invoke-WebRequest -Uri "$BASE/releases/latest/download/$asset" -OutFile "$binDir\$asset"
 Unblock-File "$binDir\$asset"
 Copy-Item "$binDir\$asset" "$binDir\claude-status-pet" -Force
-Write-Host "[2/4] Binary updated"
+Write-Host "[2/3] Binary updated"
 
 # 3. Update hooks (only for installed hook locations)
 $hookUpdated = $false
@@ -107,31 +107,12 @@ if (Test-Path $copilotHooksDir) {
     $vscodeHookFile = "$copilotHooksDir\status-pet-vscode.json"
     if (Test-Path $vscodeHookFile) {
         Invoke-WebRequest -Uri "$RAW/vscode/hooks/hooks.json" -OutFile $vscodeHookFile
-        $hookUpdated = $true; Write-Host "[3/4] VS Code hooks updated"
+        $hookUpdated = $true; Write-Host "[3/3] VS Code hooks updated"
     }
 }
-if (-not $hookUpdated) { Write-Host "[3/4] No hook locations to update (skipped)" }
+if (-not $hookUpdated) { Write-Host "[3/3] No hook locations to update (skipped)" }
 
-# 4. Update assets
-$assetsDir = "$dir\assets"
-New-Item -ItemType Directory -Path $assetsDir -Force | Out-Null
-Invoke-WebRequest -Uri "$BASE/releases/latest/download/pet-assets.zip" -OutFile "$env:TEMP\pet-assets.zip"
-Expand-Archive -Path "$env:TEMP\pet-assets.zip" -DestinationPath $assetsDir -Force
-Remove-Item "$env:TEMP\pet-assets.zip" -ErrorAction SilentlyContinue
-# Clean outdated DLC so they re-download on next use
-Get-ChildItem "$assetsDir\dlc\*.json" -ErrorAction SilentlyContinue | ForEach-Object {
-    $dlcId = $_.BaseName; $charJson = "$assetsDir\$dlcId\character.json"
-    if (Test-Path $charJson) {
-        $cfg = Get-Content $_.FullName | ConvertFrom-Json
-        $inst = Get-Content $charJson | ConvertFrom-Json
-        if ($cfg.version -and (!$inst.version -or $inst.version -lt $cfg.version)) {
-            Remove-Item "$assetsDir\$dlcId" -Recurse -Force
-        }
-    }
-}
-Write-Host "[4/4] Assets updated"
-
-Write-Host "Update complete! Run /pet on to start."
+Write-Host "Update complete! Run /pet on to start. Assets will be downloaded automatically on launch."
 ```
 
 **bash:**
@@ -143,7 +124,7 @@ DIR="$HOME/.claude/pet-data"
 
 # 1. Close running pets
 pkill -f claude-status-pet 2>/dev/null; sleep 0.5
-echo "[1/4] Stopped running pets"
+echo "[1/3] Stopped running pets"
 
 # 2. Download binary
 mkdir -p "$DIR/bin"
@@ -156,34 +137,17 @@ esac
 curl -sLo "$DIR/bin/$ASSET" "$BASE/releases/latest/download/$ASSET"
 chmod +x "$DIR/bin/$ASSET" 2>/dev/null || true
 ln -sf "$DIR/bin/$ASSET" "$DIR/bin/claude-status-pet" 2>/dev/null || true
-echo "[2/4] Binary updated"
+echo "[2/3] Binary updated"
 
 # 3. Update hooks (only for installed hook locations)
 HOOK_UPDATED=0
 if [ -f "$HOME/.copilot/hooks/status-pet-vscode.json" ]; then
   curl -sLo "$HOME/.copilot/hooks/status-pet-vscode.json" "$RAW/vscode/hooks/hooks.json"
-  HOOK_UPDATED=1; echo "[3/4] VS Code hooks updated"
+  HOOK_UPDATED=1; echo "[3/3] VS Code hooks updated"
 fi
-[ "$HOOK_UPDATED" -eq 0 ] && echo "[3/4] No hook locations to update (skipped)"
+[ "$HOOK_UPDATED" -eq 0 ] && echo "[3/3] No hook locations to update (skipped)"
 
-# 4. Update assets
-mkdir -p "$DIR/assets"
-curl -sLo /tmp/pet-assets.zip "$BASE/releases/latest/download/pet-assets.zip"
-unzip -o /tmp/pet-assets.zip -d "$DIR/assets"
-rm -f /tmp/pet-assets.zip
-# Clean outdated DLC so they re-download on next use
-for cfg in "$DIR/assets/dlc/"*.json; do
-  [ -f "$cfg" ] || continue
-  id=$(basename "$cfg" .json)
-  cj="$DIR/assets/$id/character.json"
-  [ -f "$cj" ] || continue
-  cv=$(grep -o '"version"[[:space:]]*:[[:space:]]*[0-9]*' "$cfg" | grep -o '[0-9]*')
-  iv=$(grep -o '"version"[[:space:]]*:[[:space:]]*[0-9]*' "$cj" | grep -o '[0-9]*')
-  [ -n "$cv" ] && { [ -z "$iv" ] || [ "$iv" -lt "$cv" ]; } && rm -rf "$DIR/assets/$id"
-done
-echo "[4/4] Assets updated"
-
-echo "Update complete! Run /pet on to start."
+echo "Update complete! Run /pet on to start. Assets will be downloaded automatically on launch."
 ```
 
 Tell the user: "Update complete! Use `/pet on` to start the pet."

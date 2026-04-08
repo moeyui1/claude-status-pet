@@ -58,17 +58,18 @@ claude-status-pet/
 │   │   └── ferris/          # Ferris SVG art + character.json
 │   └── src-tauri/           # Rust backend
 │       ├── src/
-│       │   ├── lib.rs       # GUI mode + write-status CLI + DLC download
+│       │   ├── lib.rs       # GUI mode + write-status CLI + DLC download + assets auto-download
 │       │   ├── adapter/     # Hook adapters (one per AI agent)
 │       │   │   ├── mod.rs   # Adapter trait + registry + StdinInput struct
 │       │   │   ├── claude.rs   # Claude Code adapter
 │       │   │   └── copilot.rs  # GitHub Copilot CLI adapter
 │       │   ├── status_map.rs   # Universal tool→state fuzzy matching
 │       │   └── tests.rs     # Unit tests
-│       ├── Cargo.toml       # Dependencies: tauri, serde, notify, base64, ureq
+│       ├── Cargo.toml       # Dependencies: tauri, serde, notify, base64, ureq, zip
 │       └── tauri.conf.json
 ├── .github/workflows/
-│   └── release.yml          # CI: builds binaries + asset zip on version tags
+│   ├── release.yml          # CI: builds binaries + asset zip on version tags
+│   └── test.yml             # CI: runs cargo test on every push to main
 ├── CONTRIBUTING.md          # Adding characters + adapters
 ├── README.md                # User-facing (English)
 └── README.zh-CN.md          # User-facing (Chinese)
@@ -137,6 +138,9 @@ Characters defined by `character.json` files:
 - **Custom**: `~/.claude/pet-data/characters/*/character.json` (user-installed packs)
 
 DLC download is async (`spawn_blocking`) with 30s HTTP timeout per file. Auto-downloads missing DLC on startup if selected character requires it.
+
+### Assets auto-download
+On GUI startup, if the `assets/dlc/` directory is empty or missing, the binary automatically downloads `pet-assets.zip` from GitHub releases and extracts it. Users can also manually update assets via Settings → Update Assets in the right-click menu. Download failures are shown in the speech bubble and do not crash the app.
 
 ## States
 

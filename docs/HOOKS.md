@@ -39,7 +39,7 @@ This document explains how hook events from different AI assistants are mapped t
 | `Notification` | `waiting` | "Waiting for approval..." | Permission prompts |
 | `Stop` | `idle` | "Waiting for input" | Response complete |
 | `StopFailure` | `error` | "Something went wrong" | |
-| `SessionEnd` | `offline` | "Session ended" | Writes offline, does NOT delete file |
+| `SessionEnd` | `closed` | "Session ended" | Writes closed status, does NOT delete file |
 
 ### GitHub Copilot
 
@@ -99,7 +99,8 @@ All states the pet can display, with their visual behavior:
 | `delegating` | side bounce | blue | 15 | Agent, Skill, SubagentStart |
 | `waiting` | pulse | orange | 5 | Permission prompt |
 | `error` | shake 3× | red | 9 | StopFailure, errorOccurred |
-| `offline` | slow breathing | grey | 7 | SessionEnd |
+| `offline` | slow breathing | grey | 7 | timeout/unknown sessionEnd |
+| `closed` | — | grey | 7 | SessionEnd (Claude) |
 
 Both Claude Code and GitHub Copilot now use the same fine-grained states for tool use.
 

@@ -508,6 +508,39 @@ function buildConfigPage() {
   addColorRow(charMenu, 'ASCII Fill', petFillColor, '#ffffff', (v) => { petFillColor = v; saveConfig('petFillColor', v); });
   addColorRow(charMenu, 'Background', petBgColor, '#ffffff', (v) => { petBgColor = v; saveConfig('petBgColor', v); });
   addDivider(charMenu);
+  addMenuItem(charMenu, 'Update Assets', async () => {
+    closeMenu();
+    stateLabel.textContent = 'downloading';
+    container.className = 'anim-thinking';
+    statusText.textContent = 'Updating assets...';
+    bubble.classList.remove('hidden');
+    try {
+      await window.__TAURI__.core.invoke('update_assets');
+      // Refresh DLC list after update
+      try {
+        availableDlcs = await window.__TAURI__.core.invoke('list_available_dlcs');
+        for (const dlc of availableDlcs) {
+          dlcInstalledCache[dlc.id] = dlc.installed;
+        }
+      } catch(e) {}
+      statusText.textContent = 'Assets updated!';
+      container.className = '';
+      stateLabel.textContent = 'idle';
+      clearTimeout(bubbleTimeout);
+      bubbleTimeout = setTimeout(() => bubble.classList.add('hidden'), 5000);
+    } catch(e) {
+      statusText.textContent = 'Update failed: ' + (e || 'unknown error');
+      container.className = 'anim-error';
+      stateLabel.textContent = 'error';
+      clearTimeout(bubbleTimeout);
+      bubbleTimeout = setTimeout(() => {
+        bubble.classList.add('hidden');
+        container.className = '';
+        stateLabel.textContent = 'idle';
+      }, 8000);
+    }
+  });
+  addDivider(charMenu);
   addMenuItem(charMenu, 'Reset Default', () => {
     petScale = 1; petTextColor = ''; petSessionBg = ''; petFillColor = ''; petBgColor = '';
     localStorage.removeItem('petScale'); localStorage.removeItem('petTextColor');
@@ -685,6 +718,36 @@ async function initAssets() {
     try {
       hasExternalAssets = !!(await window.__TAURI__.core.invoke('get_assets_dir'));
     } catch(e) {}
+
+    // Auto-download assets if the directory doesn't exist yet
+    if (hasExternalAssets) {
+      const assetsDir = await window.__TAURI__.core.invoke('get_assets_dir');
+      // Check if the dlc/ subdirectory exists by trying to list DLCs
+      const dlcs = await window.__TAURI__.core.invoke('list_available_dlcs');
+      if (dlcs.length === 0) {
+        // Assets dir exists but has no DLC configs — need to download
+        stateLabel.textContent = 'downloading';
+        container.className = 'anim-thinking';
+        statusText.textContent = 'Downloading assets...';
+        bubble.classList.remove('hidden');
+        try {
+          await window.__TAURI__.core.invoke('update_assets');
+          statusText.textContent = 'Assets ready!';
+          clearTimeout(bubbleTimeout);
+          bubbleTimeout = setTimeout(() => bubble.classList.add('hidden'), 3000);
+        } catch(e) {
+          statusText.textContent = 'Assets download failed: ' + (e || 'unknown error');
+          container.className = 'anim-error';
+          stateLabel.textContent = 'error';
+          clearTimeout(bubbleTimeout);
+          bubbleTimeout = setTimeout(() => {
+            bubble.classList.add('hidden');
+            container.className = '';
+            stateLabel.textContent = 'idle';
+          }, 8000);
+        }
+      }
+    }
   }
 }
 

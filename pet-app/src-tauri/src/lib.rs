@@ -14,6 +14,8 @@ mod tests;
 
 static DEBUG_ENABLED: AtomicBool = AtomicBool::new(false);
 
+const ASSETS_REPO: &str = "moeyui1/claude-status-pet";
+
 fn init_debug(args: &[String]) {
     let _ = args; // reserved for future use
     if std::env::var("PET_DEBUG").map_or(false, |v| v == "1" || v == "true") {
@@ -261,7 +263,7 @@ fn is_dlc_installed(assets_dir: tauri::State<'_, Option<PathBuf>>, dlc_name: Str
 
 #[tauri::command]
 async fn download_dlc(assets_dir: tauri::State<'_, Option<PathBuf>>, dlc_name: String) -> Result<bool, String> {
-    let dir = assets_dir.inner().as_ref().ok_or("No assets dir")?.clone();
+    let dir = assets_dir.inner().as_ref().ok_or("No assets directory configured")?.clone();
     let dlc = dlc_name.clone();
 
     tauri::async_runtime::spawn_blocking(move || {
@@ -671,6 +673,88 @@ fn download_file(url: &str, dest: &PathBuf) -> Result<(), String> {
     fs::write(dest, &bytes).map_err(|e| e.to_string())
 }
 
+fn download_assets_blocking(assets_dir: &PathBuf) -> Result<(), String> {
+    use std::io::Read;
+    let url = format!("https://github.com/{}/releases/latest/download/pet-assets.zip", ASSETS_REPO);
+    let agent = ureq::Agent::config_builder()
+        .timeout_global(Some(std::time::Duration::from_secs(60)))
+        .build()
+        .new_agent();
+    let resp = agent.get(&url).call().map_err(|e| format!("Download failed: {}", e))?;
+    let status = resp.status();
+    if status != 200 {
+        return Err(format!("Download failed: HTTP {}", status));
+    }
+    let mut zip_bytes: Vec<u8> = Vec::new();
+    resp.into_body().into_reader().read_to_end(&mut zip_bytes)
+        .map_err(|e| format!("Download failed: {}", e))?;
+    if zip_bytes.is_empty() {
+        return Err("Download failed: empty response".into());
+    }
+
+    // Extract zip to assets_dir
+    fs::create_dir_all(assets_dir)
+        .map_err(|e| format!("Failed to create assets directory: {}", e))?;
+
+    let cursor = std::io::Cursor::new(&zip_bytes);
+    let mut archive = zip::ZipArchive::new(cursor)
+        .map_err(|e| format!("Invalid zip archive: {}", e))?;
+
+    for i in 0..archive.len() {
+        let mut file = archive.by_index(i)
+            .map_err(|e| format!("Zip read error: {}", e))?;
+        let Some(enclosed_name) = file.enclosed_name() else { continue };
+        let dest = assets_dir.join(enclosed_name);
+        // Path traversal prevention
+        if !dest.starts_with(assets_dir) { continue; }
+        if file.is_dir() {
+            let _ = fs::create_dir_all(&dest);
+        } else {
+            if let Some(parent) = dest.parent() {
+                let _ = fs::create_dir_all(parent);
+            }
+            let mut buf = Vec::new();
+            file.read_to_end(&mut buf).map_err(|e| format!("Zip extract error: {}", e))?;
+            fs::write(&dest, &buf).map_err(|e| format!("Write error: {}", e))?;
+        }
+    }
+
+    // Clean outdated DLC so they re-download on next use
+    let dlc_config_dir = assets_dir.join("dlc");
+    if let Ok(entries) = fs::read_dir(&dlc_config_dir) {
+        for entry in entries.filter_map(|e| e.ok()) {
+            let path = entry.path();
+            if path.extension().and_then(|e| e.to_str()) != Some("json") { continue; }
+            let dlc_id = path.file_stem().unwrap_or_default().to_string_lossy().to_string();
+            let char_json = assets_dir.join(&dlc_id).join("character.json");
+            if !char_json.exists() { continue; }
+            let Ok(cfg_str) = fs::read_to_string(&path) else { continue };
+            let Ok(cfg) = serde_json::from_str::<serde_json::Value>(&cfg_str) else { continue };
+            let Ok(inst_str) = fs::read_to_string(&char_json) else { continue };
+            let Ok(inst) = serde_json::from_str::<serde_json::Value>(&inst_str) else { continue };
+            if let Some(cv) = cfg.get("version").and_then(|v| v.as_u64()) {
+                let iv = inst.get("version").and_then(|v| v.as_u64()).unwrap_or(0);
+                if iv < cv {
+                    let _ = fs::remove_dir_all(assets_dir.join(&dlc_id));
+                }
+            }
+        }
+    }
+
+    Ok(())
+}
+
+#[tauri::command]
+async fn update_assets(assets_dir: tauri::State<'_, Option<PathBuf>>) -> Result<(), String> {
+    let dir = assets_dir.inner().as_ref()
+        .cloned()
+        .unwrap_or_else(|| default_pet_dir().join("assets"));
+
+    tauri::async_runtime::spawn_blocking(move || {
+        download_assets_blocking(&dir)
+    }).await.map_err(|e| e.to_string())?
+}
+
 fn read_stdin() -> String {
     use std::io::Read;
     // Read stdin until complete JSON object (depth-balanced {}) or timeout.
@@ -780,7 +864,8 @@ pub fn run() {
     let assets_dir: Option<PathBuf> = args
         .windows(2)
         .find(|w| w[0] == "--assets-dir")
-        .map(|w| PathBuf::from(&w[1]));
+        .map(|w| PathBuf::from(&w[1]))
+        .or_else(|| Some(default_pet_dir().join("assets")));
 
     if let Some(parent) = initial_status_path.parent() {
         let _ = fs::create_dir_all(parent);
@@ -800,7 +885,7 @@ pub fn run() {
         .manage(session_id_shared)
         .manage(lock_path_shared)
         .manage(assets_dir)
-        .invoke_handler(tauri::generate_handler![get_status, get_session_id, get_assets_dir, load_asset, load_text_asset, load_custom_asset, is_dlc_installed, download_dlc, list_available_dlcs, list_character_packs, list_unlocked_sessions, bind_session])
+        .invoke_handler(tauri::generate_handler![get_status, get_session_id, get_assets_dir, load_asset, load_text_asset, load_custom_asset, is_dlc_installed, download_dlc, list_available_dlcs, list_character_packs, list_unlocked_sessions, bind_session, update_assets])
         .setup(move |app| {
             let window = app.get_webview_window("main").unwrap();
 
