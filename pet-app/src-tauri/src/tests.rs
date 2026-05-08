@@ -168,10 +168,11 @@ mod tests {
     }
 
     #[test]
-    fn test_copilot_session_end_complete_is_idle() {
+    fn test_copilot_session_end_is_closed() {
+        // sessionEnd → closed (matches Claude's SessionEnd behavior)
         let stdin = make_stdin(Some("sessionEnd"), None, None, None, Some("/proj"));
         let ev = adapter::copilot::CopilotAdapter.parse(&stdin).unwrap();
-        assert_eq!(ev.event, "done"); // complete → idle
+        assert_eq!(ev.event, "closed");
     }
 
     #[test]

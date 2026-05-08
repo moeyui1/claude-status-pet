@@ -70,7 +70,7 @@ Copilot CLI hooks — camelCase events via `--copilot-event` CLI arg. Tool names
 | `permissionRequest` | `waiting` | "Waiting for approval..." | Fires before permission service |
 | `preCompact` | — | — | Ignored (no status change) |
 | `errorOccurred` | `error` | "Error: {message}" | |
-| `sessionEnd` | varies | "Session ended" | `complete`/`abort`/`user_exit` → idle, `error` → error, `timeout` → offline |
+| `sessionEnd` | `closed` | "Session ended" | Writes closed status, does NOT delete file |
 
 ### VS Code Copilot
 

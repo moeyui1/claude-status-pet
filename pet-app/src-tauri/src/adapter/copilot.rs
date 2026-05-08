@@ -16,7 +16,7 @@
 /// - notification (permission_prompt / elicitation_dialog): mapped to "waiting"
 /// - permissionRequest: mapped to "waiting"
 /// - subagentStart / subagentStop: mapped to "delegating" / "thinking"
-/// - sessionEnd: writes offline/idle/error per `reason` (does NOT close the window)
+/// - sessionEnd: writes "closed" (matches Claude — does NOT delete the status file)
 
 use super::{Adapter, NormalizedEvent, StdinInput, basename, truncate, md5_short, get_str};
 use std::path::Path;
@@ -141,14 +141,8 @@ impl Adapter for CopilotAdapter {
                 ("error".into(), String::new(), format!("Error: {}", truncate(&msg, 40)), false)
             }
             "sessionEnd" => {
-                let reason = stdin.reason.as_deref().unwrap_or("complete");
-                match reason {
-                    "complete" => ("done".into(), String::new(), "Done".into(), false),
-                    "error" => ("error".into(), String::new(), "Session error".into(), false),
-                    "abort" | "user_exit" => ("done".into(), String::new(), "Session closed".into(), false),
-                    // "timeout" or unknown → offline (sleep animation)
-                    _ => ("offline".into(), String::new(), "Session ended".into(), false),
-                }
+                // Match Claude's behavior: SessionEnd → closed (consistent across adapters).
+                ("closed".into(), String::new(), "Session ended".into(), false)
             }
             _ => {
                 ("done".into(), String::new(), "Waiting for input".into(), false)
