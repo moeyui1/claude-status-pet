@@ -48,14 +48,6 @@
         "powershell": "& \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" write-status --adapter copilot --copilot-event errorOccurred",
         "timeoutSec": 1
       }
-    ],
-    "stop": [
-      {
-        "type": "command",
-        "bash": "~/.claude/pet-data/bin/claude-status-pet write-status --adapter copilot --copilot-event stop",
-        "powershell": "& \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" write-status --adapter copilot --copilot-event stop",
-        "timeoutSec": 1
-      }
     ]
   }
 }
