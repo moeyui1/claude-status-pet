@@ -59,15 +59,3 @@
     ]
   }
 }
-    ],
-    "stop": [
-      {
-        "type": "command",
-        "bash": "bash ~/.claude/pet-data/scripts/copilot-hook.sh stop",
-        "powershell": "& \"$env:USERPROFILE\\.claude\\pet-data\\scripts\\copilot-hook.ps1\" stop",
-        "timeoutSec": 1
-      }
-    ]
-  }
-}
-
