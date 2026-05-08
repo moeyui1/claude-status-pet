@@ -99,8 +99,7 @@ impl Adapter for CopilotAdapter {
             "postToolUseFailure" => {
                 // Tool failed — surface as error with the message
                 let msg = stdin.error.as_ref()
-                    .and_then(|e| e.as_str().map(|s| s.to_string())
-                        .or_else(|| e.get("message").and_then(|m| m.as_str()).map(|s| s.to_string())))
+                    .and_then(error_message)
                     .unwrap_or_else(|| format!("{} failed", tool_name));
                 ("error".into(), String::new(), format!("Error: {}", truncate(&msg, 40)), false)
             }
@@ -137,10 +136,9 @@ impl Adapter for CopilotAdapter {
             }
             "errorOccurred" => {
                 let msg = stdin.error.as_ref()
-                    .and_then(|e| e.get("message"))
-                    .and_then(|m| m.as_str())
-                    .unwrap_or("Unknown error");
-                ("error".into(), String::new(), format!("Error: {}", truncate(msg, 40)), false)
+                    .and_then(error_message)
+                    .unwrap_or_else(|| "Unknown error".to_string());
+                ("error".into(), String::new(), format!("Error: {}", truncate(&msg, 40)), false)
             }
             "sessionEnd" => {
                 let reason = stdin.reason.as_deref().unwrap_or("complete");
@@ -166,4 +164,17 @@ impl Adapter for CopilotAdapter {
             launch_only,
         })
     }
+}
+
+/// Extract a human-readable message from an `error` JSON value.
+/// Handles both:
+/// - postToolUseFailure: `error: string`
+/// - errorOccurred: `error: { message: string, ... }`
+fn error_message(value: &serde_json::Value) -> Option<String> {
+    if let Some(s) = value.as_str() {
+        return Some(s.to_string());
+    }
+    value.get("message")
+        .and_then(|m| m.as_str())
+        .map(|s| s.to_string())
 }

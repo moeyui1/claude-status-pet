@@ -227,6 +227,7 @@ mod tests {
         let stdin = make_stdin(Some("permissionRequest"), Some("bash"), None, None, Some("/proj"));
         let ev = adapter::copilot::CopilotAdapter.parse(&stdin).unwrap();
         assert_eq!(ev.event, "wait");
+        assert!(ev.detail.to_lowercase().contains("approval"), "got: {}", ev.detail);
     }
 
     #[test]
