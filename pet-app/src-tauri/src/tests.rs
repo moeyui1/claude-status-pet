@@ -161,13 +161,6 @@ mod tests {
     }
 
     #[test]
-    fn test_copilot_stop() {
-        let stdin = make_stdin(Some("stop"), None, None, None, Some("/proj"));
-        let ev = adapter::copilot::CopilotAdapter.parse(&stdin).unwrap();
-        assert_eq!(ev.event, "done");
-    }
-
-    #[test]
     fn test_copilot_session_end_is_closed() {
         // sessionEnd → closed (matches Claude's SessionEnd behavior)
         let stdin = make_stdin(Some("sessionEnd"), None, None, None, Some("/proj"));
@@ -185,7 +178,7 @@ mod tests {
 
     #[test]
     fn test_copilot_agent_stop_is_done() {
-        // agentStop is the camelCase form per the new docs (alias for stop)
+        // agentStop is the camelCase turn-complete event per the docs
         let stdin = make_stdin(Some("agentStop"), None, None, None, Some("/proj"));
         let ev = adapter::copilot::CopilotAdapter.parse(&stdin).unwrap();
         assert_eq!(ev.event, "done");
@@ -199,6 +192,16 @@ mod tests {
         let ev = adapter::copilot::CopilotAdapter.parse(&stdin).unwrap();
         assert_eq!(ev.event, "error");
         assert!(ev.detail.to_lowercase().contains("command"), "got: {}", ev.detail);
+    }
+
+    #[test]
+    fn test_copilot_post_tool_use_failure_no_tool_name_fallback() {
+        // No toolName and no error message — fallback should be "Tool failed" (not " failed")
+        let raw = r#"{"hookEventName":"postToolUseFailure","cwd":"/proj"}"#;
+        let stdin: StdinInput = serde_json::from_str(raw).unwrap();
+        let ev = adapter::copilot::CopilotAdapter.parse(&stdin).unwrap();
+        assert_eq!(ev.event, "error");
+        assert!(ev.detail.contains("Tool failed"), "got: {}", ev.detail);
     }
 
     #[test]

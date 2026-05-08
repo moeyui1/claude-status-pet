@@ -100,10 +100,16 @@ impl Adapter for CopilotAdapter {
                 // Tool failed — surface as error with the message
                 let msg = stdin.error.as_ref()
                     .and_then(error_message)
-                    .unwrap_or_else(|| format!("{} failed", tool_name));
+                    .unwrap_or_else(|| {
+                        if tool_name.is_empty() {
+                            "Tool failed".to_string()
+                        } else {
+                            format!("{} failed", tool_name)
+                        }
+                    });
                 ("error".into(), String::new(), format!("Error: {}", truncate(&msg, 40)), false)
             }
-            "stop" | "agentStop" => {
+            "agentStop" => {
                 ("done".into(), String::new(), "Done".into(), false)
             }
             "subagentStart" => {

@@ -81,6 +81,22 @@
         "timeoutSec": 1
       }
     ],
+    "permissionRequest": [
+      {
+        "type": "command",
+        "bash": "~/.claude/pet-data/bin/claude-status-pet write-status --adapter copilot --copilot-event permissionRequest",
+        "powershell": "& \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" write-status --adapter copilot --copilot-event permissionRequest",
+        "timeoutSec": 1
+      }
+    ],
+    "preCompact": [
+      {
+        "type": "command",
+        "bash": "~/.claude/pet-data/bin/claude-status-pet write-status --adapter copilot --copilot-event preCompact",
+        "powershell": "& \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" write-status --adapter copilot --copilot-event preCompact",
+        "timeoutSec": 1
+      }
+    ],
     "errorOccurred": [
       {
         "type": "command",

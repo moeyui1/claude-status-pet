@@ -13,7 +13,7 @@ This document explains how hook events from different AI assistants are mapped t
 | **Tool names** | `Edit`, `Read`, `Bash`, `Grep` | `bash`, `edit`, `view`, `grep`, `glob`, `create`, `web_fetch`, `task`, `powershell`, `ask_user` | `replace_string_in_file`, `read_file`, `run_in_terminal` |
 | **Tool input keys** | snake_case (`file_path`) | camelCase (`filePath`) — or snake_case `tool_input` for PascalCase events | both (`file_path` and `filePath`) |
 | **Session lifecycle** | `SessionStart` + `SessionEnd` | `sessionStart` + `sessionEnd` | `SessionStart` + `Stop` |
-| **Idle trigger** | `Stop` | `agentStop` (or `stop`) | `Stop` |
+| **Idle trigger** | `Stop` | `agentStop` | `Stop` |
 | **Error event** | `StopFailure` | `errorOccurred` + `postToolUseFailure` | — (no dedicated error event) |
 | **Sub-agents** | `SubagentStart` / `SubagentStop` | `subagentStart` / `subagentStop` | `SubagentStart` / `SubagentStop` |
 | **Permission prompt** | `Notification` | `notification` (`permission_prompt`) + `permissionRequest` | not available |
@@ -61,7 +61,7 @@ Copilot CLI hooks — camelCase events via `--copilot-event` CLI arg. Tool names
 | `preToolUse` — other | `running` | "Using {toolName}" | Fallback |
 | `postToolUse` | `thinking` | "Processing..." | Avoids idle flash between tools |
 | `postToolUseFailure` | `error` | "Error: {message}" | Tool execution failed |
-| `agentStop` (or `stop`) | `idle` | "Done" | Main agent finishes a turn |
+| `agentStop` | `idle` | "Done" | Main agent finishes a turn |
 | `subagentStart` | `delegating` | "Spawning {agentName}..." | |
 | `subagentStop` | `thinking` | "Sub-agent finished" | |
 | `notification` — `permission_prompt` | `waiting` | "Waiting for approval..." | |
