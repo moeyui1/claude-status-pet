@@ -161,6 +161,16 @@ mod tests {
     }
 
     #[test]
+    fn test_copilot_post_tool_task_complete_is_done() {
+        // In autopilot mode, agentStop does NOT fire between iterations.
+        // postToolUse with tool_name=task_complete is the only end-of-turn signal.
+        let stdin = make_stdin(Some("postToolUse"), Some("task_complete"), None, None, Some("/proj"));
+        let ev = adapter::copilot::CopilotAdapter.parse(&stdin).unwrap();
+        assert_eq!(ev.event, "done");
+        assert_eq!(ev.detail, "Done");
+    }
+
+    #[test]
     fn test_copilot_session_end_is_closed() {
         // sessionEnd → closed (matches Claude's SessionEnd behavior)
         let stdin = make_stdin(Some("sessionEnd"), None, None, None, Some("/proj"));

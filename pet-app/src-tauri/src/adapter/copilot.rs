@@ -11,6 +11,9 @@
 ///
 /// Quirks handled:
 /// - postToolUse: mapped to "prompt"/thinking (avoids idle flash between tools)
+/// - postToolUse with tool_name=="task_complete": mapped to "done"/idle
+///   (autopilot mode: no agentStop fires between iterations — task_complete is the
+///   only end-of-turn signal available)
 /// - postToolUseFailure: mapped to "error" with the error message
 /// - preCompact / non-actionable notifications: ignored (no status change)
 /// - notification (permission_prompt / elicitation_dialog): mapped to "waiting"
@@ -93,8 +96,17 @@ impl Adapter for CopilotAdapter {
                 ("tool".into(), tool_name.to_string(), detail, false)
             }
             "postToolUse" => {
-                // Quirk: map to thinking, not idle (avoids flash between tools)
-                ("prompt".into(), String::new(), "Processing...".into(), false)
+                // Special case: `task_complete` is Copilot CLI's built-in end-of-task tool.
+                // In autopilot mode, agentStop does NOT fire between iterations — the loop is
+                // treated as one logical turn. postToolUse:task_complete is the only end-of-turn
+                // signal available, so map it to idle. In normal mode, agentStop will re-confirm
+                // idle a moment later (same end state).
+                if tool_name == "task_complete" {
+                    ("done".into(), String::new(), "Done".into(), false)
+                } else {
+                    // Quirk: map to thinking, not idle (avoids flash between tools)
+                    ("prompt".into(), String::new(), "Processing...".into(), false)
+                }
             }
             "postToolUseFailure" => {
                 // Tool failed — surface as error with the message
