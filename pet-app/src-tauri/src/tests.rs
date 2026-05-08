@@ -161,17 +161,11 @@ mod tests {
     }
 
     #[test]
-    fn test_copilot_stop() {
-        let stdin = make_stdin(Some("stop"), None, None, None, Some("/proj"));
-        let ev = adapter::copilot::CopilotAdapter.parse(&stdin).unwrap();
-        assert_eq!(ev.event, "done");
-    }
-
-    #[test]
-    fn test_copilot_session_end_complete_is_idle() {
+    fn test_copilot_session_end_is_closed() {
+        // sessionEnd → closed (matches Claude's SessionEnd behavior)
         let stdin = make_stdin(Some("sessionEnd"), None, None, None, Some("/proj"));
         let ev = adapter::copilot::CopilotAdapter.parse(&stdin).unwrap();
-        assert_eq!(ev.event, "done"); // complete → idle
+        assert_eq!(ev.event, "closed");
     }
 
     #[test]
@@ -180,6 +174,93 @@ mod tests {
         let ev = adapter::copilot::CopilotAdapter.parse(&stdin).unwrap();
         assert!(ev.session_name.contains("Copilot"));
         assert!(ev.session_name.contains("my-app"));
+    }
+
+    #[test]
+    fn test_copilot_agent_stop_is_done() {
+        // agentStop is the camelCase turn-complete event per the docs
+        let stdin = make_stdin(Some("agentStop"), None, None, None, Some("/proj"));
+        let ev = adapter::copilot::CopilotAdapter.parse(&stdin).unwrap();
+        assert_eq!(ev.event, "done");
+    }
+
+    #[test]
+    fn test_copilot_post_tool_use_failure_is_error() {
+        let raw = r#"{"hookEventName":"postToolUseFailure","toolName":"bash","error":"command not found","cwd":"/proj"}"#;
+        let stdin: StdinInput = serde_json::from_str(raw).unwrap();
+        // Need to inject the event name as if from CLI arg; use hook_event_name fallback.
+        let ev = adapter::copilot::CopilotAdapter.parse(&stdin).unwrap();
+        assert_eq!(ev.event, "error");
+        assert!(ev.detail.to_lowercase().contains("command"), "got: {}", ev.detail);
+    }
+
+    #[test]
+    fn test_copilot_post_tool_use_failure_no_tool_name_fallback() {
+        // No toolName and no error message — fallback should be "Tool failed" (not " failed")
+        let raw = r#"{"hookEventName":"postToolUseFailure","cwd":"/proj"}"#;
+        let stdin: StdinInput = serde_json::from_str(raw).unwrap();
+        let ev = adapter::copilot::CopilotAdapter.parse(&stdin).unwrap();
+        assert_eq!(ev.event, "error");
+        assert!(ev.detail.contains("Tool failed"), "got: {}", ev.detail);
+    }
+
+    #[test]
+    fn test_copilot_subagent_start_is_delegating() {
+        let raw = r#"{"hookEventName":"subagentStart","agentName":"researcher","cwd":"/proj"}"#;
+        let stdin: StdinInput = serde_json::from_str(raw).unwrap();
+        let ev = adapter::copilot::CopilotAdapter.parse(&stdin).unwrap();
+        assert_eq!(ev.event, "subagent");
+        assert!(ev.detail.contains("researcher"), "got: {}", ev.detail);
+    }
+
+    #[test]
+    fn test_copilot_subagent_stop_is_thinking() {
+        let stdin = make_stdin(Some("subagentStop"), None, None, None, Some("/proj"));
+        let ev = adapter::copilot::CopilotAdapter.parse(&stdin).unwrap();
+        assert_eq!(ev.event, "prompt");
+    }
+
+    #[test]
+    fn test_copilot_pre_compact_ignored() {
+        let stdin = make_stdin(Some("preCompact"), None, None, None, Some("/proj"));
+        assert!(adapter::copilot::CopilotAdapter.parse(&stdin).is_none());
+    }
+
+    #[test]
+    fn test_copilot_permission_request_waits() {
+        let stdin = make_stdin(Some("permissionRequest"), Some("bash"), None, None, Some("/proj"));
+        let ev = adapter::copilot::CopilotAdapter.parse(&stdin).unwrap();
+        assert_eq!(ev.event, "wait");
+        assert!(ev.detail.to_lowercase().contains("approval"), "got: {}", ev.detail);
+    }
+
+    #[test]
+    fn test_copilot_notification_permission_prompt_waits() {
+        let raw = r#"{"hookEventName":"notification","notification_type":"permission_prompt","message":"Permission needed","cwd":"/proj"}"#;
+        let stdin: StdinInput = serde_json::from_str(raw).unwrap();
+        let ev = adapter::copilot::CopilotAdapter.parse(&stdin).unwrap();
+        assert_eq!(ev.event, "wait");
+    }
+
+    #[test]
+    fn test_copilot_notification_shell_completed_ignored() {
+        let raw = r#"{"hookEventName":"notification","notification_type":"shell_completed","cwd":"/proj"}"#;
+        let stdin: StdinInput = serde_json::from_str(raw).unwrap();
+        assert!(adapter::copilot::CopilotAdapter.parse(&stdin).is_none());
+    }
+
+    #[test]
+    fn test_copilot_official_tool_names() {
+        // Per docs: official Copilot CLI tool names are bash, edit, view, grep, glob, create, web_fetch, task, powershell
+        assert_eq!(status_map::tool_to_state("create"), "editing");
+        assert_eq!(status_map::tool_to_state("edit"), "editing");
+        assert_eq!(status_map::tool_to_state("view"), "reading");
+        assert_eq!(status_map::tool_to_state("web_fetch"), "reading");
+        assert_eq!(status_map::tool_to_state("grep"), "searching");
+        assert_eq!(status_map::tool_to_state("glob"), "searching");
+        assert_eq!(status_map::tool_to_state("bash"), "running");
+        assert_eq!(status_map::tool_to_state("powershell"), "running");
+        assert_eq!(status_map::tool_to_state("task"), "delegating");
     }
 
     // ── VS Code adapter tests ──
@@ -324,6 +405,8 @@ mod tests {
             tool_args: None,
             error: None,
             reason: None,
+            notification_type: None,
+            agent_name: None,
         }
     }
 }

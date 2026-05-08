@@ -10,15 +10,15 @@ This document explains how hook events from different AI assistants are mapped t
 | **Status writer** | `write-status --adapter claude` | `write-status --adapter copilot` | `write-status --adapter vscode` |
 | **Platforms** | Claude Code CLI | Copilot CLI | VS Code (agent mode) |
 | **Event naming** | PascalCase (`PreToolUse`) | camelCase (`preToolUse`) | PascalCase (`PreToolUse`) |
-| **Tool names** | `Edit`, `Read`, `Bash`, `Grep` | `replace_string_in_file`, `read_file`, `run_in_terminal` | `replace_string_in_file`, `read_file`, `run_in_terminal` |
-| **Tool input keys** | snake_case (`file_path`) | camelCase (`filePath`) | both (`file_path` and `filePath`) |
+| **Tool names** | `Edit`, `Read`, `Bash`, `Grep` | `bash`, `edit`, `view`, `grep`, `glob`, `create`, `web_fetch`, `task`, `powershell`, `ask_user` | `replace_string_in_file`, `read_file`, `run_in_terminal` |
+| **Tool input keys** | snake_case (`file_path`) | camelCase (`filePath`) — or snake_case `tool_input` for PascalCase events | both (`file_path` and `filePath`) |
 | **Session lifecycle** | `SessionStart` + `SessionEnd` | `sessionStart` + `sessionEnd` | `SessionStart` + `Stop` |
-| **Idle trigger** | `Stop` | `stop` | `Stop` |
-| **Error event** | `StopFailure` | `errorOccurred` | — (no dedicated error event) |
-| **Sub-agents** | `SubagentStart` / `SubagentStop` | not available | `SubagentStart` / `SubagentStop` |
-| **Permission prompt** | `Notification` | not available | not available |
+| **Idle trigger** | `Stop` | `agentStop` | `Stop` |
+| **Error event** | `StopFailure` | `errorOccurred` + `postToolUseFailure` | — (no dedicated error event) |
+| **Sub-agents** | `SubagentStart` / `SubagentStop` | `subagentStart` / `subagentStop` | `SubagentStart` / `SubagentStop` |
+| **Permission prompt** | `Notification` | `notification` (`permission_prompt`) + `permissionRequest` | not available |
 | **Post-tool event** | not used | `postToolUse` → `thinking` | `PostToolUse` → `thinking` |
-| **Context compact** | not available | not available | `PreCompact` → ignored |
+| **Context compact** | not available | `preCompact` → ignored | `PreCompact` → ignored |
 
 ## Hook Event → Status State Mapping
 
@@ -43,25 +43,34 @@ This document explains how hook events from different AI assistants are mapped t
 
 ### GitHub Copilot
 
-Copilot CLI hooks — camelCase events via `--copilot-event` CLI arg.
+Copilot CLI hooks — camelCase events via `--copilot-event` CLI arg. Tool names follow the
+[official reference](https://docs.github.com/en/copilot/reference/copilot-cli-reference/cli-hooks-reference):
+`bash`, `edit`, `view`, `grep`, `glob`, `create`, `web_fetch`, `task`, `powershell`, `ask_user`.
 
 | Hook Event | Status State | Detail | Notes |
 |---|---|---|---|
-| `sessionStart` | `idle` | "Session started" | Also auto-launches pet binary |
-| `userPromptSubmitted` | `thinking` | "Processing prompt..." | |
-| `preToolUse` — run_in_terminal | `running` | "Running: {command}" | |
-| `preToolUse` — replace_string_in_file, edit_file | `editing` | "Editing {filename}" | |
-| `preToolUse` — read_file | `reading` | "Reading {filename}" | |
-| `preToolUse` — create_file, write_file | `editing` | "Writing {filename}" | |
-| `preToolUse` — grep_search, semantic_search | `searching` | "Searching: {query}" | |
-| `preToolUse` — file_search, glob | `searching` | "Finding: {pattern}" | |
-| `preToolUse` — fetch_webpage | `reading` | "Fetching web page..." | |
-| `preToolUse` — list_dir | `reading` | "Listing {path}" | |
+| `sessionStart` | `thinking` | "Processing prompt..." | New or resumed session |
+| `userPromptSubmitted` | `thinking` | "Processing your prompt..." | |
+| `preToolUse` — `bash` / `powershell` | `running` | "Running: {command}" | |
+| `preToolUse` — `edit` / `create` | `editing` | "Editing {filename}" | |
+| `preToolUse` — `view` | `reading` | "Reading {filename}" | |
+| `preToolUse` — `grep` | `searching` | "Searching: {query}" | |
+| `preToolUse` — `glob` | `searching` | "Finding: {pattern}" | |
+| `preToolUse` — `web_fetch` | `reading` | "Fetching web page..." | |
+| `preToolUse` — `task` | `delegating` | "Using task" | Subagent task |
 | `preToolUse` — other | `running` | "Using {toolName}" | Fallback |
 | `postToolUse` | `thinking` | "Processing..." | Avoids idle flash between tools |
-| `stop` | `idle` | "Done" | Fires after each response |
+| `postToolUseFailure` | `error` | "Error: {message}" | Tool execution failed |
+| `agentStop` | `idle` | "Done" | Main agent finishes a turn |
+| `subagentStart` | `delegating` | "Spawning {agentName}..." | |
+| `subagentStop` | `thinking` | "Sub-agent finished" | |
+| `notification` — `permission_prompt` | `waiting` | "Waiting for approval..." | |
+| `notification` — `elicitation_dialog` | `waiting` | "Waiting for input..." | |
+| `notification` — other types | — | — | Ignored (shell/agent completion) |
+| `permissionRequest` | `waiting` | "Waiting for approval..." | Fires before permission service |
+| `preCompact` | — | — | Ignored (no status change) |
 | `errorOccurred` | `error` | "Error: {message}" | |
-| `sessionEnd` | `offline` | "Session ended" | Writes offline, does NOT delete file |
+| `sessionEnd` | `closed` | "Session ended" | Writes closed status, does NOT delete file |
 
 ### VS Code Copilot
 

@@ -47,6 +47,14 @@ pub struct StdinInput {
     // Session end reason (complete, error, abort, timeout, user_exit)
     #[serde(default)]
     pub reason: Option<String>,
+    // Copilot notification hook: type of notification (permission_prompt, elicitation_dialog, etc.)
+    #[serde(default)]
+    pub notification_type: Option<String>,
+    // Copilot subagent events: name of the subagent
+    #[serde(alias = "agentName", default)]
+    pub agent_name: Option<String>,
+    // Copilot preToolUse permission tool name (for permissionRequest hook matcher)
+    // Already covered by tool_name alias.
 }
 
 pub trait Adapter {

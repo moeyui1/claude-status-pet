@@ -1,14 +1,22 @@
 /// GitHub Copilot adapter
 ///
-/// Parses Copilot hook data:
-/// - Event name: from COPILOT_HOOK_EVENT env var (camelCase)
-/// - Tool names: snake_case (replace_string_in_file, read_file, etc.)
-/// - Tool args: JSON string in toolArgs field (needs secondary parse)
-/// - Session ID: not provided — generated from MD5 of cwd
+/// Parses Copilot CLI hook data per the official reference:
+/// https://docs.github.com/en/copilot/reference/copilot-cli-reference/cli-hooks-reference
+///
+/// - Event name: from `--copilot-event` CLI arg (camelCase, e.g. `preToolUse`)
+/// - Tool names: standard Copilot CLI names (`bash`, `edit`, `view`, `grep`, `glob`,
+///   `create`, `web_fetch`, `task`, `powershell`, `ask_user`)
+/// - Tool args: `toolArgs` field — JSON string for `preToolUse`, object for `postToolUse`
+/// - Session ID: `sessionId` from stdin (fallback: hash of cwd)
 ///
 /// Quirks handled:
 /// - postToolUse: mapped to "prompt"/thinking (avoids idle flash between tools)
-/// - sessionEnd: writes offline (does NOT close the window)
+/// - postToolUseFailure: mapped to "error" with the error message
+/// - preCompact / non-actionable notifications: ignored (no status change)
+/// - notification (permission_prompt / elicitation_dialog): mapped to "waiting"
+/// - permissionRequest: mapped to "waiting"
+/// - subagentStart / subagentStop: mapped to "delegating" / "thinking"
+/// - sessionEnd: writes "closed" (matches Claude — does NOT delete the status file)
 
 use super::{Adapter, NormalizedEvent, StdinInput, basename, truncate, md5_short, get_str};
 use std::path::Path;
@@ -88,25 +96,59 @@ impl Adapter for CopilotAdapter {
                 // Quirk: map to thinking, not idle (avoids flash between tools)
                 ("prompt".into(), String::new(), "Processing...".into(), false)
             }
-            "stop" => {
+            "postToolUseFailure" => {
+                // Tool failed — surface as error with the message
+                let msg = stdin.error.as_ref()
+                    .and_then(error_message)
+                    .unwrap_or_else(|| {
+                        if tool_name.is_empty() {
+                            "Tool failed".to_string()
+                        } else {
+                            format!("{} failed", tool_name)
+                        }
+                    });
+                ("error".into(), String::new(), format!("Error: {}", truncate(&msg, 40)), false)
+            }
+            "agentStop" => {
                 ("done".into(), String::new(), "Done".into(), false)
+            }
+            "subagentStart" => {
+                let name = stdin.agent_name.as_deref().unwrap_or("sub-agent");
+                ("subagent".into(), "agent".into(), format!("Spawning {}...", name), false)
+            }
+            "subagentStop" => {
+                ("prompt".into(), String::new(), "Sub-agent finished".into(), false)
+            }
+            "preCompact" => {
+                // Context compaction — not status-relevant
+                return None;
+            }
+            "permissionRequest" => {
+                // Permission prompt before tool runs
+                ("wait".into(), String::new(), "Waiting for approval...".into(), false)
+            }
+            "notification" => {
+                // Fire-and-forget notification. Only surface user-actionable types.
+                match stdin.notification_type.as_deref().unwrap_or("") {
+                    "permission_prompt" => {
+                        ("wait".into(), String::new(), "Waiting for approval...".into(), false)
+                    }
+                    "elicitation_dialog" => {
+                        ("wait".into(), String::new(), "Waiting for input...".into(), false)
+                    }
+                    // shell_completed, agent_completed, agent_idle, etc. — ignore
+                    _ => return None,
+                }
             }
             "errorOccurred" => {
                 let msg = stdin.error.as_ref()
-                    .and_then(|e| e.get("message"))
-                    .and_then(|m| m.as_str())
-                    .unwrap_or("Unknown error");
-                ("error".into(), String::new(), format!("Error: {}", truncate(msg, 40)), false)
+                    .and_then(error_message)
+                    .unwrap_or_else(|| "Unknown error".to_string());
+                ("error".into(), String::new(), format!("Error: {}", truncate(&msg, 40)), false)
             }
             "sessionEnd" => {
-                let reason = stdin.reason.as_deref().unwrap_or("complete");
-                match reason {
-                    "complete" => ("done".into(), String::new(), "Done".into(), false),
-                    "error" => ("error".into(), String::new(), "Session error".into(), false),
-                    "abort" | "user_exit" => ("done".into(), String::new(), "Session closed".into(), false),
-                    // "timeout" or unknown → offline (sleep animation)
-                    _ => ("offline".into(), String::new(), "Session ended".into(), false),
-                }
+                // Match Claude's behavior: SessionEnd → closed (consistent across adapters).
+                ("closed".into(), String::new(), "Session ended".into(), false)
             }
             _ => {
                 ("done".into(), String::new(), "Waiting for input".into(), false)
@@ -122,4 +164,17 @@ impl Adapter for CopilotAdapter {
             launch_only,
         })
     }
+}
+
+/// Extract a human-readable message from an `error` JSON value.
+/// Handles both:
+/// - postToolUseFailure: `error: string`
+/// - errorOccurred: `error: { message: string, ... }`
+fn error_message(value: &serde_json::Value) -> Option<String> {
+    if let Some(s) = value.as_str() {
+        return Some(s.to_string());
+    }
+    value.get("message")
+        .and_then(|m| m.as_str())
+        .map(|s| s.to_string())
 }
