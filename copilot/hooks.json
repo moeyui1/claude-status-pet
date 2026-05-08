@@ -41,6 +41,46 @@
         "timeoutSec": 1
       }
     ],
+    "postToolUseFailure": [
+      {
+        "type": "command",
+        "bash": "~/.claude/pet-data/bin/claude-status-pet write-status --adapter copilot --copilot-event postToolUseFailure",
+        "powershell": "& \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" write-status --adapter copilot --copilot-event postToolUseFailure",
+        "timeoutSec": 1
+      }
+    ],
+    "agentStop": [
+      {
+        "type": "command",
+        "bash": "~/.claude/pet-data/bin/claude-status-pet write-status --adapter copilot --copilot-event agentStop",
+        "powershell": "& \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" write-status --adapter copilot --copilot-event agentStop",
+        "timeoutSec": 1
+      }
+    ],
+    "subagentStart": [
+      {
+        "type": "command",
+        "bash": "~/.claude/pet-data/bin/claude-status-pet write-status --adapter copilot --copilot-event subagentStart",
+        "powershell": "& \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" write-status --adapter copilot --copilot-event subagentStart",
+        "timeoutSec": 1
+      }
+    ],
+    "subagentStop": [
+      {
+        "type": "command",
+        "bash": "~/.claude/pet-data/bin/claude-status-pet write-status --adapter copilot --copilot-event subagentStop",
+        "powershell": "& \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" write-status --adapter copilot --copilot-event subagentStop",
+        "timeoutSec": 1
+      }
+    ],
+    "notification": [
+      {
+        "type": "command",
+        "bash": "~/.claude/pet-data/bin/claude-status-pet write-status --adapter copilot --copilot-event notification",
+        "powershell": "& \"$env:USERPROFILE\\.claude\\pet-data\\bin\\claude-status-pet-windows-x64.exe\" write-status --adapter copilot --copilot-event notification",
+        "timeoutSec": 1
+      }
+    ],
     "errorOccurred": [
       {
         "type": "command",

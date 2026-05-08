@@ -27,7 +27,7 @@ pub fn event_to_state(event: &str) -> &'static str {
 pub fn tool_to_state(tool: &str) -> &'static str {
     let t = tool.to_lowercase();
 
-    if contains_any(&t, &["edit", "write", "replace", "create_file", "notebook"]) {
+    if contains_any(&t, &["edit", "write", "replace", "create", "notebook"]) {
         "editing"
     } else if contains_any(&t, &["read", "view", "fetch", "list_dir", "web_fetch"]) {
         "reading"
