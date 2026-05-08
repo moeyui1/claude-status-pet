@@ -60,6 +60,7 @@ Copilot CLI hooks — camelCase events via `--copilot-event` CLI arg. Tool names
 | `preToolUse` — `task` | `delegating` | "Using task" | Subagent task |
 | `preToolUse` — other | `running` | "Using {toolName}" | Fallback |
 | `postToolUse` | `thinking` | "Processing..." | Avoids idle flash between tools |
+| `postToolUse` — `task_complete` | `idle` | "Done" | End-of-turn signal (works in autopilot mode where `agentStop` doesn't fire between iterations) |
 | `postToolUseFailure` | `error` | "Error: {message}" | Tool execution failed |
 | `agentStop` | `idle` | "Done" | Main agent finishes a turn |
 | `subagentStart` | `delegating` | "Spawning {agentName}..." | |
