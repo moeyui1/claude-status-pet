@@ -44,7 +44,7 @@ This document explains how hook events from different AI assistants are mapped t
 ### GitHub Copilot
 
 Copilot CLI hooks — camelCase events via `--copilot-event` CLI arg. Tool names follow the
-[official reference](https://docs.github.com/en/copilot/reference/copilot-cli-reference/cli-hooks-reference):
+[official reference](https://docs.github.com/en/copilot/reference/hooks-reference):
 `bash`, `edit`, `view`, `grep`, `glob`, `create`, `web_fetch`, `task`, `powershell`, `ask_user`.
 
 | Hook Event | Status State | Detail | Notes |

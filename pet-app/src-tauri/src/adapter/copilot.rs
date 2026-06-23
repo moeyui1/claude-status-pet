@@ -1,7 +1,7 @@
 /// GitHub Copilot adapter
 ///
 /// Parses Copilot CLI hook data per the official reference:
-/// https://docs.github.com/en/copilot/reference/copilot-cli-reference/cli-hooks-reference
+/// https://docs.github.com/en/copilot/reference/hooks-reference
 ///
 /// - Event name: from `--copilot-event` CLI arg (camelCase, e.g. `preToolUse`)
 /// - Tool names: standard Copilot CLI names (`bash`, `edit`, `view`, `grep`, `glob`,
