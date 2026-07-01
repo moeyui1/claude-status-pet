@@ -53,8 +53,6 @@ pub struct StdinInput {
     // Copilot subagent events: name of the subagent
     #[serde(alias = "agentName", default)]
     pub agent_name: Option<String>,
-    // Copilot preToolUse permission tool name (for permissionRequest hook matcher)
-    // Already covered by tool_name alias.
 }
 
 pub trait Adapter {

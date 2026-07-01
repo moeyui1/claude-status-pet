@@ -17,7 +17,6 @@
 /// - postToolUseFailure: mapped to "error" with the error message
 /// - preCompact / non-actionable notifications: ignored (no status change)
 /// - notification (permission_prompt / elicitation_dialog): mapped to "waiting"
-/// - permissionRequest: mapped to "waiting"
 /// - subagentStart / subagentStop: mapped to "delegating" / "thinking"
 /// - sessionEnd: writes "closed" (matches Claude — does NOT delete the status file)
 
@@ -136,8 +135,12 @@ impl Adapter for CopilotAdapter {
                 return None;
             }
             "permissionRequest" => {
-                // Permission prompt before tool runs
-                ("wait".into(), String::new(), "Waiting for approval...".into(), false)
+                // Permission decisions are handled by Copilot's own permission flow.
+                // We do NOT hook this event — it fires before the permission service
+                // runs and the CLI waits for the hook synchronously, which can delay or
+                // block the agent's permission prompt. Permission state is surfaced via
+                // the fire-and-forget `notification` (permission_prompt) event instead.
+                return None;
             }
             "notification" => {
                 // Fire-and-forget notification. Only surface user-actionable types.

@@ -16,7 +16,7 @@ This document explains how hook events from different AI assistants are mapped t
 | **Idle trigger** | `Stop` | `agentStop` | `Stop` |
 | **Error event** | `StopFailure` | `errorOccurred` + `postToolUseFailure` | — (no dedicated error event) |
 | **Sub-agents** | `SubagentStart` / `SubagentStop` | `subagentStart` / `subagentStop` | `SubagentStart` / `SubagentStop` |
-| **Permission prompt** | `Notification` | `notification` (`permission_prompt`) + `permissionRequest` | not available |
+| **Permission prompt** | `Notification` | `notification` (`permission_prompt`) | not available |
 | **Post-tool event** | not used | `postToolUse` → `thinking` | `PostToolUse` → `thinking` |
 | **Context compact** | not available | `preCompact` → ignored | `PreCompact` → ignored |
 
@@ -68,7 +68,6 @@ Copilot CLI hooks — camelCase events via `--copilot-event` CLI arg. Tool names
 | `notification` — `permission_prompt` | `waiting` | "Waiting for approval..." | |
 | `notification` — `elicitation_dialog` | `waiting` | "Waiting for input..." | |
 | `notification` — other types | — | — | Ignored (shell/agent completion) |
-| `permissionRequest` | `waiting` | "Waiting for approval..." | Fires before permission service |
 | `preCompact` | — | — | Ignored (no status change) |
 | `errorOccurred` | `error` | "Error: {message}" | |
 | `sessionEnd` | `closed` | "Session ended" | Writes closed status, does NOT delete file |
