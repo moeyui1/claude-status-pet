@@ -237,11 +237,11 @@ mod tests {
     }
 
     #[test]
-    fn test_copilot_permission_request_waits() {
+    fn test_copilot_permission_request_ignored() {
+        // permissionRequest is intentionally not hooked (can block the permission flow).
+        // Permission state is surfaced via the notification(permission_prompt) event instead.
         let stdin = make_stdin(Some("permissionRequest"), Some("bash"), None, None, Some("/proj"));
-        let ev = adapter::copilot::CopilotAdapter.parse(&stdin).unwrap();
-        assert_eq!(ev.event, "wait");
-        assert!(ev.detail.to_lowercase().contains("approval"), "got: {}", ev.detail);
+        assert!(adapter::copilot::CopilotAdapter.parse(&stdin).is_none());
     }
 
     #[test]
